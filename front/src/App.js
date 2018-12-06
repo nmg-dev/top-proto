@@ -1,18 +1,35 @@
 import React, { Component } from 'react';
-import { Paper } from '@material-ui/core';
-import logo from './logo.svg';
-import './App.css';
+import { Grid } from '@material-ui/core';
+
+import Login from './login.js';
+import View from './view.js';
+import Manager from './manager.js';
+import Admin from './admin.js';
+
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <Paper>
-          
-        </Paper>
-      </div>
-    );
-  }
+	constructor(props) {
+		super(props);
+	}
+	componentDidMount() {
+		console.log('hello world');
+	}
+	render() {
+		return (
+		  <div className="Application">
+		    <Grid container spacing={32} className="container">
+		    	<Login />
+		    	<View />
+		    	<Manager />
+		    	<Admin />
+		    </Grid>
+		  </div>
+		);
+	}
+}
+
+const styles = {
+
 }
 
 export default App;

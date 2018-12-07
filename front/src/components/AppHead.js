@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { AppBar, Icon, IconButton, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
+import AppPart from './AppPart.js';
+
 const styles = {
 	appbar: {
 	},
@@ -15,14 +17,18 @@ const styles = {
 	icons: {
 
 	}
-}
+};
 
-class AppHeader extends Component {
+class AppHead extends AppPart {
 	constructor(props) { 
 		super(props);
 		this.state = {
 			user: null
 		}
+	}
+
+	onAppStageUpdated(stage, prevStage=null) {
+
 	}
 
 	render() {
@@ -43,4 +49,4 @@ class AppHeader extends Component {
 	}
 }
 
-export default withStyles(styles)(AppHeader)
+export default withStyles(styles)(AppHead)

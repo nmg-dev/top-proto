@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { AppBar, Grid, Toolbar, Button, IconButton, Typography, Icon } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
-import Login from './login.js';
-import View from './view.js';
-import Manager from './manager.js';
-import Admin from './admin.js';
+import Login from './components/login.js';
+import View from './components/view.js';
+import Manager from './components/manager.js';
+import Admin from './components/admin.js';
 
 const styles = {
 	root: {

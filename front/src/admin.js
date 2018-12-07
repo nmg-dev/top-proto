@@ -1,16 +1,17 @@
-import React, { Component } from 'react';
-import { Grid, Paper } from '@material-ui/core';
+import React from 'react';
+// import { Paper } from '@material-ui/core';
+import AuthPaper from './authPaper.js';
 
-class Admin extends Component {
-	render() {
-		return (
-			<Grid item xs={12}>
-        		<Paper className="admin">
-        			Admin view
-        		</Paper>
-        	</Grid>
-		)
+class Admin extends AuthPaper {
+	constructor(props) {
+		super(props);
 	}
+
+	contents() {
+		return (<div>admin panel</div>);
+	}
+
+
 }
 
 export default Admin;

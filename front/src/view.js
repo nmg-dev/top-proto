@@ -1,14 +1,11 @@
-import React, { Component } from 'react';
-import { Grid, Paper } from '@material-ui/core';
+import React from 'react';
+// import { Grid, Paper } from '@material-ui/core';
+import AuthPaper from './authPaper.js';
 
-class View extends Component {
-	render() {
+class View extends AuthPaper {
+	contents() {
 		return (
-			<Grid item xs={12}>
-        		<Paper className="index">
-        			Index View
-        		</Paper>
-        	</Grid>
+			<h3>View</h3>
 		)
 	}
 }

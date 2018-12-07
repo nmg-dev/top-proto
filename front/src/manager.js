@@ -1,15 +1,11 @@
-import React, { Component } from 'react';
-import { Grid, Paper } from '@material-ui/core';
+import React from 'react';
+// import { Grid, Paper } from '@material-ui/core';
+import AuthPaper from './authPaper.js';
 
-class Manager extends Component {
-	render() {
-		return (
-			<Grid item xs={12}>
-        		<Paper className="manager">
-        			Manager view
-        		</Paper>
-        	</Grid>
-		)
+class Manager extends AuthPaper {
+
+	contents() {
+		return (<h1>Manager</h1>);
 	}
 }
 

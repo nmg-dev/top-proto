@@ -17,14 +17,10 @@ class Login extends Component {
 
 	render() {
 		return (
-			<Grid item xs={12}>
-        		<Paper className="login">
-        			<div className="g-signin2" 
-        			data-onsuccess="onLoginSuccess" 
-        			data-onfailure="onLoginError">
-        			</div>
-        		</Paper>
-        	</Grid>
+			<div className="g-signin2" 
+			data-onsuccess="onLoginSuccess" 
+			data-onfailure="onLoginError">
+			</div>
 		)
 	}
 }

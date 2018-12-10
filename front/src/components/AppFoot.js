@@ -6,7 +6,7 @@ import AppPart from './AppPart.js';
 
 const styles = {
 	footer: {
-		display: block
+		display: 'block'
 	},
 	gridContainer: {
 

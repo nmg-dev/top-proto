@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { AppBar, Grid, Toolbar, Button, IconButton, Typography, Icon } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
-import Login from './components/login.js';
-import View from './components/view.js';
-import Manager from './components/manager.js';
-import Admin from './components/admin.js';
+
+import AppHead from './components/AppHead.js';
+import AppBody from './components/AppBody.js';
+import AppFoot from './components/AppFoot.js';
 
 const styles = {
 	root: {
@@ -24,40 +24,27 @@ class App extends Component {
 
 	componentDidMount() {
 		console.log('hello world');
+		// check for authentication
+
 	}
 
-	onStage() {
-		switch(this.state.stage) {
-			case 'login': return (<Login />)
-			case 'manage': return (<Manager />)
-			case 'admin': return (<Admin />)
-			case 'view': 
-			default:
-				return (<View />)
-		}
+	onLoginSuccess(resp) 
+	{
+		console.log('activated', resp);
 	}
 
-	
+	onLoginError(err) {
+		console.error('error', err);
+	}
 
 	render() {
 		return (
 		  <div className="Application">
-		  	<AppBar position="static" className={this.props.root}>
-		  		<Toolbar>
-		  			<Icon className={this.props.icon}>menu</Icon>
-		  		</Toolbar>
-		  		<Typography variand="h6">
-		  			Tag Operation: {this.onStageTitle()}
-		  		</Typography>
-		  		<Login />
-		  	</AppBar>
-		    <Grid container spacing={32} className="container">
-		    	{this.onStage}
-		    </Grid>
+		  	<AppHead />
+		  	<AppBody  />
+		  	<AppFoot />
 		  </div>
 		);
 	}
 }
-
-
 export default withStyles(styles)(App);

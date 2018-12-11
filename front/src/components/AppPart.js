@@ -1,14 +1,10 @@
 import React from 'react';
 
 class AppPart extends React.Component {
-	constructor(props, app) {
+	constructor(props) {
 		super(props);
-		this._app = app;
+		this.state = {};
 	}
-
-	/* abstact placeholders */
-	// on app stage changed
-	onAppStageUpdated(stage, prevStage=null) { return null; }
 }
 
 export default AppPart;

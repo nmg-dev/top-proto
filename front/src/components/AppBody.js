@@ -1,39 +1,35 @@
 import React, { Component } from 'react';
-import { Paper, Card } from '@material-ui/core';
+import { Paper, Card, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 import AppPart from './AppPart.js';
-import { GoogleLogin } from 'react-google-login';
+
+import AppBodyView from './AppBodyView.js';
+import AppBodyManage from './AppBodyManage.js';
+import AppBodyAdmin from './AppBodyAdmin.js';
 
 const styles = {
 	bodyContainer: {
-		'min-height': '100vh'
+		'min-height': 'calc(80vh - 64px)',
+		'padding': 32,
 	}
-}
-
-const onLoginSuccess = function(resp) {
-	console.log(resp);
-}
-
-const onLoginError = function(err) {
-	console.error(err.error);
 }
 
 class AppBody extends AppPart {
 	constructor(props) { 
 		super(props);
-
 	}
 
 	onAppStageUpdated(stage, prevStage=null) {
 		
 	}
 
-	componentDidMount() {
-		console.log(window.gapi);
-		window.gapi.load('client:auth2', this.initClient)
-		
-	}
+	// componentDidMount() {
+	// 	// call when authentication completed
+	// 	if(this.state.user) {
+	// 		// TODO: request data
+	// 	}
+	// }
 
 	initClient() {
 		window.gapi.client.init({
@@ -48,20 +44,22 @@ class AppBody extends AppPart {
 			.then((rs) => { console.log(rs); });
 	}
 
-	contents() {
-		return (
-			<div className="g-signin2" >
-			</div>
-		);
+	renderStatge() {
+		switch(this.state.stage) {
+			case 'view':
+			default:
+				return <AppBodyView />
+				
+		}
 	}
-
 	render() {
+
 		return (
-			<Paper className={this.props.bodyContainer}>
-				{this.contents()}
+			<Paper className={this.props.bodyContainer} style={styles.bodyContainer}>
+				{this.renderStage()}		
 			</Paper>
 		);
 	}
 }
 
-export default withStyles(styles)(AppBody)
+export default AppBody;

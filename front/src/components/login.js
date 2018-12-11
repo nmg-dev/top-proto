@@ -25,12 +25,4 @@ class Login extends Component {
 	}
 }
 
-function onLoginSuccess(resp) {
-	console.log(resp);
-}
-
-function onLoginError(err) {
-	console.error(err.error);
-}
-
 export default Login;

@@ -1,2 +1,4 @@
 *.log
+/*.exe
 front/package.json
+database.go

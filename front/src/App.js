@@ -12,12 +12,15 @@ import {
 		Chip
 	} 
 	from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
+
+
 
 
 import AppView from './appView.js';
 import AppManage from './appManage.js';
 import AppAdmin from './appAdmin.js';
+
+const API_HOST = 'http://localhost:8080';
 
 const styles = {
 	head: {
@@ -88,44 +91,34 @@ class App extends Component {
 		console.log(ev, arguments);
 	}
 
+
 	sessionLogin(gauth) {
 		let resp = gauth.getAuthResponse();
 		let profile = gauth.getBasicProfile();
-		let user = {
-			id: profile.getId(),
-			name: profile.getName(),
-			email: profile.getEmail(),
-			icon: profile.getImageUrl(),
-			token: resp.id_token,
-			expires_at: resp.expires_at,
-			can_admin: true,
-			can_manage: true,
-		} 
-
-		// TODO: check for backend login
-
-		// open web socket from now
-		this.ws = new WebSocket('ws://'+window.location.hostname+':8080/ws/'+user.id);
-		this.ws.onopen = this.onSocketOpen.bind(this);
-		this.ws.onclose = this.onSocketClose.bind(this);
-		this.ws.onmessage = this.onSocketReceive.bind(this);
-
-		// state session logged in
-		this.setState({ user: user });
+		fetch(API_HOST + '/open', {
+			method: 'POST',
+			body: JSON.stringify({
+				id: profile.getId(),
+				email: profile.getEmail(),
+				token: resp.id_token
+			})
+		})	.then((plainResp) => plainResp.json())
+			.then((userInfo) => {
+				console.log('user verified...', userInfo)
+				this.setState({user: userInfo});
+			})
+			.catch((err) => {
+				console.error(err);
+			});
 	}
-
-	handleProfileClick() {
-		// TODO: logout or change status
-	}
-
 
 	renderHeadProfile() {
 		if(this.state.user) {
-			let pname = this.state.user.name + ' <' + this.state.user.email + '>';
+			let pname = this.state.user.profile.name + ' <' + this.state.user.profile.email + '>';
 			return (
 				<div style={ this.state.user!=null ? {display: 'inline-flex'} : {display: 'none'} }>
 					<Chip
-						avatar={<Avatar alt={this.state.user.name} src={this.state.user.icon} className={this.props.avatar} />}
+						avatar={<Avatar alt={this.state.user.profile.name} src={this.state.user.profile.picture} className={this.props.avatar} />}
 						label={pname}
 						onClick={this.handleProfileClick}
 					/>

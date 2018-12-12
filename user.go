@@ -21,7 +21,7 @@ type User struct {
 
 	Expire    uint64 `json:"expires_at"`
 	CanAdmin  bool   `json:"can_admin" db:"can_admin"`
-	CanManage bool   `json:"can_manage db:"can_manage"`
+	CanManage bool   `json:"can_manage" db:"can_manage"`
 
 	Profile DJsonMap `json:"profile" db:"profile"`
 	Access  DJsonMap `db:"access"`

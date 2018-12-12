@@ -1,5 +1,5 @@
 *.log
 /*.exe
 front/package.json
-front/build/*
+front/node_modules/*
 database.go

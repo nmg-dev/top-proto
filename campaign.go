@@ -78,5 +78,8 @@ type CampaignResp struct {
 }
 
 func SearchQuery(from time.Time, till time.Time) *CampaignResp {
+	resp := new(CampaignResp)
+
+	return resp
 
 }

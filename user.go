@@ -133,7 +133,7 @@ func (u *User) Bind(row *sql.Row) error {
 }
 
 func (u *User) Find(db *sql.DB, id uint) error {
-	stmt, _ = db.Prepare(`SELECT * FROM users WHERE id=?`)
+	stmt, _ := db.Prepare(`SELECT * FROM users WHERE id=?`)
 	return u.Bind(stmt.QueryRow(id))
 }
 
@@ -145,6 +145,14 @@ func (u *User) SearchEmail(db *sql.DB) error {
 		return errors.New("Not Found")
 	}
 	return u.Bind(rs)
+}
+
+func (u User) IsDeleted() bool {
+	return 0 < u.DeletedAt.Unix() && u.DeletedAt.Before(time.Now())
+}
+
+func (u User) IsBlocked() bool {
+	return 0 < u.BlockedAt.Unix() && u.BlockedAt.Before(time.Now())
 }
 
 // String
@@ -195,6 +203,12 @@ func PostOpen(ctx *gin.Context) {
 		theUser.CanAdmin = false
 		theUser.CanManage = theUser.IsInternal
 		theUser.Insert(db)
+	} else if theUser.IsBlocked() {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"e": theUser.BlockedAt})
+		return
+	} else if theUser.IsDeleted() {
+		ctx.JSON(http.StatusForbidden, gin.H{"e": theUser.DeletedAt})
+		return
 	} else {
 		theUser.Update(db)
 	}

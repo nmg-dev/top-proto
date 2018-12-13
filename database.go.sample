@@ -1,50 +1,19 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
-
-	"github.com/jmoiron/sqlx"
-
-	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
-)
-
 // DBDriver - database driver type
 const DBDriver = `mysql`
 
 // DBHost - database host
-const DBHost = `unix(/var/run/mysql/mysql.sock)`
-
-// const DBHost = `tcp(localhost:3306)`
-// const DBHost = `unix(/path/to/unix/socket)`
+// const DBHost = `unix(/var/run/mysql/mysql.sock)`
+const DBHost = `tcp(localhost:3306)`
 
 // DBUser - database user name
-const DBUser = `nmg-to`
+const DBUser = `UserName`
 
 // DBPass - database user pass
-const DBPass = `nmg-pass`
+const DBPass = `DBPass`
 
 // DBSchema - database schema
-const DBSchema = `nmg-to`
+const DBSchema = `DBSchema`
 
 const dbKeyBindings = `__DB__`
-
-func databaseSetMiddle(ctx *gin.Context) {
-	cnx, err := sqlx.Connect(DBDriver, fmt.Sprintf("%s:%s@%s/%s", DBUser, DBPass, DBHost))
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-	}
-
-	ctx.Set(dbKeyBindings, cnx)
-}
-
-// Database - middleware
-func Database() gin.HandlerFunc {
-	return databaseSetMiddle
-}
-
-func GetDatabase(ctx *gin.Context) *sqlx.DB {
-	db, _ := ctx.Get(dbKeyBindings)
-	return db
-}

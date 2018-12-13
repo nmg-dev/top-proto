@@ -22,22 +22,7 @@ func main() {
 		AllowOrigins: []string{"http://localhost:3000"},
 	}))
 
-	// with Database binding
-	app.Group("/", func(ctx *gin.Context) {
-		app.Use(Database())
-
-		app.GET("/init", GetInitView)
-
-		// token validation first
-		app.POST("/open", PostOpen)
-		// get list of campaigns
-		app.GET("/campaigns", GetCampaign)
-		// get list of attributes
-		app.GET("/attributes", GetAttributes)
-		// query results
-		app.POST("/query", PostQuery)
-
-	})
+	GroupDatabaseConnection(app)
 
 	// campaign CRUD
 	app.Run() // listen and serve on 0.0.0.0:8080

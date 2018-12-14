@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -114,4 +115,23 @@ func (c *Campaign) Find(db *sql.DB, id uint) error {
 		c.Bind(rs)
 		return nil
 	}
+}
+
+func FindCampaignsIn(db *sql.DB, ids []uint) map[uint]Campaign {
+	cmps := make(map[uint]Campaign)
+
+	query := `SELECT * FROM campaigns WHERE id IN (%s)`
+	query = fmt.Sprintf(query, WhereInJoin(ids))
+	stmt, _ := db.Prepare(query)
+
+	rs, _ := stmt.Query()
+	for rs.Next() {
+		var cmp Campaign
+		cmp.Bind(rs)
+		if 0 < cmp.ID {
+			cmps[cmp.ID] = cmp
+		}
+	}
+
+	return cmps
 }

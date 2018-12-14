@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -109,5 +110,24 @@ func (a *Attribution) Bind(row Scannable) error {
 
 // FilterCIDsWithAIds - filter out cids with aids
 func FilterCIDsWithAIds(cids []uint, aids []uint) []uint {
+	return cids
+}
 
+//
+func FindAttributesIn(db *sql.DB, aids []uint) map[uint]Attribution {
+	atts := make(map[uint]Attribution)
+
+	query := fmt.Sprintf(`SELECT * FROM attributes WHERE id IN (%s)`, WhereInJoin(aids))
+	stmt, _ := db.Prepare(query)
+	rs, _ := stmt.Query()
+	defer stmt.Close()
+
+	for rs.Next() {
+		var att Attribution
+		att.Bind(rs)
+		if 0 < att.ID {
+			atts[att.ID] = att
+		}
+	}
+	return atts
 }

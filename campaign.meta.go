@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -26,23 +25,19 @@ const campaignMetaUpdateStmt = `UPDATE campaign_meta SET campaign_id=?, attr_id=
 const campaignMetaDeleteStmt = `UPDATE campaign_meta SET deleted_at=NOW(), deleted_by=? WHERE id=?`
 
 func ListAttrsFromCampaignIds(db *sql.DB, cids []uint) []uint {
-	query := `SELECT attr_id, COUNT(*) as cnt FROM campaign_meta WHERE campaign_id IN (%s) GROUP BY attr_id ORDER BY cnt DESC`
-	var campaignIDs []string
-
-	for i, cid := range cids {
-		campaignIDs = append(campaignIDs, string(cids[i]))
-	}
-	stmt, _ := db.Prepare(fmt.Sprintf(query, strings.Join(campaignIDs, ",")))
+	query := `SELECT attr_id, COUNT(*) as cnt FROM campaign_meta WHERE campaign_id IN (%s) %s GROUP BY attr_id ORDER BY cnt DESC`
+	query = fmt.Sprintf(query, WhereInJoin(cids))
+	stmt, _ := db.Prepare(query)
 	rs, _ := stmt.Query()
 
 	var aid, acnt uint
-	var attrIDs []uint
+	var aids []uint
 	for rs.Next() {
 		rs.Scan(&aid, &acnt)
-		attrIDs = append(attrIDs, aid)
+		aids = append(aids, aid)
 	}
 
-	return attrIDs
+	return aids
 }
 
 func (m *CampaignMeta) insertStmt(db *sql.DB) *sql.Stmt {
@@ -109,4 +104,44 @@ func (m CampaignMeta) Delete(db *sql.DB) error {
 	} else {
 		return nil
 	}
+}
+
+// Bind
+func (m *CampaignMeta) Bind(r Scannable) error {
+	return r.Scan(
+		&m.ID,
+		&m.CampaignID,
+		&m.AttributeID,
+		&m.CreatedAt,
+		&m.UpdatedAt,
+		&m.CreatedBy,
+		&m.UpdatedBy)
+}
+
+// FindAffiliationsIn
+func FindAffiliationsIn(db *sql.DB, cids []uint, aids []uint) map[uint][]uint {
+	affs := make(map[uint][]uint)
+	query := fmt.Sprintf(
+		`SELECT * FROM campaign_meta WHERE campaign_id IN (%s) AND attr_id IN (%s)`,
+		WhereInJoin(cids),
+		WhereInJoin(aids))
+	stmt, _ := db.Prepare(query)
+	rs, _ := stmt.Query()
+	defer stmt.Close()
+
+	for rs.Next() {
+		var m CampaignMeta
+		m.Bind(rs)
+
+		if 0 < m.ID {
+			if _, ok := affs[m.CampaignID]; !ok {
+				affs[m.CampaignID] = []uint{m.AttributeID}
+			} else {
+				affs[m.CampaignID] = append(affs[m.CampaignID], m.AttributeID)
+			}
+		}
+	}
+
+	return affs
+
 }

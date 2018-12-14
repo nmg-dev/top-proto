@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -80,6 +81,7 @@ func (p CampaignPerformance) Delete(db *sql.DB) error {
 	return nil
 }
 
+// Bind
 func (p *CampaignPerformance) Bind(r Scannable) error {
 	return r.Scan(
 		&p.ID,
@@ -108,4 +110,28 @@ func ListCIDsFromPeriod(db *sql.DB, from time.Time, till time.Time) []uint {
 	}
 
 	return cids
+}
+
+func FindPerformancesIn(db *sql.DB, cids []uint, from time.Time, till time.Time) map[uint][]CampaignPerformance {
+	recs := make(map[uint][]CampaignPerformance)
+
+	query := `SELECT * FROM campaign_performances WHERE campaign_id IN (%s) AND ? < day_id AND day_id <= ? ORDER BY day_id`
+	stmt, _ := db.Prepare(fmt.Sprintf(query, WhereInJoin(cids)))
+	rs, _ := stmt.Query(from, till)
+	defer stmt.Close()
+
+	for rs.Next() {
+		var p CampaignPerformance
+		p.Bind(rs)
+
+		if 0 < p.ID {
+			if _, ok := recs[p.CampaignID]; !ok {
+				recs[p.CampaignID] = []CampaignPerformance{p}
+			} else {
+				recs[p.CampaignID] = append(recs[p.CampaignID], p)
+			}
+		}
+	}
+
+	return recs
 }

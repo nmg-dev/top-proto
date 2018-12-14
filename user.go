@@ -44,30 +44,45 @@ const userBlockStmt = `UPDATE users SET blocked_at=NOW() WHERE id=?`
 const userSearchByEmail = `SELECT * FROM users WHERE profile->"$.email"=? ORDER BY ID DESC LIMIT 1`
 const userConditionAvailable = `deleted_at is NULL AND blocked_at is NULL`
 
-func (u User) Saved() bool {
-	return 0 < u.ID
+func (u *User) insertStatement(db *sql.DB) *sql.Stmt {
+	return QueriableState(db, userInsertStmt)
+}
+
+func (u *User) insertExecution(stmt *sql.Stmt) (sql.Result, error) {
+	access, _ := json.Marshal(u.Access)
+	profile, _ := json.Marshal(u.Profile)
+	return stmt.Exec(
+		u.GUID,
+		access,
+		profile,
+		u.CanAdmin,
+		u.CanManage,
+	)
+}
+
+func (u User) updateStatement(db *sql.DB) *sql.Stmt {
+	return QueriableState(db, userUpdateStmt)
+}
+
+func (u User) updateExecution(stmt *sql.Stmt) (sql.Result, error) {
+	access, _ := json.Marshal(u.Access)
+	profile, _ := json.Marshal(u.Profile)
+	return stmt.Exec(access, profile, u.CanAdmin, u.CanManage, u.ID)
+}
+
+func (u User) deleteStatement(db *sql.DB) *sql.Stmt {
+	return QueriableState(db, userDeleteStmt)
+}
+
+func (u User) deleteExecution(stmt *sql.Stmt) (sql.Result, error) {
+	return stmt.Exec(u.ID)
 }
 
 // Insert - Queriable impl.
 func (u *User) Insert(db *sql.DB) error {
 	if u.ID <= 0 {
-		stmt, _ := db.Prepare(userInsertStmt)
-		access, _ := json.Marshal(u.Access)
-		profile, _ := json.Marshal(u.Profile)
-		rs, err := stmt.Exec(
-			u.GUID,
-			access,
-			profile,
-			u.CanAdmin,
-			u.CanManage,
-		)
-		defer stmt.Close()
-
-		lastID, _ := rs.LastInsertId()
+		lastID, err := ExecuteQueriableInsert(u, db, u.insertStatement, u.insertExecution)
 		u.ID = uint(lastID)
-
-		fmt.Printf("%d\n", u.ID)
-
 		return err
 	}
 	return nil
@@ -76,14 +91,7 @@ func (u *User) Insert(db *sql.DB) error {
 // Update - Queriable impl.
 func (u User) Update(db *sql.DB) error {
 	if 0 < u.ID {
-		stmt, _ := db.Prepare(userUpdateStmt)
-		access, _ := json.Marshal(u.Access)
-		profile, _ := json.Marshal(u.Profile)
-
-		_, err := stmt.Exec(access, profile, u.CanAdmin, u.CanManage, u.ID)
-		defer stmt.Close()
-
-		return err
+		return ExecuteQueriableUpdate(u, db, u.updateStatement, u.updateExecution)
 	} else {
 		return u.Insert(db)
 	}
@@ -92,15 +100,13 @@ func (u User) Update(db *sql.DB) error {
 // Delete - Queriable impl.
 func (u User) Delete(db *sql.DB) error {
 	if 0 < u.ID {
-		stmt, _ := db.Prepare(userDeleteStmt)
-		stmt.Exec(u.ID)
-		defer stmt.Close()
+		return ExecuteQueriableUpdate(u, db, u.deleteStatement, u.deleteExecution)
 	}
 	return nil
 }
 
 // Bind - Queriable impl.
-func (u *User) Bind(row *sql.Row) error {
+func (u *User) Bind(row Scannable) error {
 	var accessJson, profileJson string
 	var deletedAt, blockedAt interface{}
 	err := row.Scan(
@@ -134,6 +140,7 @@ func (u *User) Bind(row *sql.Row) error {
 
 func (u *User) Find(db *sql.DB, id uint) error {
 	stmt, _ := db.Prepare(`SELECT * FROM users WHERE id=?`)
+	defer stmt.Close()
 	return u.Bind(stmt.QueryRow(id))
 }
 
@@ -141,6 +148,8 @@ func (u *User) Find(db *sql.DB, id uint) error {
 func (u *User) SearchEmail(db *sql.DB) error {
 	stmt, _ := db.Prepare(userSearchByEmail)
 	rs := stmt.QueryRow(u.Email)
+	defer stmt.Close()
+
 	if rs == nil {
 		return errors.New("Not Found")
 	}
@@ -199,7 +208,7 @@ func PostOpen(ctx *gin.Context) {
 	// database check for existing user
 	db := getDatabase(ctx)
 	theUser.SearchEmail(db)
-	if !theUser.Saved() {
+	if theUser.ID <= 0 {
 		theUser.CanAdmin = false
 		theUser.CanManage = theUser.IsInternal
 		theUser.Insert(db)

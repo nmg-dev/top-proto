@@ -9,12 +9,49 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// Scannable to fit sql.Row, sql.Rows
+type Scannable interface {
+	Scan(dest ...interface{}) error
+}
+
 // Queriable table queriable
 type Queriable interface {
-	Insert(db *sql.DB) error
 	Update(db *sql.DB) error
 	Delete(db *sql.DB) error
-	Bind(row *sql.Row) error
+}
+
+// UintIDEntity
+type UintIDEntity struct {
+	ID uint `json:"id" db:"id"`
+}
+
+// QueriableExec
+type QueriableStmt func(db *sql.DB) *sql.Stmt
+type QueriableExec func(stmt *sql.Stmt) (sql.Result, error)
+
+//
+func QueriableState(db *sql.DB, query string) *sql.Stmt {
+	stmt, _ := db.Prepare(query)
+	return stmt
+}
+
+// ExecuteQueriableInsert
+func ExecuteQueriableInsert(q Queriable, db *sql.DB, qs QueriableStmt, exec QueriableExec) (int64, error) {
+	stmt := qs(db)
+	rs, err := exec(stmt)
+	defer stmt.Close()
+
+	lastId, _ := rs.LastInsertId()
+	return lastId, err
+}
+
+//ExecuteQueriableUpdate
+func ExecuteQueriableUpdate(q Queriable, db *sql.DB, qs QueriableStmt, exec QueriableExec) error {
+	stmt := qs(db)
+	_, err := exec(stmt)
+	defer stmt.Close()
+
+	return err
 }
 
 func initConnection() (*sql.DB, error) {

@@ -1,0 +1,15 @@
+campaign	account	agency	date	impressions	clicks	conversion	cost(krw)
+campaign01	nmg	nmg	2018-12-01	100	10	10	1000
+campaign01	nmg	nmg	2018-12-02	100	10	10	1000
+campaign01	nmg	nmg	2018-12-03	100	10	10	1000
+campaign01	nmg	nmg	2018-12-04	100	10	10	1000
+campaign01	nmg	nmg	2018-12-05	100	10	10	1000
+campaign01	nmg	nmg	2018-12-06	100	10	10	1000
+campaign01	nmg	nmg	2018-12-07	200	15	20	1500
+campaign02	nmg	nmg	2018-12-01	200	15	20	1500
+campaign02	nmg	nmg	2018-12-02	200	15	20	1500
+campaign02	nmg	nmg	2018-12-03	200	15	20	1500
+campaign02	nmg	nmg	2018-12-04	200	15	20	1500
+campaign02	nmg	nmg	2018-12-05	200	15	20	1500
+campaign02	nmg	nmg	2018-12-06	200	15	20	1500
+campaign02	nmg	nmg	2018-12-07	200	15	20	1500

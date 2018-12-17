@@ -20,6 +20,8 @@ func GroupDatabaseConnection(app *gin.Engine) {
 	// query results
 	dbGroup.POST("/query", PostQuery)
 
+	dbGroup.GET("/sample", PostSample)
+
 }
 
 // GetInitView - initializing data

@@ -61,8 +61,6 @@ class App extends Component {
 	}
 
 	componentWillUpdate() {
-		console.log(this.state);
-
 		// on login
 		if(this.state.login!=null) {
 			// this._appHead.setState({login: this.state.login});

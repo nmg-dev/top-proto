@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { Card, CardHeader, CardContent, Grid, Chip, Icon, Paper, TextField, MenuItem } from '@material-ui/core';
 
+
 import Plot from 'react-plotly.js';
+const moment = require('moment');
 
 class AppView extends Component {
 
@@ -22,29 +24,49 @@ class AppView extends Component {
 					{label: 'option5', value: '5'},
 				]
 			},
-			main: {
-				spending: 100,
-				cpc: 0,
-				cvr: 0,
-				ctr: 0,
-				data: [
-					{
-						'x': [1,2,3],
-						'y': [2,6,3],
-						'type': 'scatter',
-						'mode': 'lines+points',
-						'marker': { 'color': 'red' }
-					},
-					{
-						type: 'bar',
-						x: [1,2,3],
-						y: [2,5,3],
+			summary: {
+				spending: 10000000,
+				cpc: 12,
+				cvr: 30,
+				ctr: 20,
+			},
+			plots: {
+				scatter: {
+					data: [
+						{ x: [10], y: [5], marker: { size: 10}, mode: 'points', },
+						{ x: [5], y: [1], marker: { size: 5}, mode: 'points', },
+						{ x: [7], y: [7], marker: { size: 7}, mode: 'points', },
+						{ x: [8], y: [9], marker: { size: 9}, mode: 'points', },
+						{ x: [4], y: [8], marker: { size: 2}, mode: 'points', },
+					],
+					layout: {
+						width: '100%', 
+						height: '30vh', 
+						title: 'Per Campaign'
 					}
-				],
-				layout: {
-					width: '100%', 
-					height: 240, 
-					title: 'A Fancy Plot'
+				},
+				main: {
+					
+					data: [
+						{ 
+							x: [1,2,3,4,5,6,7],
+							y: [10,20,30,30,30,50],
+							type: 'bar',
+							marker: { color: 'red' },
+						},
+						{
+							x: [1,2,3,4,5,6,7],
+							y: [5,6,6,2,4,5,6],
+							type: 'scatter',
+							mode: 'lines+points',
+							marker: { color: 'blue' },
+						}
+					],
+					layout: {
+						width: '100%', 
+						height: '40vh', 
+						title: 'Daily'
+					}
 				}
 			}
 		};
@@ -67,9 +89,9 @@ class AppView extends Component {
 					<CardHeader title="Put Options" />
 					<CardContent>
 						<div>
-							<TextField type="date" label="from" />
+							<TextField type="date" label="from" value={moment().add(-7, 'day').format('YYYY-MM-DD')} />
 							 - 
-							<TextField type="date" label="till" />
+							<TextField type="date" label="till" value={moment().format('YYYY-MM-DD')} />
 						</div>
 						<div>
 							<TextField select 
@@ -79,6 +101,9 @@ class AppView extends Component {
 								{this.state.options.data.map((opt) => (
 									<MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
 								))}
+							</TextField>
+							<TextField select>
+								
 							</TextField>
 							<TextField select
 								label="Attribute Value"
@@ -119,15 +144,22 @@ class AppView extends Component {
 				<Grid item md={8}>
 					<Paper>
 						<Grid container>
-							{this.renderHeaderCard('money', 'Spending', '지출 - KRW', this.state.main.spending)}
-							{this.renderHeaderCard('money_off', 'CPC', '클릭당 지출 - KRW/Click', this.state.main.cpc)}
-							{this.renderHeaderCard('touch_app', 'CTR', '클릭 진행률 (%)', this.state.main.ctr)}
-							{this.renderHeaderCard('tab_unselected', 'CVR', '전환율 (%)', this.state.main.cvr)}
+							{this.renderHeaderCard('money', 'Spending', '지출 - KRW', this.state.summary.spending)}
+							{this.renderHeaderCard('money_off', 'CPC', '클릭당 지출 - KRW/Click', this.state.summary.cpc)}
+							{this.renderHeaderCard('touch_app', 'CTR', '클릭 진행률 (%)', this.state.summary.ctr)}
+							{this.renderHeaderCard('tab_unselected', 'CVR', '전환율 (%)', this.state.summary.cvr)}
 						</Grid>
 					</Paper>
 					<Paper>
 						<Card>
-							<Plot data={this.state.main.data} layout={this.state.main.layout} />
+							<CardHeader>
+								<h1>Campaign Charts</h1>
+							</CardHeader>
+							<CardContent>
+								<Plot data={this.state.plots.scatter.data} layout={this.state.plots.scatter.layout} />
+								<Plot data={this.state.plots.main.data} layout={this.state.plots.main.layout} />
+							</CardContent> 
+
 						</Card>
 					</Paper>
 				</Grid>

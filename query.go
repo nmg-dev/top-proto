@@ -9,6 +9,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+const dbKeyBindings = `__DB__`
+
 // Scannable to fit sql.Row, sql.Rows
 type Scannable interface {
 	Scan(dest ...interface{}) error
@@ -59,17 +61,13 @@ func initConnection() (*sql.DB, error) {
 	return sql.Open(DBDriver, datasource)
 }
 
-func databaseSetMiddle(ctx *gin.Context) {
+// DatabaseSetMiddle
+func DatabaseSetMiddle(ctx *gin.Context) {
 	db, err := initConnection()
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 	}
 	ctx.Set(dbKeyBindings, db)
-}
-
-// Database - middleware
-func Database() gin.HandlerFunc {
-	return databaseSetMiddle
 }
 
 func getDatabase(ctx *gin.Context) *sql.DB {

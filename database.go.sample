@@ -16,4 +16,14 @@ const DBPass = `DBPass`
 // DBSchema - database schema
 const DBSchema = `DBSchema`
 
-const dbKeyBindings = `__DB__`
+
+// RedisCache address
+const RedisAddress = `localhost:6379`
+
+// RedisDBNumber 0-9
+const RedisDBNumber = 1
+
+// RedisAuthPass redis auth password
+const RedisAuthPass = ``
+
+

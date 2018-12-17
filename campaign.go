@@ -3,16 +3,17 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 )
 
 // Campaign - campaign data
 type Campaign struct {
-	ID      uint   `json:"id" db:"id"`
-	OwnerID uint   `json: "owner" db:"owner_id"`
-	Title   string `json:"title" db:"title"`
-	Memo    string `json:"memo" db:"memo"`
+	ID    uint   `json:"id" db:"id"`
+	Title string `json:"title" db:"title"`
+	Memo  string `json:"memo" db:"memo"`
+
+	PeriodFrom time.Time `json:"from" db:"period_from"`
+	PeriodTill time.Time `json:"till" db:"period_till"`
 
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	CreatedBy uint      `json:"created_by" db:"created_by"`
@@ -22,8 +23,8 @@ type Campaign struct {
 	DeletedBy uint      `json:"deleted_by" db:"deleted_by"`
 }
 
-const campaignInsertStmt = `INSERT INTO campaigns (owner_id, title, memo, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, NOW(), ?, NOW(), ?)`
-const campaignUpdateStmt = `UPDATE campaigns SET owner_id=?, title=?, memo=?, updated_at=NOW(), updated_by=? WHERE id=?`
+const campaignInsertStmt = `INSERT INTO campaigns (title, memo, period_from, period_till, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, NOW(), ?, NOW(), ?)`
+const campaignUpdateStmt = `UPDATE campaigns SET title=?, memo=?, period_from=?, period_till, updated_at=NOW(), updated_by=? WHERE id=?`
 const campaignDeleteStmt = `UPDATE campaigns SET deleted_at=NOW(), deleted_by=? WHERE id=?`
 const campaignFindStmt = `SELECT * FROM campaigns WHERE id=?`
 
@@ -32,7 +33,7 @@ func (c *Campaign) insertStatement(db *sql.DB) *sql.Stmt {
 }
 
 func (c *Campaign) insertExecution(stmt *sql.Stmt) (sql.Result, error) {
-	return stmt.Exec(c.CreatedBy, c.Title, c.Memo, c.CreatedBy, c.CreatedBy)
+	return stmt.Exec(c.Title, c.Memo, c.PeriodFrom, c.PeriodTill, c.CreatedBy, c.CreatedBy)
 }
 
 func (c Campaign) updateStatement(db *sql.DB) *sql.Stmt {
@@ -41,9 +42,10 @@ func (c Campaign) updateStatement(db *sql.DB) *sql.Stmt {
 
 func (c Campaign) updateExecution(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(
-		c.OwnerID,
 		c.Title,
 		c.Memo,
+		c.PeriodFrom,
+		c.PeriodTill,
 		c.UpdatedBy,
 		c.ID,
 	)
@@ -90,10 +92,10 @@ func (c Campaign) Delete(db *sql.DB) error {
 func (c *Campaign) Bind(row Scannable) error {
 	return row.Scan(
 		&c.ID,
-		&c.OwnerID,
 		&c.Title,
 		&c.Memo,
-
+		&c.PeriodFrom,
+		&c.PeriodTill,
 		&c.CreatedAt,
 		&c.UpdatedAt,
 		&c.DeletedAt,
@@ -115,23 +117,4 @@ func (c *Campaign) Find(db *sql.DB, id uint) error {
 		c.Bind(rs)
 		return nil
 	}
-}
-
-func FindCampaignsIn(db *sql.DB, ids []uint) map[uint]Campaign {
-	cmps := make(map[uint]Campaign)
-
-	query := `SELECT * FROM campaigns WHERE id IN (%s)`
-	query = fmt.Sprintf(query, WhereInJoin(ids))
-	stmt, _ := db.Prepare(query)
-
-	rs, _ := stmt.Query()
-	for rs.Next() {
-		var cmp Campaign
-		cmp.Bind(rs)
-		if 0 < cmp.ID {
-			cmps[cmp.ID] = cmp
-		}
-	}
-
-	return cmps
 }

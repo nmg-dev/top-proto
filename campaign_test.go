@@ -3,6 +3,7 @@ package main
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCampaignCRUD(t *testing.T) {
@@ -11,10 +12,11 @@ func TestCampaignCRUD(t *testing.T) {
 
 	// test insert
 	c := Campaign{
-		OwnerID:   1,
-		Title:     "test",
-		Memo:      "memo",
-		CreatedBy: 1,
+		Title:      "test",
+		Memo:       "memo",
+		CreatedBy:  1,
+		PeriodFrom: time.Now(),
+		PeriodTill: time.Now(),
 	}
 
 	if err := c.Insert(db); err != nil {

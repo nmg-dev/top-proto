@@ -2,15 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 )
 
 // CampaignMeta - campaign meta data
 type CampaignMeta struct {
-	ID          uint `json:"id" db:"id"`
-	CampaignID  uint `db:"campaign_id"`
-	AttributeID uint `db:"attr_id"`
+	ID         uint `json:"id" db:"id"`
+	CampaignID uint `db:"campaign_id"`
+	TagID      uint `db:"tag_id"`
 
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	CreatedBy uint      `json:"created_by" db:"created_by"`
@@ -20,25 +19,9 @@ type CampaignMeta struct {
 	DeletedBy uint      `json:"deleted_by" db:"deleted_by"`
 }
 
-const campaignMetaInsertStmt = `INSERT campaign_meta (campaign_id, attr_id, created_at, created_by, updated_at, updated_by) VALUE (?, ?, NOW(), ?, NOW(), ?)`
-const campaignMetaUpdateStmt = `UPDATE campaign_meta SET campaign_id=?, attr_id=?, updated_id=?, updated_by=? WHERE id=?`
-const campaignMetaDeleteStmt = `UPDATE campaign_meta SET deleted_at=NOW(), deleted_by=? WHERE id=?`
-
-func ListAttrsFromCampaignIds(db *sql.DB, cids []uint) []uint {
-	query := `SELECT attr_id, COUNT(*) as cnt FROM campaign_meta WHERE campaign_id IN (%s) %s GROUP BY attr_id ORDER BY cnt DESC`
-	query = fmt.Sprintf(query, WhereInJoin(cids))
-	stmt, _ := db.Prepare(query)
-	rs, _ := stmt.Query()
-
-	var aid, acnt uint
-	var aids []uint
-	for rs.Next() {
-		rs.Scan(&aid, &acnt)
-		aids = append(aids, aid)
-	}
-
-	return aids
-}
+const campaignMetaInsertStmt = `INSERT tag_affiliations (campaign_id, tag_id, created_at, created_by, updated_at, updated_by) VALUE (?, ?, NOW(), ?, NOW(), ?)`
+const campaignMetaUpdateStmt = `UPDATE tag_affiliations SET campaign_id=?, tag_id=?, updated_id=?, updated_by=? WHERE id=?`
+const campaignMetaDeleteStmt = `UPDATE tag_affiliations SET deleted_at=NOW(), deleted_by=? WHERE id=?`
 
 func (m *CampaignMeta) insertStmt(db *sql.DB) *sql.Stmt {
 	return QueriableState(db, campaignMetaInsertStmt)
@@ -47,7 +30,7 @@ func (m *CampaignMeta) insertStmt(db *sql.DB) *sql.Stmt {
 func (m *CampaignMeta) insertExec(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(
 		m.CampaignID,
-		m.AttributeID,
+		m.TagID,
 		m.CreatedBy,
 		m.CreatedBy,
 	)
@@ -60,7 +43,7 @@ func (m CampaignMeta) updateStmt(db *sql.DB) *sql.Stmt {
 func (m CampaignMeta) updateExec(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(
 		m.CampaignID,
-		m.AttributeID,
+		m.TagID,
 		m.UpdatedBy,
 		m.ID,
 	)
@@ -111,37 +94,9 @@ func (m *CampaignMeta) Bind(r Scannable) error {
 	return r.Scan(
 		&m.ID,
 		&m.CampaignID,
-		&m.AttributeID,
+		&m.TagID,
 		&m.CreatedAt,
 		&m.UpdatedAt,
 		&m.CreatedBy,
 		&m.UpdatedBy)
-}
-
-// FindAffiliationsIn
-func FindAffiliationsIn(db *sql.DB, cids []uint, aids []uint) map[uint][]uint {
-	affs := make(map[uint][]uint)
-	query := fmt.Sprintf(
-		`SELECT * FROM campaign_meta WHERE campaign_id IN (%s) AND attr_id IN (%s)`,
-		WhereInJoin(cids),
-		WhereInJoin(aids))
-	stmt, _ := db.Prepare(query)
-	rs, _ := stmt.Query()
-	defer stmt.Close()
-
-	for rs.Next() {
-		var m CampaignMeta
-		m.Bind(rs)
-
-		if 0 < m.ID {
-			if _, ok := affs[m.CampaignID]; !ok {
-				affs[m.CampaignID] = []uint{m.AttributeID}
-			} else {
-				affs[m.CampaignID] = append(affs[m.CampaignID], m.AttributeID)
-			}
-		}
-	}
-
-	return affs
-
 }

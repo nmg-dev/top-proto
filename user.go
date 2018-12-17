@@ -183,10 +183,10 @@ const googleVerifiedEmail = `true`
 
 const hostDomain = `nextmediagroup.co.kr,`
 
-// PostOpen - start open
-const selectUserEmail = `select * from user where json_extract(profile, $.email)=?`
+const selectUserEmail = `SELECT * FROM user WHERE profile->"$.email" = ?`
 
-func PostOpen(ctx *gin.Context) {
+// PostOpen - start open
+func PostOpenAuth(ctx *gin.Context) {
 	var theUser User
 	ins, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
@@ -224,6 +224,53 @@ func PostOpen(ctx *gin.Context) {
 
 	// response back
 	ctx.JSON(http.StatusOK, theUser)
+}
+
+// GetUserCacheKey
+func GetUserCacheKey(token string) string {
+	return fmt.Sprintf("to://user/%s", token)
+}
+
+// RequireLoginSetMiddle - when only login session required
+func RequireLoginSetMiddle(ctx *gin.Context) {
+	if statusCode := authInMiddle(ctx, false, false); statusCode != http.StatusOK {
+		ctx.AbortWithStatusJSON(statusCode, gin.H{"e": "login required"})
+	}
+}
+
+// RequireManagerSetMiddle - when manager auth required
+func RequireManagerSetMiddle(ctx *gin.Context) {
+	if statusCode := authInMiddle(ctx, true, false); statusCode != http.StatusOK {
+		ctx.AbortWithStatusJSON(statusCode, gin.H{"e": "manager authentication required"})
+	}
+}
+
+// RequireAdminSetMiddle - when admin auth required
+func RequireAdminSetMiddle(ctx *gin.Context) {
+	if statusCode := authInMiddle(ctx, false, true); statusCode != http.StatusOK {
+		ctx.AbortWithStatusJSON(statusCode, gin.H{"e": "admin authentication required"})
+	}
+}
+
+func authInMiddle(ctx *gin.Context, needManager bool, needAdmin bool) int {
+	if token, ok := ctx.GetQuery("token"); ok {
+		db := getDatabase(ctx)
+		stmt, _ := db.Prepare(`SELECT * FROM users WHERE access->"$.token"=? ORDER BY updated_at DESC LIMIT 1`)
+
+		var theUser User
+		rs := stmt.QueryRow(token)
+		theUser.Bind(rs)
+
+		if needAdmin && !theUser.CanAdmin {
+			return http.StatusForbidden
+		} else if needManager && !theUser.CanAdmin && !theUser.CanManage {
+			return http.StatusForbidden
+		} else {
+			return http.StatusOK
+		}
+	}
+
+	return http.StatusUnauthorized
 }
 
 // ValidateGToken - google token validation

@@ -93,7 +93,7 @@ class App extends Component {
 	sessionLogin(gauth) {
 		let resp = gauth.getAuthResponse();
 		let profile = gauth.getBasicProfile();
-		fetch(API_HOST + '/open', {
+		fetch(API_HOST + '/auth', {
 			method: 'POST',
 			body: JSON.stringify({
 				id: profile.getId(),

@@ -1,148 +1,125 @@
 package main
 
 import (
-	// "database/sql"
-
+	"database/sql"
+	"fmt"
 	"net/http"
-	"time"
-
-	"math/rand"
 
 	"github.com/gin-gonic/gin"
+	// "database/sql"
+
+	"time"
 )
 
 // CampaignQuery
 type CampaignQuery struct {
-	PeriodFrom   time.Time     `json:"from"`
-	PeriodTill   time.Time     `json:"till"`
-	Attributions []Attribution `json:"attrs"`
+	CampaignIds []uint    `json:"campaign_ids"`
+	PeriodFrom  time.Time `json:"from"`
+	PeriodTill  time.Time `json:"till"`
+	Tags        []uint    `json:"tags"`
 }
 
 // CampaignResp
 type CampaignResp struct {
 	Cmps map[uint]Campaign              `json:"campaigns"`
-	Atts map[uint]Attribution           `json:"attributions"`
-	Maps map[uint][]uint                `json:"map"` // Meta[11] = [2, 3, 4] campaign(11) holds attribution(2), (3), (4)
 	Recs map[uint][]CampaignPerformance `json:"records"`
 }
 
-// PostSearch - search response for the query
-// func PostSearch(ctx *gin.Context) {
-// period first
-// var q CampaignQuery
-// ctx.Bind(&q)
+const KeyCampaignQuery = `__cq__`
 
-// db := getDatabase(ctx)
-// cids, aids := searchQuery(db, q)
+// PostCampaignQuery
+func PostCampaignQuery(ctx *gin.Context) {
+	db := getDatabase(ctx)
 
-// // map attributions to put
-// var resp = CampaignResp{
-// 	Cmps: FindCampaignsIn(db, cids),
-// 	Atts: FindAttributesIn(db, aids),
-// 	Maps: FindAffiliationsIn(db, cids, aids),
-// 	Recs: FindPerformancesIn(db, cids, q.PeriodFrom, q.PeriodTill),
-// }
+	var cquery CampaignQuery
+	ctx.BindJSON(&cquery)
+	//
+	campaignIds := FindCampaignIdsWithin(db, cquery.PeriodFrom, cquery.PeriodTill, cquery.CampaignIds)
 
-// ctx.JSON(http.StatusOK, PostSample(ctx))
-// }
+	//
+	campaignIds = FindCampaignIdsBy(db, cquery.Tags, campaignIds)
 
-func PostSample(ctx *gin.Context) {
-	var resp = CampaignResp{
-		Cmps: map[uint]Campaign{
-			1: Campaign{
-				ID:        1,
-				OwnerID:   1,
-				Title:     `TEST1`,
-				Memo:      `Default`,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-				CreatedBy: 1,
-				UpdatedBy: 1,
-			},
-			2: Campaign{
-				ID:        2,
-				OwnerID:   1,
-				Title:     `TEST2`,
-				Memo:      `Sample`,
-				CreatedAt: time.Now(),
-				CreatedBy: 1,
-			},
-		},
-		Atts: map[uint]Attribution{
-			1: Attribution{
-				ID:        1,
-				Class:     `account`,
-				Label:     `NMG01`,
-				Name:      `NMG`,
-				Props:     map[string]interface{}{`type`: `internal`},
-				Priority:  1,
-				CreatedAt: time.Now(),
-				CreatedBy: 1,
-			},
-			2: Attribution{
-				ID:        2,
-				Class:     `agency`,
-				Label:     `AdQUA`,
-				Name:      `AdQUA`,
-				Props:     map[string]interface{}{`type`: `group`},
-				Priority:  1,
-				CreatedAt: time.Now(),
-				CreatedBy: 1,
-			},
-		},
-		Maps: map[uint][]uint{
-			1: []uint{1, 2},
-			2: []uint{2},
-		},
-	}
-	// random performances
-	resp.Recs = make(map[uint][]CampaignPerformance)
-	for i, _ := range resp.Cmps {
-		var performs = make([]CampaignPerformance, 7)
-		cid := i + 1
-		for d := 6; 0 < d; d-- {
-			date := time.Now().AddDate(0, 0, -d)
-			performs[d] = CampaignPerformance{
-				ID:         uint64(i*uint(7) + uint(d)),
-				DayID:      date,
-				CampaignID: cid,
-				Impression: uint(rand.Intn(4000) + 1000),
-				Click:      uint(rand.Intn(1000) + 200),
-				Conversion: uint(rand.Intn(100) + 50),
-				Cost:       uint(rand.Intn(10000000) + 5000000),
-				CreatedAt:  date,
-				CreatedBy:  1,
-			}
-			resp.Recs[cid] = performs
-		}
+	resp := CampaignResp{
+		Cmps: FindCampaignsIn(db, campaignIds),
+		Recs: FindCampaignRecordsIn(db, cquery.PeriodFrom, cquery.PeriodTill, campaignIds),
 	}
 
 	ctx.JSON(http.StatusOK, resp)
-
-	// return resp
 }
 
-// func searchQuery(db *sql.DB, q CampaignQuery) ([]uint, []uint) {
-// 	var cids, aids []uint
+// FindCampaignsWithin - search by period
+func FindCampaignIdsWithin(db *sql.DB, periodFrom time.Time, periodTill time.Time, cids []uint) []uint {
+	query := fmt.Sprintf(`SELECT id FROM campaigns WHERE NOT(? <= period_till) AND NOT(? <= period_from)`)
+	if 0 < len(cids) {
+		query += fmt.Sprintf(` AND id IN (%s) `, WhereInJoin(cids))
+	}
+	stmt, _ := db.Prepare(query)
+	rs, _ := stmt.Query(periodFrom, periodTill)
 
-// 	if 0 < len(q.Attributions) {
-// 		// with given aids
-// 		aids = make([]uint, len(q.Attributions))
-// 		for i, a := range q.Attributions {
-// 			aids[i] = a.ID
-// 		}
+	rets := []uint{}
+	for rs.Next() {
+		var cid uint
+		rs.Scan(&cid)
+		rets = append(rets, cid)
+	}
 
-// 		// retrieve campaign ids by period and aid
+	return rets
+}
 
-// 	} else {
-// 		// retrieve campaign ids by period
-// 		cids = ListCIDsFromPeriod(db, q.PeriodFrom, q.PeriodTill)
+// FindCampaignIdsBy - search by tag ids affiliation
+func FindCampaignIdsBy(db *sql.DB, tids []uint, cids []uint) []uint {
+	query := fmt.Sprintf(`SELECT campaign_ids FROM tag_affiliations WHERE attr_id IN (%s) AND campaign_ids IN (%s)`, WhereInJoin(tids), WhereInJoin(cids))
+	stmt, _ := db.Prepare(query)
+	rs, _ := stmt.Query()
 
-// 		// retrive attribute ids by campaign_ids
-// 		aids = ListAttrsFromCampaignIds(db, cids)
+	rets := []uint{}
+	for rs.Next() {
+		var cid uint
+		rs.Scan(&cid)
+		rets = append(rets, cid)
+	}
 
-// 	}
+	return rets
+}
 
-// 	return cids, aids
+// FindCampaignsIn - search with campaign ids
+func FindCampaignsIn(db *sql.DB, ids []uint) map[uint]Campaign {
+	cmps := make(map[uint]Campaign)
 
-// }
+	query := `SELECT * FROM campaigns WHERE id IN (%s)`
+	query = fmt.Sprintf(query, WhereInJoin(ids))
+	stmt, _ := db.Prepare(query)
+
+	rs, _ := stmt.Query()
+	for rs.Next() {
+		var cmp Campaign
+		cmp.Bind(rs)
+		if 0 < cmp.ID {
+			cmps[cmp.ID] = cmp
+		}
+	}
+
+	return cmps
+}
+
+// FindCampaignPerformances
+func FindCampaignRecordsIn(db *sql.DB, periodFrom time.Time, periodTill time.Time, ids []uint) map[uint][]CampaignPerformance {
+	query := fmt.Sprintf(`SELECT * FROM campaign_performances WHERE ?<=day_id AND day_id<=? AND campaign_id IN (%s) ORDER BY campaign_id, day_id`, WhereInJoin(ids))
+	stmt, _ := db.Prepare(query)
+	rs, _ := stmt.Query(periodFrom, periodTill)
+
+	rets := make(map[uint][]CampaignPerformance)
+
+	for rs.Next() {
+		var cp CampaignPerformance
+		cp.Bind(rs)
+
+		if sl, ok := rets[cp.CampaignID]; !ok {
+			rets[cp.CampaignID] = []CampaignPerformance{cp}
+		} else {
+			rets[cp.CampaignID] = append(sl, cp)
+		}
+	}
+
+	return rets
+}

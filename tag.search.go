@@ -27,6 +27,22 @@ func GetTagWithClass(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+func ListAllTags(db *sql.DB) map[uint]Tag {
+	tags := make(map[uint]Tag)
+	stmt, _ := db.Prepare(`SELECT * FROM tags`)
+	rs, _ := stmt.Query()
+
+	for rs.Next() {
+		var t Tag
+		t.Bind(rs)
+		if 0 < t.ID {
+			tags[t.ID] = t
+		}
+	}
+
+	return tags
+}
+
 func ListTagClasses(db *sql.DB) []TagMeta {
 	stmt, _ := db.Prepare(`SELECT class, min(name), count(*) FROM tags GROUP BY class ORDER BY priority`)
 	rs, _ := stmt.Query()

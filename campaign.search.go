@@ -30,14 +30,9 @@ const KeyCampaignQuery = `__cq__`
 // PostCampaignQuery
 func PostCampaignQuery(ctx *gin.Context) {
 	db := getDatabase(ctx)
-
 	var cquery CampaignQuery
 	ctx.BindJSON(&cquery)
-	//
 	campaignIds := FindCampaignIdsWithin(db, cquery.PeriodFrom, cquery.PeriodTill, cquery.CampaignIds)
-
-	//
-	campaignIds = FindCampaignIdsBy(db, cquery.Tags, campaignIds)
 
 	resp := CampaignResp{
 		Cmps: FindCampaignsIn(db, campaignIds),
@@ -122,4 +117,21 @@ func FindCampaignRecordsIn(db *sql.DB, periodFrom time.Time, periodTill time.Tim
 	}
 
 	return rets
+}
+
+// ListAllCampaigns - for debug: list all campaign
+func ListAllCampaigns(db *sql.DB) map[uint]Campaign {
+	cs := make(map[uint]Campaign)
+	stmt, _ := db.Prepare(`SELECT * FROM campaigns`)
+	rs, _ := stmt.Query()
+
+	for rs.Next() {
+		var c Campaign
+		c.Bind(rs)
+		if 0 < c.ID {
+			cs[c.ID] = c
+		}
+	}
+
+	return cs
 }

@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^3.6.1",
     "@material-ui/icons": "^3.0.1",
+    "luxon": "^1.8.2",
     "moment": "^2.23.0",
     "plotly.js": "^1.42.5",
     "react": "^16.6.3",

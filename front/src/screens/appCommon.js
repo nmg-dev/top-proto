@@ -26,10 +26,6 @@ class AppCommon extends React.Component {
         }
     }
 
-    promised_request_withToken(endpoint, options) {
-        return this.props.api(endpoint + '?token='+this.props.user.token, options)
-    }
-
     componentDidMount() {
         
 
@@ -45,12 +41,12 @@ class AppCommon extends React.Component {
 	renderStage() {
 		switch(this.state.stage) {
 			case 'admin':
-				return (<AppAdmin api={this.promised_request_withToken.bind(this)} />);
+				return (<AppAdmin lang={this.props.lang} api={this.props.api} />);
 			case 'manage':
-				return (<AppManage api={this.promised_request_withToken.bind(this)} />);
+				return (<AppManage lang={this.props.lang} api={this.props.api} />);
 			case 'view':
 			default:
-				return (<AppView api={this.promised_request_withToken.bind(this)} />);
+				return (<AppView lang={this.props.lang} api={this.props.api} />);
 
 		}
 	}

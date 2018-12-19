@@ -21,8 +21,9 @@ type CampaignQuery struct {
 
 // CampaignResp
 type CampaignResp struct {
-	Cmps map[uint]Campaign              `json:"campaigns"`
-	Recs map[uint][]CampaignPerformance `json:"records"`
+	Cmps map[uint]Campaign     `json:"campaigns"`
+	Recs []CampaignPerformance `json:"records"`
+	Affs []TagAffiliation      `json:"affiliations"`
 }
 
 const KeyCampaignQuery = `__cq__`
@@ -37,6 +38,7 @@ func PostCampaignQuery(ctx *gin.Context) {
 	resp := CampaignResp{
 		Cmps: FindCampaignsIn(db, campaignIds),
 		Recs: FindCampaignRecordsIn(db, cquery.PeriodFrom, cquery.PeriodTill, campaignIds),
+		Affs: FindAffilationsWithCampaignIDs(db, campaignIds),
 	}
 
 	ctx.JSON(http.StatusOK, resp)
@@ -44,12 +46,14 @@ func PostCampaignQuery(ctx *gin.Context) {
 
 // FindCampaignsWithin - search by period
 func FindCampaignIdsWithin(db *sql.DB, periodFrom time.Time, periodTill time.Time, cids []uint) []uint {
-	query := fmt.Sprintf(`SELECT id FROM campaigns WHERE NOT(? <= period_till) AND NOT(? <= period_from)`)
+	query := fmt.Sprintf(`SELECT id FROM campaigns WHERE ? < period_till AND ? > period_from`)
 	if 0 < len(cids) {
 		query += fmt.Sprintf(` AND id IN (%s) `, WhereInJoin(cids))
 	}
+
 	stmt, _ := db.Prepare(query)
 	rs, _ := stmt.Query(periodFrom, periodTill)
+	defer stmt.Close()
 
 	rets := []uint{}
 	for rs.Next() {
@@ -66,6 +70,7 @@ func FindCampaignIdsBy(db *sql.DB, tids []uint, cids []uint) []uint {
 	query := fmt.Sprintf(`SELECT campaign_ids FROM tag_affiliations WHERE attr_id IN (%s) AND campaign_ids IN (%s)`, WhereInJoin(tids), WhereInJoin(cids))
 	stmt, _ := db.Prepare(query)
 	rs, _ := stmt.Query()
+	defer stmt.Close()
 
 	rets := []uint{}
 	for rs.Next() {
@@ -80,12 +85,21 @@ func FindCampaignIdsBy(db *sql.DB, tids []uint, cids []uint) []uint {
 // FindCampaignsIn - search with campaign ids
 func FindCampaignsIn(db *sql.DB, ids []uint) map[uint]Campaign {
 	cmps := make(map[uint]Campaign)
+	var query string
 
-	query := `SELECT * FROM campaigns WHERE id IN (%s)`
-	query = fmt.Sprintf(query, WhereInJoin(ids))
+	if len(ids) <= 0 {
+		return map[uint]Campaign{}
+	} else if len(ids) <= 1 {
+		query = `SELECT * FROM campaigns WHERE id=?`
+	} else {
+		query = `SELECT * FROM campaigns WHERE id IN (%s)`
+		query = fmt.Sprintf(query, WhereInJoin(ids))
+	}
+
 	stmt, _ := db.Prepare(query)
-
 	rs, _ := stmt.Query()
+	defer stmt.Close()
+
 	for rs.Next() {
 		var cmp Campaign
 		cmp.Bind(rs)
@@ -98,22 +112,20 @@ func FindCampaignsIn(db *sql.DB, ids []uint) map[uint]Campaign {
 }
 
 // FindCampaignPerformances
-func FindCampaignRecordsIn(db *sql.DB, periodFrom time.Time, periodTill time.Time, ids []uint) map[uint][]CampaignPerformance {
+func FindCampaignRecordsIn(db *sql.DB, periodFrom time.Time, periodTill time.Time, ids []uint) []CampaignPerformance {
 	query := fmt.Sprintf(`SELECT * FROM campaign_performances WHERE ?<=day_id AND day_id<=? AND campaign_id IN (%s) ORDER BY campaign_id, day_id`, WhereInJoin(ids))
 	stmt, _ := db.Prepare(query)
 	rs, _ := stmt.Query(periodFrom, periodTill)
+	defer stmt.Close()
 
-	rets := make(map[uint][]CampaignPerformance)
+	rets := []CampaignPerformance{}
 
 	for rs.Next() {
 		var cp CampaignPerformance
 		cp.Bind(rs)
 
-		if sl, ok := rets[cp.CampaignID]; !ok {
-			rets[cp.CampaignID] = []CampaignPerformance{cp}
-		} else {
-			rets[cp.CampaignID] = append(sl, cp)
-		}
+		rets = append(rets, cp)
+
 	}
 
 	return rets
@@ -124,6 +136,7 @@ func ListAllCampaigns(db *sql.DB) map[uint]Campaign {
 	cs := make(map[uint]Campaign)
 	stmt, _ := db.Prepare(`SELECT * FROM campaigns`)
 	rs, _ := stmt.Query()
+	defer stmt.Close()
 
 	for rs.Next() {
 		var c Campaign

@@ -9,18 +9,18 @@ import (
 // CampaignPerformance
 type CampaignPerformance struct {
 	ID         uint64    `json:"id" db:"id"`
-	DayID      time.Time `json:"day_id" db:"day_id"`
-	CampaignID uint      `db:"campaign_id"`
+	DayID      time.Time `json:"d" db:"day_id"`
+	CampaignID uint      `json:"c" db:"campaign_id"`
 
-	Impression uint `json:"impression" db:"impression"`
-	Click      uint `json:"click" db:"click"`
-	Conversion uint `json:"conversion" db:"conversion"`
+	Impression uint `json:"imp" db:"impression"`
+	Click      uint `json:"clk" db:"click"`
+	Conversion uint `json:"cnv" db:"conversion"`
 	Cost       uint `json:"cost" db:"cost"`
 
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	CreatedBy uint      `json:"created_by" db:"created_by"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
-	UpdatedBy uint      `json:"updated_by" db:"updated_by"`
+	CreatedAt time.Time `json:"c_at" db:"created_at"`
+	CreatedBy uint      `json:"c_by" db:"created_by"`
+	UpdatedAt time.Time `json:"u_at" db:"updated_at"`
+	UpdatedBy uint      `json:"u_by" db:"updated_by"`
 }
 
 const performanceInsertStmt = `INSERT INTO campaign_performances (day_id, campaign_id, impression, click, conversion, cost, created_at, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?)`

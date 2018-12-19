@@ -16,7 +16,7 @@ func GroupDatabaseConnection(app *gin.Engine) {
 	sessionGroup := dbGroup.Group("")
 	sessionGroup.Use(RequireLoginSetMiddle)
 
-	sessionGroup.GET("/t/", GetTagClasses)
+	sessionGroup.GET("/t/", GetTagAll)
 	sessionGroup.GET("/t/:class", GetTagWithClass)
 	sessionGroup.POST("/c/", PostCampaignQuery)
 

@@ -47,11 +47,12 @@ class App extends React.Component {
 	}
 
 	componentDidUpdate() {
-		// console.log(this, this.state);
-		// console.log(arguments);
 	}
 
 	promised_request(endpoint, options) {
+		if(!options) options = {credentials: 'include'}
+		else options.credentials = 'include';
+
 		return fetch(AppConfig.API_HOST + endpoint, options)
 			.catch((err) => { console.error(err); })
 			.then((plainResp) => plainResp.json())
@@ -71,12 +72,11 @@ class App extends React.Component {
 		})
 			.then((userInfo) => {
 				this.setState({user: userInfo});
+			})
+			.catch((err) => {
+				this.setState({user: null});
 			});
 	}
-
-
-
-
 
 	render() {
 		// not logged in yet

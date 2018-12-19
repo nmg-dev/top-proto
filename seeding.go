@@ -211,7 +211,7 @@ func seedingAffiliations(db *sql.DB, tags map[uint]Tag, camps map[uint]Campaign)
 		stmt, _ := tx.Prepare(`INSERT into tag_affiliations (campaign_id, tag_id) VALUES (?, ?)`)
 		for _, tmap := range tagmaps {
 			affiliatedTID := rand.Intn(len(tmap))
-			stmt.Exec(c.ID, affiliatedTID)
+			stmt.Exec(c.ID, tmap[affiliatedTID])
 		}
 		tx.Commit()
 	}

@@ -185,6 +185,8 @@ const hostDomain = `nextmediagroup.co.kr,`
 
 const selectUserEmail = `SELECT * FROM user WHERE profile->"$.email" = ?`
 
+const authTokenCookieKey = `gnmg_access`
+
 // PostOpen - start open
 func PostOpenAuth(ctx *gin.Context) {
 	var theUser User
@@ -223,6 +225,7 @@ func PostOpenAuth(ctx *gin.Context) {
 	}
 
 	// response back
+	ctx.SetCookie(authTokenCookieKey, theUser.Access["token"].(string), 3600, ``, ``, false, false)
 	ctx.JSON(http.StatusOK, theUser)
 }
 
@@ -253,7 +256,9 @@ func RequireAdminSetMiddle(ctx *gin.Context) {
 }
 
 func authInMiddle(ctx *gin.Context, needManager bool, needAdmin bool) int {
-	if token, ok := ctx.GetQuery("token"); ok {
+
+	if cookie, cerr := ctx.Request.Cookie(authTokenCookieKey); cerr == nil {
+		token := cookie.Value
 		db := getDatabase(ctx)
 		stmt, _ := db.Prepare(`SELECT * FROM users WHERE access->"$.token"=? ORDER BY updated_at DESC LIMIT 1`)
 

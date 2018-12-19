@@ -30,9 +30,6 @@ const styles = {
 	actionBarInput: {
 		display: 'inline-flex',
 	}
-
-
-
 }
 
 class AppHead extends React.Component {
@@ -146,12 +143,9 @@ class AppHead extends React.Component {
 	renderProfileMenuItem(condition, stage) {
 		if(condition) {
 			return (
-				<MenuItem>
-					<Button 
-					onClick={this.handleProfileMenuItemClick.bind(this)} 
-					stage={stage}>
-						{stage}
-					</Button>
+				<MenuItem onClick={this.handleProfileMenuItemClick.bind(this)} 
+				stage={stage}>
+					{stage}
 				</MenuItem>
 			);
 		} else {

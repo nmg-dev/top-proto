@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,9 +14,9 @@ type TagMeta struct {
 	Counts   int    `json: "class_count"`
 }
 
-func GetTagClasses(ctx *gin.Context) {
+func GetTagAll(ctx *gin.Context) {
 	db := getDatabase(ctx)
-	resp := ListTagClasses(db)
+	resp := ListAllTags(db)
 	ctx.JSON(http.StatusOK, resp)
 }
 
@@ -70,5 +71,20 @@ func ListTagsWithClass(db *sql.DB, cls string) map[uint]Tag {
 		rets[t.ID] = t
 	}
 
+	return rets
+}
+
+func FindAffilationsWithCampaignIDs(db *sql.DB, cids []uint) []TagAffiliation {
+	query := fmt.Sprintf(`SELECT * FROM tag_affiliations WHERE campaign_id IN (%s)`, WhereInJoin(cids))
+	stmt, _ := db.Prepare(query)
+	rs, _ := stmt.Query()
+	defer stmt.Close()
+
+	rets := []TagAffiliation{}
+	for rs.Next() {
+		var aff TagAffiliation
+		aff.Bind(rs)
+		rets = append(rets, aff)
+	}
 	return rets
 }

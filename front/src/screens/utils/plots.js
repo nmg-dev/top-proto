@@ -65,10 +65,29 @@ class Plots {
                 visible: true
             },
         };
-        console.log(category, data);
 
         return (
             <Plot data={[data]} layout={layout} />
+        );
+    }
+    
+    summaryBoxes(scoremap, layout) {
+        let _data=[];
+
+        Object.keys(scoremap).forEach((category) => {  
+            let trace = {x: [], y: [], type: 'box', name: category};
+            let scores = scoremap[category];
+
+            Object.keys(scores).forEach((tid) => {
+                scores[tid]._raws.forEach((sc) => {
+                    trace.x.push(scores[tid].label);
+                    trace.y.push(sc);
+                });
+            });
+            _data.push(trace);
+        });
+        return (
+            <Plot data={_data} layout={layout} />
         );
     }
 }

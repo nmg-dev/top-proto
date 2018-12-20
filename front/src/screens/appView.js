@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { List, ListItem, Paper, TextField, MenuItem, Toolbar, Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Button, Grid, Divider } from '@material-ui/core';
+import { List, ListItem, Paper, TextField, MenuItem, Toolbar, Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Button, Grid, Divider, CardActions } from '@material-ui/core';
 
 import plots from './utils/plots.js';
 import langs from './utils/langs.js';
@@ -10,6 +10,11 @@ import moment from 'moment';
 const styles = {
 	wrapper : {
 		padding: '2vh',
+	},
+	toolbar: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-evenly',
 	},
 	summaryGrid: {
 		maxHeight: 84,
@@ -41,7 +46,8 @@ class AppView extends Component {
 		];
 		this.state = {
 			scoremap: {},
-			showmap: {},
+			showmap: null,
+			showboxes: true,
 			kpi: this.metrix[0],
 			period_from: moment().add(-1, 'year'),
 			period_till: moment(),
@@ -50,9 +56,14 @@ class AppView extends Component {
 		this.container = React.createRef();
 	}
 
-	procScoreMap() {
-		let fn = this.state.kpi.calc;
+	procScoreMap(metric, stateChange) {
+		console.log('try to update scoremap by '+ metric.key);
+		let fn = metric.calc;
+		if(!stateChange)
+			stateChange = {};
 		let scoremap = {};
+
+		
 
 		this._affs.forEach((aff) => {
 			let c = this._campaigns[aff.c];
@@ -94,7 +105,7 @@ class AppView extends Component {
 					scoremap[cat][tid]._raws.forEach((sc) => { sdev += Math.pow(sc-scoremap[cat][tid].score,2) });
 					scoremap[cat][tid].stdev = sdev/scoremap[cat][tid].count;					
 					// clear raw
-					delete(scoremap[cat][tid]._raws);
+					// delete(scoremap[cat][tid]._raws);
 				} else {
 					delete(scoremap[cat][tid]);
 				}
@@ -102,8 +113,8 @@ class AppView extends Component {
 		});
 
 		console.log(scoremap);
-
-		this.setState({scoremap: scoremap})
+		stateChange.scoremap = scoremap;
+		this.setState(stateChange)
 	}
 
 	onTagRetrieved(tdata) {
@@ -128,7 +139,7 @@ class AppView extends Component {
 		this._campaigns = cdata.campaigns;
 		this._affs = cdata.affiliations;
 
-		this.procScoreMap();
+		this.procScoreMap(this.state.kpi);
 	}
 
 	componentDidUpdate() {
@@ -196,12 +207,33 @@ class AppView extends Component {
 		);
 	}
 
+	renderKPIPicker() {
+		return (
+			<TextField select
+				label="KPI"
+				value={this.state.kpi.key}
+				InputLabelProps={{shrink: true}}
+				onChange={(ev)=> {
+					if(ev.target.value) {
+						this.metrix.forEach((mx) => {
+							if(mx.key == ev.target.value) {
+								this.procScoreMap(mx, {kpi: mx});
+							}
+						});
+					}
+				}}>
+					{this.metrix.map((mx) => !mx.hide ? <MenuItem key={mx.key} value={mx.key}>{mx.key.toUpperCase()}</MenuItem> : '')}
+			</TextField>
+		)
+	}
+
 	renderQuerybar() {
 		return (
 			<Paper>
-				<Toolbar component="nav">
+				<Toolbar component="nav" style={styles.toolbar}>
 					{this.renderCategoryPicker()}
 					{this.renderPeriodPicker()}					
+					{this.renderKPIPicker()}
 				</Toolbar>
 			</Paper>
 		);
@@ -213,11 +245,11 @@ class AppView extends Component {
 		let stdev = plots.categoryStdev(vs, average);
 
 		return (
-			<Grid item xs={12} style={{margin: 4}}>
+			<Grid item xs={12} style={{marginTop: 4}}>
 				<Card>
 					<CardHeader 
 						title={cat.toUpperCase()}
-						subtitle={'Avg.('+average.toFixed(3)+'), Std.Dev.('+stdev.toFixed(6)+')'}
+						subheader={'Avg.('+average.toFixed(3)+'), Std.Dev.('+stdev.toFixed(6)+')'}
 					/>
 					<CardContent>
 						<Toolbar>
@@ -231,11 +263,44 @@ class AppView extends Component {
 		);
 	}
 
-	renderQueryCard(history) {
-
+	renderSummaryBoxToggleButton() {
+		return (<IconButton onClick={() => this.setState({showboxes: !this.state.showboxes})}><Icon>{this.state.showboxes?'expand_less':'expand_more'}</Icon></IconButton>);
 	}
 
-	renderSummaryPanel() {
+	renderSummaryBoxes() {
+		let _title = 'Summary of '+this.state.category?this.state.category:'ALL';
+		let _subtitle = '';
+
+		Object.keys(this.state.scoremap).forEach((cat) => {
+			if(0 < _subtitle.length)
+				_subtitle += ', ';
+			let scs=this.state.scoremap[cat];
+			let bestAt = null;
+			// search for best
+			Object.keys(scs).forEach((tid) => {
+				if(!bestAt || scs[bestAt].score < scs[tid].score)
+					bestAt = tid;
+			});
+			let best = scs[bestAt];
+			_subtitle += cat + ':' + langs.trans(this.props.lang, best) + '('+best.score.toFixed(3)+')';
+		});
+		return (
+			<Card style={{marginTop: 8}}>
+				<CardHeader 
+					title={_title}
+					subheader={'Best with: '+ _subtitle}
+					action={this.renderSummaryBoxToggleButton()}
+				/>
+				<CardContent>
+					<Collapse in={this.state.showboxes}>
+						{plots.summaryBoxes(this.state.scoremap, { width: 800})}
+					</Collapse>
+				</CardContent>
+			</Card>
+		)
+	}
+
+	renderBarCards() {
 		let categories = Object.keys(this.state.scoremap);
 		if(0<=categories.indexOf('category'))
 			categories.splice(categories.indexOf('category'), 1);
@@ -246,13 +311,15 @@ class AppView extends Component {
 		)
 	}
 
+
 	render() {
 		return (
 			<main style={styles.wrapper}>
 				{this.renderQuerybar()}
-
 				<Divider />
-				{this.renderSummaryPanel()}
+				{this.renderSummaryBoxes()}
+				<Divider />
+				{this.renderBarCards()}
 			</main>
 		)
 	}

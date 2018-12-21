@@ -57,9 +57,10 @@ class Plots {
         let data = {
             type: 'bar',
             name: category,
-            x: names,
-            y: values,
-            error_y: {
+            y: names,
+            x: values,
+            orientation: 'h',
+            error_x: {
                 type: 'data',
                 array: errs,
                 visible: true

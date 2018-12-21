@@ -1,5 +1,7 @@
 function trans(lang, v, defaultPropName) {
-    if(v && v.i18n && v.i18n[lang])
+    if(!v)
+        return ''; 
+    else if(v && v.i18n && v.i18n[lang])
         return v.i18n[lang];
     else if(defaultPropName)
         return v[defaultPropName];

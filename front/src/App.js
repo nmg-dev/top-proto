@@ -65,7 +65,7 @@ class App extends React.Component {
 		this.promised_request('/auth', {
 			method: 'POST',
 			body: JSON.stringify({
-				id: profile.getId(),
+				gid: profile.getId(),
 				email: profile.getEmail(),
 				token: resp.id_token
 			})

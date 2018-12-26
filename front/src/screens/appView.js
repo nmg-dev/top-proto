@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { List, ListItem, Paper, TextField, MenuItem, Toolbar, Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Button, Grid, Divider, CardActions, Hidden, Chip } from '@material-ui/core';
+import { List, ListItem, Paper, TextField, MenuItem, Toolbar, Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Button, Grid, Divider, CardActions, Hidden, Chip, ListItemText, TableHead, TableCell, Table, TableBody, TableRow } from '@material-ui/core';
+
+import moment from 'moment';
 
 import plots from './utils/plots.js';
 import langs from './utils/langs.js';
 
-
-import moment from 'moment';
+import DataTable from './components/dataTable.js';
 
 
 const styles = {
@@ -51,6 +52,10 @@ class AppView extends Component {
 		this._tags = {};
 		this._campaigns = {};
 		this._affs = [];
+		this._performs = {};
+
+		this.categoryId = null;
+		this.tagSelections = [];
 
 		this.metrix = [
 			{key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)) },
@@ -76,7 +81,7 @@ class AppView extends Component {
 		switch(this.state.kpi.key) {
 			case 'cpc':
 			case 'cpa':
-				return parseFloat(num.toFixed(4)).toLocaleString();
+				return parseFloat(num.toFixed(4)).toLocaleString() + 'KRW';
 			case 'ctr':
 			case 'cvr':
 				return (100*num).toFixed(3) + '%';
@@ -90,13 +95,45 @@ class AppView extends Component {
 		switch(this.state.kpi.key) {
 			case 'cpc':
 			case 'cpa':
-				return num.toLocaleString();
+				return '±'+num.toLocaleString();
 			case 'ctr':
 			case 'cvr':
-				return (100*num).toFixed(4) + '%p';
+				return '±'+(100*num).toFixed(4) + '%p';
 			default:
-				return num.toFixed(4);
+				return '±'+num.toFixed(4);
 		}
+	}
+
+	_filterCampaignIds() {
+		let campaigns = {};
+		this._affs.forEach((a) => {
+			// let cid = a.c;
+			// let tid = a.t;
+			if(!(this._campaigns[a.c] && this._tags[a.t])) return;
+			let tag = this._tags[a.t];
+			if(!this.categoryId || (tag.class=='categroy' && a.t==this.categoryId))
+				campaigns[a.c] = 0;
+		})
+		return campaigns;
+	}
+
+	_filterTagSelecteds(campaigns) {
+		this._affs.forEach((a) => {
+			if(!(this._campaigns[a.c] && this._tags[a.t])) return;
+			let tag = this._tags[a.t];
+			if(tag.class=='category') return;
+			if(!this._performs[tag.class]) {
+				campaigns[a.c] += 1;
+				return;
+			}
+			else {
+				let dt = this._performs[tag.class].current;
+				if(dt && dt.hasSelected(a.t))
+					campaigns[a.c] += 1;
+			}
+		});
+		console.log(campaigns);
+		return campaigns;
 	}
 
 	procScoreMap(metric, stateChange) {
@@ -104,19 +141,24 @@ class AppView extends Component {
 		let fn = metric.calc;
 		if(!stateChange)
 			stateChange = {};
-		let scoremap = {};
-		
-		this._affs.forEach((aff) => {
-			let c = this._campaigns[aff.c];
-			let t = this._tags[aff.t];
-			if(!(c && t)) return;
-			// if(!this.tags[aff.t]) return;
 
-			if(t.class=='category') return;
+		// filter campaigns
+		let cids = this._filterCampaignIds();
+		// filter tags
+		cids = this._filterTagSelecteds(cids);
+
+		// build with records
+		let scoremap = {};
+		this._affs.forEach((a) => {
+			let c = this._campaigns[a.c];
+			let t = this._tags[a.t];
+			if(!(c && t)) return;
+			else if(!cids[a.c] || cids[a.c]<=0) return;
 
 			if(!scoremap[t.class]) scoremap[t.class] = {};
 			if(!scoremap[t.class][t.id])
 				scoremap[t.class][t.id] = {
+					_id: parseInt(t.id),
 					label: t.name,
 					i18n: t.i18n,
 					priority: t.priority,
@@ -130,7 +172,9 @@ class AppView extends Component {
 				// scoremap[t.class][t.id].score += fn(r);
 				// scoremap[t.class][t.id].count += 1;
 			});
+
 		});
+
 
 		let categories = this.state.categories;
 		Object.keys(scoremap).forEach((cat) => {
@@ -232,12 +276,15 @@ class AppView extends Component {
 		return (
 				<TextField select
 					label="Category"
-					value={this.state.category}
+					value={this.categoryId}
 					placeholder="default all"
 					style={styles.toolbarField}
 					InputLabelProps={{shrink: true}}
 					onChange={(ev)=> {
-						this.setState({category: ev.target.value})
+						this.categoryId = ev.target.value;
+						
+						// this.setState({category: ev.target.value})
+						this.procScoreMap(this.state.kpi);
 					}}>
 					{this.tagmap && this.tagmap.category ?
 						this.tagmap.category.map((t) => 
@@ -289,26 +336,10 @@ class AppView extends Component {
 	/* render summary panel */
 	renderSummaryBoxes() {
 		let _title = 'Summary of '+this.state.category?this.state.category:'ALL';
-		let _subtitle = '';
-
-		Object.keys(this.state.scoremap).forEach((cat) => {
-			if(0 < _subtitle.length)
-				_subtitle += ', ';
-			let scs=this.state.scoremap[cat];
-			let bestAt = null;
-			// search for best
-			Object.keys(scs).forEach((tid) => {
-				if(!bestAt || scs[bestAt].score < scs[tid].score)
-					bestAt = tid;
-			});
-			let best = scs[bestAt];
-			_subtitle += cat + ':' + langs.trans(this.props.lang, best) + '('+best.score.toFixed(3)+')';
-		});
 		return (
 			<Card style={{marginTop: 8}}>
 				<CardHeader 
 					title={_title}
-					subheader={'Best with: '+ _subtitle}
 					action={this.renderCardToggleAction(
 						()=>this.setState({showboxes: !this.state.showboxes}),
 						()=>this.state.showboxes
@@ -316,7 +347,32 @@ class AppView extends Component {
 				/>
 				<CardContent>
 					<Collapse in={this.state.showboxes}>
-						{plots.summaryBoxes(this.state.scoremap, { width: 800})}
+						<Table>
+							<TableHead>
+								<TableRow>
+									<TableCell>Category</TableCell>
+									<TableCell>AVG.</TableCell>
+									<TableCell>std.dev.</TableCell>
+								</TableRow>
+							</TableHead>
+							<TableBody>
+								{Object.keys(this.state.scoremap).map((cat) => {
+									let bs = plots.bestScoredAt(this.state.scoremap, cat);
+									let bi = this.state.scoremap[cat][bs];
+									return (<TableRow category={cat}>
+										<TableCell>{cat}</TableCell>
+										<TableCell>{this._fv(bi.score)}</TableCell>
+										<TableCell>{this._fr(bi.stdev)}</TableCell>
+									</TableRow>);
+								})}
+								<TableRow>
+
+								</TableRow>
+							</TableBody>
+						</Table>
+						<div>
+						{plots.summaryBoxes(this.state.scoremap)}
+						</div>
 					</Collapse>
 				</CardContent>
 			</Card>
@@ -328,15 +384,20 @@ class AppView extends Component {
 
 	/* render performance cards */
 	onUpdatePerformanceItem(ev, changes) {
-		let cat = ev.target.getAttribute('category');
-		let tid = ev.target.getAttribute('tag_id');
+		let cat = ev.currentTarget.getAttribute('category');
+		let tid = ev.currentTarget.getAttribute('tag_id');
 		// let scores = this.state.scoremap[cat][tid];
 		let categories = this.state.categories;
-		console.log(ev, ev.target, ev.currentTarget, cat, tid, this.state.categories);
 		if(categories[cat]) {
 			let selecteds = categories[cat].selecteds;
+			if(selecteds.indexOf(tid)<0) {
+				selecteds.push(tid);
+			} else {
+				selecteds.splice(selecteds.indexOf(tid), 1);
+			}
+			categories.selecteds = selecteds;
 
-			categories[cat] = changes(selecteds, tid, cat);
+			// categories[cat] = changes(selecteds, tid, cat);
 			this.setState({categories: categories});
 		}
 	}
@@ -356,26 +417,13 @@ class AppView extends Component {
 		}).bind(this));
 	}
 	renderPerformanceCardHeader(cat, mean, stdev) {
-		mean = this._fv(mean);
-		stdev = this._fr(stdev);
 		return (
 			<CardHeader
 				category={cat}
 				title={cat.toUpperCase()}
 				subheader={<div style={styles.chipContainer}>
-					{Object.keys(this.state.scoremap[cat]).map((tid) => 
-					<Chip tag_id={tid} category={cat}
-						style={0<=this.state.categories[cat].selecteds.indexOf(tid)
-							? styles.performanceChipActive 
-							: styles.performanceChipDeactive}
-						label={langs.trans(this.props.lang, this.state.scoremap[cat][tid])}
-						onClick={this.onUpdatePerformanceSelection.bind(this)} 
-						title={'mean(' + mean + '), std.dev('+ stdev +')' } />
-					)}
-					<Hidden mdDown>
-						<span style={styles.performanceMean}>{mean}</span>
-						<span style={styles.performanceBias}>{stdev}</span>
-					</Hidden>
+					<span style={styles.performanceMean}>{this._fv(mean)}</span>
+					<span style={styles.performanceBias}>{this._fr(stdev)}</span>
 				</div>}
 				action={this.renderCardToggleAction(
 					this.onUpdatePerformanceOpen.bind(this),
@@ -385,28 +433,21 @@ class AppView extends Component {
 		);
 	}
 	renderPerformanceCardContent(cat) {
+		if(!this.state.scoremap[cat])
+			return '';
+		let scores = plots.categoryValues(this.state.scoremap[cat]);
+		let mean = plots.categoryAverage(scores);
+		let sdev = plots.categoryStdev(scores, mean);
+
+		this._performs[cat] = React.createRef();
+
 		return (<Collapse in={this.state.categories[cat].open}>
-			<Grid container spacing={4}>
-				<Grid item xs={3}>
-					<List>
-						{Object.keys(this.state.scoremap[cat]).map((tid) =>
-							<ListItem button 
-								selected={0<=this.state.categories[cat].selecteds.indexOf(tid)}
-								onClick={this.onUpdatePerformanceSelection.bind(this)} 
-							>
-								{langs.trans(this.props.lang, this.state.scoremap[cat][tid])}
-								<Hidden mdDown>
-									<span style={styles.performanceMean}>{this._fv(this.state.scoremap[cat][tid].score)}</span>
-									<span style={styles.performanceMean}>{this._fr(this.state.scoremap[cat][tid].score)}</span>
-								</Hidden>
-							</ListItem>
-						)}
-					</List>
-				</Grid>
-				<Grid item xs={6}>
-					{plots.categoryBars(this.state.scoremap[cat], cat, performanceLayout)}
-				</Grid>
-			</Grid>
+			<DataTable category={cat} ref={this._performs[cat]}
+			values={scores} mean={mean} stdev={sdev}
+			valueToString={this._fv.bind(this)}
+			selecteds={this.state.categories[cat].selecteds}
+			onCategorySelect={this.onUpdatePerformanceItem.bind(this)}
+			/>
 		</Collapse>);
 	}
 	renderCategoryPerformances(cat) {

@@ -20,6 +20,18 @@ class Plots {
         )
     }
 
+    bestScoredAt(scoremap, cat) {
+        let scs=scoremap[cat];
+        let bestAt = null;
+        // search for best
+        Object.keys(scs).forEach((tid) => {
+            if(!bestAt || scs[bestAt].score < scs[tid].score)
+                bestAt = tid;
+        });
+        return bestAt;
+    }
+
+
     categoryValues(scoremap) {
         let sm = scoremap;
 		let vs = [];		
@@ -32,14 +44,16 @@ class Plots {
 
     categoryAverage(scores) {
         let average = 0;
-        scores.forEach((v) => { average += v.score/scores.length; });
-        return average;
+        let cnts = 0;
+        scores.forEach((v) => { average += v.score*v.count; cnts+=v.count; });
+        return average/cnts;
     }
 
     categoryStdev(scores, average) {
         let stdev=0;
-        scores.forEach((v) => { stdev += Math.pow(average-v.score,2)/scores.length; });
-        return stdev;
+        let cnts=0;
+        scores.forEach((v) => { stdev += Math.pow(average-v.score,2)*v.count; cnts+=v.count; });
+        return stdev/Math.max(1, cnts-1);
     }
 
     categoryBars(scores, category, layout) {
@@ -72,23 +86,48 @@ class Plots {
         );
     }
     
-    summaryBoxes(scoremap, layout) {
+    summaryBoxes(scoremap) {
         let _data=[];
+        let _mean=null;
+        let _xs=[], _ys=[];
 
         Object.keys(scoremap).forEach((category) => {  
             let trace = {x: [], y: [], type: 'box', name: category};
             let scores = scoremap[category];
+            if(!_mean) {
+                let total = 0;
+                let count = 0;
+                Object.keys(scores).forEach((tid) => {
+                    total += scores[tid].score * scores[tid].count;
+                    count += scores[tid].count;
+                });
+                _mean = total/count;
+            }
 
             Object.keys(scores).forEach((tid) => {
                 scores[tid]._raws.forEach((sc) => {
                     trace.x.push(scores[tid].label);
+                    // _xs.push(scores[tid].label)
+                    // _ys.push(_mean);
                     trace.y.push(sc);
                 });
             });
             _data.push(trace);
         });
+
+        _data.push({
+            // x: _xs,
+            y: _ys,
+            type: 'line',
+            name: 'AVG.',
+        });
+
         return (
-            <Plot data={_data} layout={layout} />
+            <Plot data={_data} layout={{
+                width: window.innerWidth-20, 
+                height: window.innerHeight/2,
+                legend: {'orientation': 'h'},
+            }} />
         );
     }
 }

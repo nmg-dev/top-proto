@@ -45,6 +45,12 @@ const performanceLayout = {
 	height: 300
 };
 
+const PredefinedCategories = [
+	'category', 'goal', 'channel', 'media'
+];
+
+
+
 class AppView extends Component {
 	constructor(props) {
 		super(props);
@@ -54,7 +60,13 @@ class AppView extends Component {
 		this._affs = [];
 		this._performs = {};
 
-		this.categoryId = null;
+		PredefinedCategories.forEach((p) => {
+			this[p] = null;
+		});
+
+		// this.categoryId = null;
+		// this.goalId = null;
+		// this.channelId = null;
 		this.tagSelections = [];
 
 		this.metrix = [
@@ -74,6 +86,13 @@ class AppView extends Component {
 		}
 
 		this.container = React.createRef();
+	}
+
+	// intersect two obj
+	_jx(o1, o2) {
+		let orr = {};
+		Object.keys(o1).filter((v)=>o2[v]!==undefined).forEach((k) => {orr[k] = o1[k];});
+		return orr;
 	}
 
 	// format mean, value
@@ -105,36 +124,67 @@ class AppView extends Component {
 	}
 
 	_filterCampaignIds() {
-		let campaigns = {};
-		this._affs.forEach((a) => {
-			// let cid = a.c;
-			// let tid = a.t;
-			if(!(this._campaigns[a.c] && this._tags[a.t])) return;
-			let tag = this._tags[a.t];
-			if(!this.categoryId || (tag.class=='categroy' && a.t==this.categoryId))
-				campaigns[a.c] = 0;
-		})
-		return campaigns;
+		let cids = this._campaigns;
+		// filter predefineds
+		PredefinedCategories.forEach((pf) => {
+			let pfv = this[pf];
+			if(pfv) {
+				cids = this._jx(cids, this._tags[pfv]._c);
+			} 
+		});
+
+		if(this._performs) {
+			Object.keys(this._performs).forEach((cat) => {
+				let dt = this._performs[cat].current;
+				if(!dt) return;
+				let ds = dt.getSelecteds();
+				if(ds && 0<ds.length) {
+					let uns = {};
+					ds.forEach((dss) => {
+						uns = Object.assign(this._tags[parseInt(dss)]._c, uns);
+					});
+					cids = this._jx(cids, uns);
+				}
+			});
+		}
+		return cids;
 	}
 
-	_filterTagSelecteds(campaigns) {
+	_filterTagSelecteds(cids) {
+		let tags = {};
+		Object.keys(cids).forEach((cid) => {
+			tags = Object.assign(this._campaigns[cid]._t, tags);
+		});
+		return tags;
+	}
+
+	_filteredScoremap(cids, tids, fn) {
+		let scoremap = {};
 		this._affs.forEach((a) => {
-			if(!(this._campaigns[a.c] && this._tags[a.t])) return;
-			let tag = this._tags[a.t];
-			if(tag.class=='category') return;
-			if(!this._performs[tag.class]) {
-				campaigns[a.c] += 1;
-				return;
-			}
-			else {
-				let dt = this._performs[tag.class].current;
-				if(dt && dt.hasSelected(a.t))
-					campaigns[a.c] += 1;
+			if(cids[a.c] && tids[a.t]) {
+				let c = this._campaigns[a.c];
+				let t = this._tags[a.t];
+				if(!scoremap[t.class]) scoremap[t.class] = {};
+				if(!scoremap[t.class][t.id]) {
+					scoremap[t.class][t.id] = {
+						_id: parseInt(t.id),
+						label: t.name,
+						i18n: t.i18n,
+						priority: t.priority,
+						_raws: [],
+						score: 0,
+						count: 0,
+						stdev: 0,
+					};
+				}
+				c.records.forEach((r) => {
+					scoremap[t.class][t.id]._raws.push(fn(r));
+				});
 			}
 		});
-		console.log(campaigns);
-		return campaigns;
+		return scoremap;
 	}
+
 
 	procScoreMap(metric, stateChange) {
 		console.log('try to update scoremap by '+ metric.key);
@@ -145,36 +195,12 @@ class AppView extends Component {
 		// filter campaigns
 		let cids = this._filterCampaignIds();
 		// filter tags
-		cids = this._filterTagSelecteds(cids);
+		let tids = this._filterTagSelecteds(cids);
 
+		console.log(Object.keys(cids), Object.keys(tids));
+		
 		// build with records
-		let scoremap = {};
-		this._affs.forEach((a) => {
-			let c = this._campaigns[a.c];
-			let t = this._tags[a.t];
-			if(!(c && t)) return;
-			else if(!cids[a.c] || cids[a.c]<=0) return;
-
-			if(!scoremap[t.class]) scoremap[t.class] = {};
-			if(!scoremap[t.class][t.id])
-				scoremap[t.class][t.id] = {
-					_id: parseInt(t.id),
-					label: t.name,
-					i18n: t.i18n,
-					priority: t.priority,
-					_raws: [],
-					score: 0,
-					count: 0,
-					stdev: 0,
-				};
-			c.records.forEach((r) => {
-				scoremap[t.class][t.id]._raws.push(fn(r));
-				// scoremap[t.class][t.id].score += fn(r);
-				// scoremap[t.class][t.id].count += 1;
-			});
-
-		});
-
+		let scoremap = this._filteredScoremap(cids, tids, fn);
 
 		let categories = this.state.categories;
 		Object.keys(scoremap).forEach((cat) => {
@@ -208,7 +234,7 @@ class AppView extends Component {
 		// DEBUG:
 		stateChange.scoremap = scoremap;
 		stateChange.categories = categories;
-		this.setState(stateChange)
+		this.setState(stateChange);
 	}
 
 	onTagRetrieved(tdata) {
@@ -232,6 +258,17 @@ class AppView extends Component {
 		});
 		this._campaigns = cdata.campaigns;
 		this._affs = cdata.affiliations;
+		// mapping cids
+		this._affs.forEach((a) => {
+			if(!(this._campaigns[a.c] && this._tags[a.t])) return;
+			// push maps
+			if(!this._tags[a.t]._c)
+				this._tags[a.t]._c  = {};
+			this._tags[a.t]._c[a.c] = this._campaigns[a.c];
+			if(!this._campaigns[a.c]._t)
+				this._campaigns[a.c]._t = {};
+			this._campaigns[a.c]._t[a.t] = this._tags[a.t];
+		});
 
 		this.procScoreMap(this.state.kpi);
 	}
@@ -265,35 +302,41 @@ class AppView extends Component {
 		return (
 			<Paper>
 				<Toolbar component="nav" style={styles.toolbar}>
-					{this.renderCategoryPicker()}
-					{this.renderPeriodPicker()}					
-					{this.renderKPIPicker()}
+					<div>
+						{this.renderPredefinePicker('category')}
+						{this.renderPredefinePicker('goal')}
+						{this.renderPredefinePicker('channel')}
+						{this.renderPredefinePicker('media')}
+					</div>
+					<div>
+						{this.renderPeriodPicker()}
+						{this.renderKPIPicker()}
+					</div>
 				</Toolbar>
 			</Paper>
 		);
 	}
-	renderCategoryPicker() {
+	renderPredefinePicker(predefinedKey, titleLabel) {
 		return (
-				<TextField select
-					label="Category"
-					value={this.categoryId}
-					placeholder="default all"
-					style={styles.toolbarField}
-					InputLabelProps={{shrink: true}}
-					onChange={(ev)=> {
-						this.categoryId = ev.target.value;
-						
-						// this.setState({category: ev.target.value})
-						this.procScoreMap(this.state.kpi);
-					}}>
-					{this.tagmap && this.tagmap.category ?
-						this.tagmap.category.map((t) => 
-							<MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)
-						: ''
-					}
-				</TextField>
-		);
+			<TextField select
+				name={predefinedKey}
+				label={predefinedKey}
+				value={this[predefinedKey]}
+				style={styles.toolbarField}
+				InputLabelProps={{shrink: true}}
+				onChange={(ev) => {
+					console.log(ev.target.name, ev.target.value);
+					let pfk = ev.target.name;
+					this[pfk] = ev.target.value;
+					this.procScoreMap(this.state.kpi);
+				}}>
+				<MenuItem key="" value={null}>ALL SELECT</MenuItem>
+				<Divider />
+				{this.tagmap && this.tagmap[predefinedKey] ? this.tagmap[predefinedKey].map((t) => (<MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)) : ''}
+			</TextField>
+		)
 	}
+	
 	renderPeriodPicker() {
 		return (
 			<ListItem>
@@ -398,7 +441,7 @@ class AppView extends Component {
 			categories.selecteds = selecteds;
 
 			// categories[cat] = changes(selecteds, tid, cat);
-			this.setState({categories: categories});
+			this.procScoreMap(this.state.kpi, {categories: categories});
 		}
 	}
 	onUpdatePerformanceSelection(ev) {
@@ -410,6 +453,7 @@ class AppView extends Component {
 
 			return {selecteds: selecteds, open: this.state.categories[cat].open};
 		}).bind(this));
+		
 	}
 	onUpdatePerformanceOpen(ev) {
 		this.onUpdatePerformanceItem(ev, ((selecteds, tid, cat) => {

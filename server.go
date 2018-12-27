@@ -30,6 +30,8 @@ func main() {
 	}
 
 	app := gin.Default()
+	// recovery
+	app.Use(gin.Recovery())
 
 	// static index endpoint
 	app.Use(static.Serve("/", static.LocalFile("front/build", false)))
@@ -37,7 +39,12 @@ func main() {
 	// disable CORS
 	app.Use(cors.New(cors.Config{
 		// for debug!
-		AllowOrigins: []string{"http://localhost:3000"},
+		AllowOrigins: []string{
+			"http://localhost:3000",
+			"http://to.nextmediagroup.co.kr:8080",
+			// "http://to.nextmediagroup.co.kr",
+			// "https://to.nextmediagroup.co.kr"
+		},
 	}))
 
 	GroupDatabaseConnection(app)

@@ -83,11 +83,7 @@ class DataTable extends React.Component {
 
     getSelecteds() {
         if(!this.state.selecteds || this.state.selecteds.length<=0) {
-            let tids = [];
-            this.props.values.forEach((vs) => {
-                tids.push(vs._id);
-            });
-            return tids;
+            return null;
         } else {
             return this.state.selecteds;
         }
@@ -107,6 +103,8 @@ class DataTable extends React.Component {
             
             console.log(ss);
             this.setState({selecteds: ss});
+            // propagate parent
+            this.props.onCategorySelect(ev);
         }
     }
 

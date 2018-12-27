@@ -314,9 +314,9 @@ CREATE TABLE IF NOT EXISTS campaign_grants (
   campaign_id INT UNSIGNED NOT NULL,
   created_at TIMESTAMP NULL,
   PRIMARY KEY (id),
-  INDEX fk_campaign_grant_user_idx (user_id ASC) VISIBLE,
-  INDEX fk_campaign_grant_campaign_idx (campaign_id ASC) VISIBLE,
-  UNIQUE INDEX unique_campaign_grant (campaign_id ASC, user_id ASC, scope ASC) VISIBLE,
+  INDEX fk_campaign_grant_user_idx (user_id ASC),
+  INDEX fk_campaign_grant_campaign_idx (campaign_id ASC),
+  UNIQUE INDEX unique_campaign_grant (campaign_id ASC, user_id ASC, scope ASC),
   CONSTRAINT fk_campaign_grant_user
     FOREIGN KEY (user_id)
     REFERENCES users (id)
@@ -340,7 +340,7 @@ CREATE TABLE IF NOT EXISTS tags (
   priority INT UNSIGNED NOT NULL DEFAULT 1,
   i18n JSON NULL,
   PRIMARY KEY (id),
-  INDEX idx_tag_class (class ASC, name ASC) VISIBLE)
+  INDEX idx_tag_class (class ASC, name ASC))
 ENGINE = InnoDB;
 
 
@@ -359,10 +359,10 @@ CREATE TABLE IF NOT EXISTS campaign_performances (
   updated_at TIMESTAMP NULL,
   created_by INT UNSIGNED NULL,
   updated_by INT UNSIGNED NULL,
-  INDEX fk_campaign_performance_idx (campaign_id ASC) INVISIBLE,
+  INDEX fk_campaign_performance_idx (campaign_id ASC),
   PRIMARY KEY (id),
-  INDEX idx_daily_performance (day_id ASC) VISIBLE,
-  INDEX idx_campaign_performance (campaign_id ASC) VISIBLE,
+  INDEX idx_daily_performance (day_id ASC) ,
+  INDEX idx_campaign_performance (campaign_id ASC) ,
   CONSTRAINT fk_campaign_performance
     FOREIGN KEY (campaign_id)
     REFERENCES campaigns (id)
@@ -379,8 +379,8 @@ CREATE TABLE IF NOT EXISTS tag_affiliations (
   campaign_id INT UNSIGNED NOT NULL,
   tag_id INT UNSIGNED NOT NULL,
   PRIMARY KEY (id),
-  INDEX fk_campaign_meta_campaign_idx (campaign_id ASC) VISIBLE,
-  INDEX fk_campaign_meta_attribute_idx (tag_id ASC) VISIBLE,
+  INDEX fk_campaign_meta_campaign_idx (campaign_id ASC) ,
+  INDEX fk_campaign_meta_attribute_idx (tag_id ASC) ,
   CONSTRAINT fk_campaign_meta_campaign
     FOREIGN KEY (campaign_id)
     REFERENCES campaigns (id)

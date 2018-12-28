@@ -1,3 +1,11 @@
+const kr = {
+    
+}
+
+const en = {
+
+}
+
 function trans(lang, v, defaultPropName) {
     if(!v)
         return ''; 

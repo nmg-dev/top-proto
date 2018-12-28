@@ -6,11 +6,11 @@ import * as serviceWorker from './serviceWorker';
 
 var __app = ReactDOM.render(<App />, document.getElementById('root'));
 
-window._onGoogleLoginSuccess = __app.sessionLogin.bind(__app);
+window._onGoogleLoginSuccess = __app.onLoginCallback.bind(__app);
 
 window._onGoogleLoginFailure = function(err) {
 	console.error(err.error);
-	__app.setState({login: false});
+	__app.setState({login: false, user: null});
 }
 
 // If you want your app to work offline and load faster, you can change

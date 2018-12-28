@@ -18,7 +18,7 @@ import (
 type User struct {
 	ID uint `json:"id" db:"id"`
 
-	GUID  string `json:"guid" db:"gid"`
+	GUID  string `json:"gid" db:"gid"`
 	Email string `json:"email"`
 
 	Expire    float64 `json:"expires_at"`

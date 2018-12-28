@@ -56,7 +56,7 @@ const PredefinedCategories = [
 class AppView extends Component {
 	constructor(props) {
 		super(props);
-		this.tags = {};
+		// this.tags = {};
 		this._tags = {};
 		this._campaigns = {};
 		this._affs = [];

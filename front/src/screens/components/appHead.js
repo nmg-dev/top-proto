@@ -38,12 +38,17 @@ class AppHead extends React.Component {
 
 		this.state = {
 			openMenu: null,
-			openMenuAnchor: null
+			openMenuAnchor: null,
+			openToolbar: true,
 		};
 		
 		this.logoItem = React.createRef();
 		this.localeMenu = React.createRef();
 		this.profileMenu = React.createRef();
+	}
+
+	componentDidMount() {
+		console.log('app head mount', this.state);
 	}
 
 	onMenuOpen(ev) {
@@ -58,6 +63,15 @@ class AppHead extends React.Component {
 	onMenuClose() {
 		this.setState({openMenu: null, openMenuAnchor: null});
 	}
+
+	renderQueryToolbar() {
+		if(this.state.openToolbar)
+			return (
+				<Toolbar style={styles.toolbar}></Toolbar>
+			);
+		else
+			return '';
+	}
 	
     render() {
         return (
@@ -71,6 +85,7 @@ class AppHead extends React.Component {
 						{this.renderProfileMenu()}
 					</div>
                 </Toolbar>
+				{this.renderQueryToolbar()}
             </AppBar>
         );
 	}
@@ -136,8 +151,15 @@ class AppHead extends React.Component {
 	}
 
 	handleProfileMenuItemClick(ev) {
-		this.props.updateStage(ev.target.getAttribute('stage'));
-		this.setState({openMenu: null});
+		let nextStage = ev.target.getAttribute('stage');
+		let showToolbar = 0<=['view','index'].indexOf(nextStage);
+		this.props.updateStage(nextStage);
+
+
+		this.setState({
+			openMenu: null,
+			openToolbar: showToolbar,
+		});
 	}
 
 	renderProfileMenuItem(condition, stage) {
@@ -180,6 +202,7 @@ class AppHead extends React.Component {
 						/>
 					</MenuItem>
 					<Divider />
+					{this.renderProfileMenuItem(true, 'index')}
 					{this.renderProfileMenuItem(true, 'view')}
 					{this.renderProfileMenuItem(this.props.user.can_manage, 'manage')}
 					{this.renderProfileMenuItem(this.props.user.can_admin, 'admin')}

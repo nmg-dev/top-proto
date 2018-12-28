@@ -41,8 +41,6 @@ class DataTable extends React.Component {
             if(this._minValue==null || v.score < this._minValue) this._minValue = v.score;
             if(this._maxValue==null || v.score > this._maxValue) this._maxValue = v.score;
         });
-
-        console.log(this.props.category, this._minValue, this._maxValue, vvs);
     }
 
     componentWillUpdate() {
@@ -75,7 +73,6 @@ class DataTable extends React.Component {
 
     valueRanged(value, cls) {
         let percent = value/this._maxValue;
-        console.log(this.props.category, value.toFixed(4), this._minValue.toFixed(4), this._maxValue.toFixed(4), percent.toFixed(4));
         return (percent*100.0).toFixed(1)+'%';
         // if(!cls)
         //     cls = this.valueClassify(value);

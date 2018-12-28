@@ -15,8 +15,10 @@ const styles = {
 	},
 	toolbar: {
 		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'space-evenly',
+		alignItems: 'stretch',
+		justifyContent: 'space-between',
+		padding: 16,
+
 	},
 	toolbarField: {
 		minWidth: '10vw',
@@ -164,6 +166,7 @@ class AppView extends Component {
 			if(cids[a.c] && tids[a.t]) {
 				let c = this._campaigns[a.c];
 				let t = this._tags[a.t];
+				if(0<=PredefinedCategories.indexOf(t.class)) return;
 				if(!scoremap[t.class]) scoremap[t.class] = {};
 				if(!scoremap[t.class][t.id]) {
 					scoremap[t.class][t.id] = {
@@ -185,9 +188,15 @@ class AppView extends Component {
 		return scoremap;
 	}
 
+	resetPerformances() {
+		Object.keys(this._performs)
+			.filter((cat)=>this._performs[cat] && this._performs[cat].current)
+			.forEach((cat) => {
+				this._performs[cat].current.resetSelecteds();
+			});
+	}
 
 	procScoreMap(metric, stateChange) {
-		console.log('try to update scoremap by '+ metric.key);
 		let fn = metric.calc;
 		if(!stateChange)
 			stateChange = {};
@@ -196,8 +205,6 @@ class AppView extends Component {
 		let cids = this._filterCampaignIds();
 		// filter tags
 		let tids = this._filterTagSelecteds(cids);
-
-		console.log(Object.keys(cids), Object.keys(tids));
 		
 		// build with records
 		let scoremap = this._filteredScoremap(cids, tids, fn);
@@ -231,9 +238,9 @@ class AppView extends Component {
 				categories[cat] = { selecteds: categories[cat].selecteds, open: categories[cat].open };
 		});
 
-		// DEBUG:
 		stateChange.scoremap = scoremap;
 		stateChange.categories = categories;
+		
 		this.setState(stateChange);
 	}
 
@@ -270,6 +277,7 @@ class AppView extends Component {
 			this._campaigns[a.c]._t[a.t] = this._tags[a.t];
 		});
 
+		this.resetPerformances();
 		this.procScoreMap(this.state.kpi);
 	}
 
@@ -302,16 +310,14 @@ class AppView extends Component {
 		return (
 			<Paper>
 				<Toolbar component="nav" style={styles.toolbar}>
-					<div>
-						{this.renderPredefinePicker('category')}
-						{this.renderPredefinePicker('goal')}
-						{this.renderPredefinePicker('channel')}
-						{this.renderPredefinePicker('media')}
-					</div>
-					<div>
-						{this.renderPeriodPicker()}
-						{this.renderKPIPicker()}
-					</div>
+					{this.renderPredefinePicker('category')}
+					{this.renderPredefinePicker('goal')}
+					{this.renderPredefinePicker('channel')}
+					{this.renderPredefinePicker('media')}
+				</Toolbar>
+				<Toolbar component="nav" style={styles.toolbar}>
+					{this.renderPeriodPicker()}
+					{this.renderKPIPicker()}
 				</Toolbar>
 			</Paper>
 		);
@@ -325,12 +331,12 @@ class AppView extends Component {
 				style={styles.toolbarField}
 				InputLabelProps={{shrink: true}}
 				onChange={(ev) => {
-					console.log(ev.target.name, ev.target.value);
 					let pfk = ev.target.name;
 					this[pfk] = ev.target.value;
+					this.resetPerformances();
 					this.procScoreMap(this.state.kpi);
 				}}>
-				<MenuItem key="" value={null}>ALL SELECT</MenuItem>
+				<MenuItem key="" value={null}> - </MenuItem>
 				<Divider />
 				{this.tagmap && this.tagmap[predefinedKey] ? this.tagmap[predefinedKey].map((t) => (<MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)) : ''}
 			</TextField>
@@ -339,20 +345,21 @@ class AppView extends Component {
 	
 	renderPeriodPicker() {
 		return (
-			<ListItem>
+			<div>
 				<TextField
 					type="date"
 					value={this.state.period_from.format("YYYY-MM-DD")}
 					label="From"
 					style={styles.toolbarField}
 				/>
+				
 				<TextField
 					type="date"
 					value={this.state.period_till.format("YYYY-MM-DD")}
 					label="Till"
 					style={styles.toolbarField}
 				/>
-			</ListItem>
+			</div>
 		);
 	}
 	renderKPIPicker() {
@@ -366,6 +373,7 @@ class AppView extends Component {
 					if(ev.target.value) {
 						this.metrix.forEach((mx) => {
 							if(mx.key == ev.target.value) {
+								this.resetPerformances();
 								this.procScoreMap(mx, {kpi: mx});
 							}
 						});
@@ -408,9 +416,6 @@ class AppView extends Component {
 										<TableCell>{this._fr(bi.stdev)}</TableCell>
 									</TableRow>);
 								})}
-								<TableRow>
-
-								</TableRow>
 							</TableBody>
 						</Table>
 						<div>
@@ -520,7 +525,7 @@ class AppView extends Component {
 
 
 	renderBarCards() {
-		let categories = Object.keys(this.state.scoremap);
+		let categories = Object.keys(this.state.scoremap).filter((cat)=>PredefinedCategories.indexOf(cat)<0);
 		if(0<=categories.indexOf('category'))
 			categories.splice(categories.indexOf('category'), 1);
 		return (

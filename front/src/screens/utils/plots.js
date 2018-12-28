@@ -1,5 +1,6 @@
 import React from 'react';
 import Plot from 'react-plotly.js';
+import { Grid } from '@material-ui/core';
 
 class Plots {    
     pie(values, layout) {
@@ -87,9 +88,9 @@ class Plots {
     }
     
     summaryBoxes(scoremap) {
-        let _data=[];
+        let _data={};
         let _mean=null;
-        let _xs=[], _ys=[];
+        let _ys=[];
 
         Object.keys(scoremap).forEach((category) => {  
             let trace = {x: [], y: [], type: 'box', name: category};
@@ -112,22 +113,20 @@ class Plots {
                     trace.y.push(sc);
                 });
             });
-            _data.push(trace);
-        });
-
-        _data.push({
-            // x: _xs,
-            y: _ys,
-            type: 'line',
-            name: 'AVG.',
+            _data[category] = trace;
         });
 
         return (
-            <Plot data={_data} layout={{
-                width: window.innerWidth-20, 
-                height: window.innerHeight/2,
-                legend: {'orientation': 'h'},
-            }} />
+            <div style={{display: 'inline-flex', overflowX: 'auto'}}>
+                {Object.keys(_data).map((category) => (
+                    <Plot data={[_data[category]]} layout={{
+                        width: 400, 
+                        height: window.innerHeight/2,
+                        legend: {orientation: 'h'},
+                        title: category
+                    }} />
+                ))}
+            </div>
         );
     }
 }

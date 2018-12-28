@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableRow, TableBody, TableHead, TableCell, Chip } from '@material-ui/core';
+import { Table, TableRow, TableBody, TableHead, TableCell, Chip, Icon, IconButton } from '@material-ui/core';
 
 const pallett = {
     'lowest': '#D70B49',
@@ -14,7 +14,7 @@ const pallett = {
     'highest': '#079090',
 }
 
-const boundCoeff = 100;
+const boundCoeff = 20;
 
 const styles = {}
 
@@ -25,9 +25,28 @@ class DataTable extends React.Component {
         this._upperBound = this.props.mean + boundCoeff*this.props.stdev;
         this._boundedRange = this._upperBound - this._lowerBound;
 
+        this._minValue = null;
+        this._maxValue = null;
+        this._verifyMinMax();
+
         this.state = {
             selecteds: this.props.selecteds,
         }
+    }
+
+    _verifyMinMax() {
+        let vvs =[];
+        this.props.values.forEach((v) => {
+            vvs.push(v);
+            if(this._minValue==null || v.score < this._minValue) this._minValue = v.score;
+            if(this._maxValue==null || v.score > this._maxValue) this._maxValue = v.score;
+        });
+
+        console.log(this.props.category, this._minValue, this._maxValue, vvs);
+    }
+
+    componentWillUpdate() {
+        this._verifyMinMax();
     }
 
     valueClassify(value) {
@@ -55,30 +74,38 @@ class DataTable extends React.Component {
     }
 
     valueRanged(value, cls) {
-        if(!cls)
-            cls = this.valueClassify(value);
-        switch(cls) {
-            case 'highest': return '100%';
-            case 'higher': return '99%';
-            case 'lower': return '1%';
-            case 'lowest': return '0%';
-            /// 
-            case 'high':
-            case 'above':
-            case 'averae':
-            case 'below':
-            case 'low':
-            default: 
-                return (1+98.0*(value - this._lowerBound)/this._boundedRange).toFixed(1)+'%';
-        }
+        let percent = value/this._maxValue;
+        console.log(this.props.category, value.toFixed(4), this._minValue.toFixed(4), this._maxValue.toFixed(4), percent.toFixed(4));
+        return (percent*100.0).toFixed(1)+'%';
+        // if(!cls)
+        //     cls = this.valueClassify(value);
+        // console.log(cls, value, this._lowerBound, this._upperBound);
+        // switch(cls) {
+        //     case 'highest': return '100%';
+        //     case 'higher': return '99%';
+        //     case 'lower': return '1%';
+        //     case 'lowest': return '0%';
+        //     /// 
+        //     case 'high':
+        //     case 'above':
+        //     case 'averae':
+        //     case 'below':
+        //     case 'low':
+        //     default: 
+        //         return (1+98.0*(value-this._lowerBound)/(this._boundedRange)).toFixed(1)+'%';
+        // }
     }
 
     hasSelected(tid) {
         tid = tid.toString();
         if(!this.state.selecteds || this.state.selecteds.length<=0)
-            return true;
+        return true;
         else 
-            return 0<=this.state.selecteds.indexOf(tid);
+        return 0<=this.state.selecteds.indexOf(tid);
+    }
+    
+    resetSelecteds() {
+        this.setState({selecteds: []});
     }
 
     getSelecteds() {
@@ -101,7 +128,6 @@ class DataTable extends React.Component {
             else 
                 ss.splice(ss.indexOf(tid), 1);
             
-            console.log(ss);
             this.setState({selecteds: ss});
             // propagate parent
             this.props.onCategorySelect(ev);
@@ -113,7 +139,8 @@ class DataTable extends React.Component {
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell style={{width: '50%'}}>Category</TableCell>
+                        <TableCell style={{width: '25%'}}><Icon>filter_list</Icon></TableCell>
+                        <TableCell style={{width: '25%'}}>Category</TableCell>
                         <TableCell style={{width: '50%'}}>Score</TableCell>
                     </TableRow>
                 </TableHead>
@@ -124,12 +151,16 @@ class DataTable extends React.Component {
                         return (
                             <TableRow vals={row}>
                                 <TableCell>
+                                    <IconButton onClick={this.updateSelected.bind(this)} tag_id={row._id} category={this.props.category}>
+                                        <Icon>visibility</Icon>
+                                    </IconButton>
+                                </TableCell>
+                                <TableCell>
                                     <Chip tag_id={row._id} category={this.props.category}
                                         style={hasSelected
                                             ? {backgroundColor: pallett[cls], color: '#fff'} 
                                             : {backgroundColor: '#efefef', color: '#ccc' } }
                                         label={row.label}
-                                        onClick={this.updateSelected.bind(this)}
                                     />
                                 </TableCell>
                                 <TableCell value={row.score}>

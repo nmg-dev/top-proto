@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const PREDEFINED_CATEGORIES = ['category', 'goal', 'channel', 'media'];
 const PREDEFINED_METRICS = [
     {key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)) },
@@ -12,6 +14,7 @@ class ModData {
         this._tags = null;
         this._campaigns = null;
         this._affs = null;
+        this._records = null;
 
         this._tagList = null;
         this._tagmap = {};
@@ -39,9 +42,10 @@ class ModData {
 
 
     scoremap() {
-        let cids = this.campaigns.map((c)=>c.id);
-        let tids = this.tags.map((t) => t.id);
-        this._affs.filter((a) => 0<=cids.indexOf(a.c) && 0<=tids.indexOf(a.t));
+        // TODO:
+        // let cids = this.campaigns.map((c)=>c.id);
+        // let tids = this.tags.map((t) => t.id);
+        // this._affs.filter((a) => 0<=cids.indexOf(a.c) && 0<=tids.indexOf(a.t));
 
     }
 
@@ -56,14 +60,32 @@ class ModData {
                 this._tagmap[tag.class] = [];
             this._tagmap[tag.class].push(tag);
         });
+
+        this.setAffiliation();
     }
 
-    setCampaigns(campaigns) {
-        this._campaigns = campaigns;
+
+    setCampaigns(cdata) {
+        this._campaigns = cdata.campaigns;
+        this._records = cdata.records;
+        this._affs = cdata.affiliations;
+
+        this._records.forEach((r) => {
+            if(!this._campaigns[r.c]) return;
+            r.d = moment(r.d);
+            if(!this._campaigns[r.c]._r) this._campaigns[r.c]._r = [];
+            this._campaigns[r.c]._r.push(r);
+        });
+
         this.campaigns = [];
         Object.keys(this._campaigns).forEach((c) => {
+            // 
+            this._campaigns[c]._r = this._campaigns[c]._r.sort((l,r)=>l.d.isAfter(r.d));
+            //
             this.campaigns.push(this._campaigns[c]);
         });
+
+        this.setAffiliation();
     }
 
     filterByCampaignIds(cids) {
@@ -72,17 +94,15 @@ class ModData {
         this.tags = this.filteredTags(cids);
     }
 
-    setAffiliation(affs) {
-        this._affs = affs;
-
-        if(this._tags && this._campaigns) {
+    setAffiliation() {
+        if(!this._affs && this._tags && this._campaigns) {
             Object.keys(this._campaigns).forEach((c) => {
                 this._campaigns[c]._t = [];
             });
             Object.keys(this._tags).forEach((t) => {
                 this._tags[t]._c = [];
             });
-            Object.keys(affs).forEach((a) => {
+            Object.keys(this._affs).forEach((a) => {
                 if(this._campaigns[a.c] && this._tags[a.t]) {
                     this._campaigns[a.c]._t.push(a.t);
                     this._tags[a.t]._c.push(a.c);

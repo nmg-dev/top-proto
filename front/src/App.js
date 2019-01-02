@@ -17,6 +17,7 @@ import AppProfile from './screens/components/appProfile.js';
 // const modData = require('./modules/data');
 import ModApi from './modules/api';
 import ModData from './modules/data';
+import moment from 'moment';
 
 const styles = {
 	loginPanel: {
@@ -75,8 +76,18 @@ class App extends React.Component {
 	}
 
 	_onLoginServerResponseSuccess(userinfo) {
-		console.log('login success', userinfo);
 		this.setState({hasLogin: this.api.hasLogin()});
+		this.api.getTags((tags) => {
+			this.data.setTags(tags);
+		});
+		this.api.getCampaigns({
+				//TODO: update
+				from: moment().add(-1, 'year').toDate(),
+				till: moment().toDate()
+			}, 
+			(cs) => {this.data.setCampaigns(cs); },
+			(er) => {console.error(er);}
+		);
 	}
 	_onLoginServerResponseFailure(err) {
 		console.log('login error', err);

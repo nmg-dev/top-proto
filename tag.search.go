@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TagMeta
 type TagMeta struct {
 	Class    string `json: "class_name"`
 	DefValue string `json: "default_value"`

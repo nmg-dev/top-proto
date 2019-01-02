@@ -4,17 +4,7 @@ import moment from 'moment';
 
 const styles = {
     logo: {},
-    appbar : {
-        
-	},
-	toolbar: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'space-between'
-	},
-	toolbarItem: {
-		display: 'inline-flex'
-	},
+    
 	toolbarInput: {
 		display: 'inline-flex',
 		flexWrap: 'wrap',

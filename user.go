@@ -256,7 +256,6 @@ func RequireAdminSetMiddle(ctx *gin.Context) {
 }
 
 func authInMiddle(ctx *gin.Context, needManager bool, needAdmin bool) int {
-
 	if cookie, cerr := ctx.Request.Cookie(authTokenCookieKey); cerr == nil {
 		token := cookie.Value
 		db := getDatabase(ctx)

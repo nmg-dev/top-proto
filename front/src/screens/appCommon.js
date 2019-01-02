@@ -25,6 +25,7 @@ const styles = {
 		display: 'inline-flex'
     },
     logo: {},
+    
 }
 
 class AppCommon extends React.Component {
@@ -33,6 +34,7 @@ class AppCommon extends React.Component {
 
         this.state = {
             stage: 'view',
+            kpi: props.data.getDefaultMetric(),
             tags: {},
             campaigns: {},
         }
@@ -53,7 +55,7 @@ class AppCommon extends React.Component {
 	renderStage() {
 		switch(this.state.stage) {
 			case 'admin':
-				
+				return (<AppAdmin lang={this.props.lang} api={this.props.api} />);
 			case 'manage':
                 return (<AppManage lang={this.props.lang} api={this.props.api} />);
             case 'view':

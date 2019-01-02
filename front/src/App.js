@@ -4,11 +4,19 @@ import AppLogin from './screens/appLogin.js';
 import AppCommon from './screens/appCommon.js';
 
 import AppConfig from './config.js';
-import { Card, CardHeader, Icon, CardContent, CardActions, Chip, Avatar, IconButton, Divider, Menu, MenuItem } from '@material-ui/core';
+import { Card, CardHeader, Icon, CardContent, CardActions, Chip, Avatar, IconButton, Divider, Menu, MenuItem, AppBar, Toolbar, Typography, Grid } from '@material-ui/core';
 
 import AppAdmin from './screens/appAdmin';
 import AppManage from './screens/appManage';
 import AppData from './screens/appData';
+import AppFoot from './screens/components/appFoot.js';
+import AppLocale from './screens/components/appLocale.js';
+import AppProfile from './screens/components/appProfile.js';
+
+// const modAPI = require('./modules/api');
+// const modData = require('./modules/data');
+import ModApi from './modules/api';
+import ModData from './modules/data';
 
 const styles = {
 	loginPanel: {
@@ -26,6 +34,7 @@ const styles = {
 		width: '30vw',
 		height: '30vh',
 	},
+
 	loginCardHead: {
 	},
 	loginCardBody: {
@@ -47,92 +56,44 @@ const viewAdmin = 'admin';
 const viewManage = 'manage';
 const views = [viewIndex, viewInfo, viewManage, viewAdmin];
 
-const menuProfile = '_menu_profile';
-const menuLocale = '_menu_locale';
-
 class App extends React.Component {
 	constructor(props) {
 		super(props);
+
+		this.api = new ModApi(AppConfig.API_HOST);
+		this.data = new ModData();
 	
 		this.state = {
-			// authentication
-			login: false,
-			email: null,
-			profile: null,
-			token: null,
-			can_admin: false,
-			can_manage: false,
-			
-			// locale
-			lang: 'en',
-			view: 'index',
-
-			// top menu
-			openMenu: null,
+			hasLogin: this.api.hasLogin(),
+			view: 'view'
 		}
 		window.__app = this;
-
-		this.view = React.createRef();
-		this.refs = {
-			profileMenu: React.createRef(),
-			profileAnchor: React.createRef(),
-			localeMenu: React.createRef(),
-			localeAnchor: React.createRef(),
-
-			viewData: React.createRef(),
-		};
+	}
+	
+	listViews() {
+		return views;
 	}
 
-	/* sending api */
-	api(endpoint, options) {
-		if(!options) options = {credentials: 'include'}
-		else options.credentials = 'include';
-
-		return fetch(AppConfig.API_HOST + endpoint, options)
-			.catch((err) => { window.alert(err); window.location.reload(); })
-			.then((plainResp) => plainResp.json())
-	}
-
-	/* authentication */
-	hasLogin() { return this.state.login && this.state.token; }
-	canAdmin() { return this.state.can_admin && this.hasLogin() }
-	canManage() { return this.state.can_manage && this.hasLogin() }
 	_onLoginServerResponseSuccess(userinfo) {
-		this.setState({
-			login: true,
-			email: userinfo.email,
-			profile: userinfo.profile,
-			token: userinfo.token,
-			can_admin: userinfo.can_admin,
-			can_manage: userinfo.can_manage,
-		});
+		console.log('login success', userinfo);
+		this.setState({hasLogin: this.api.hasLogin()});
 	}
 	_onLoginServerResponseFailure(err) {
-		this.setState({
-			login: false,
-			email: null,
-			profile: null,
-			token: null,
-			can_admin: false,
-			can_manage: false,
-		});
+		console.log('login error', err);
+		this.setState({hasLogin: false});
 	}
 	onLoginCallback(gauth) {
+		// console.log(gauth);
 		// 
 		let resp = gauth.getAuthResponse();
-		let profile = gauth.getBasicProfile();	
-		let authOptions = {
-			method: 'POST',
-			body: JSON.stringify({
-				gid: profile.getId(),
-				email: profile.getEmail(),
-				token: resp.id_token
-			})
-		};
-		// console.log(authOptions);
-		this.api('/auth', authOptions)
-			.then(this._onLoginServerResponseSuccess.bind(this))
-			.catch(this._onLoginServerResponseFailure.bind(this));
+		let profile = gauth.getBasicProfile();
+		this.api.getAuth({
+			gid: profile.getId(),
+			email: profile.getEmail(),
+			token: resp.id_token,
+		}, 
+			this._onLoginServerResponseSuccess.bind(this),
+			this._onLoginServerResponseFailure.bind(this));
 	}
 	renderLoginScreen() {
 		return (
@@ -157,65 +118,7 @@ class App extends React.Component {
 			</div>
 		);
 	}
-	/* with logins */
-	renderProfileButton() {
-		return (<IconButton ref={this.refs.profileAnchor}
-			aria-haspopup="true"
-			aria-owns={menuProfile}
-			onClick={(ev) => this.setState({openMenu: menuProfile})}>
-				<Icon>person</Icon>
-		</IconButton>);
-	}
-	renderProfileButtonMenu() {
-		return (<Menu ref={this.refs.profileMenu} id={menuProfile}
-			open={this.state.openMenu==menuProfile}
-			onClose={()=>{this.setState({openMenu: null})}}
-			anchorEl={this.refs.profileAnchor}>
-			<MenuItem>
-				<Chip title={this.state.email}
-					avatar={<Avatar 
-						alt="profile image" 
-						src={this.state.profile?this.state.profile.picture:''} />}
-					label={this.state.profile?this.state.profile.name:''} />
-			</MenuItem>
-			<Divider />
-			{views.map((v) => (
-			<MenuItem view={v}
-				style={styles.viewMenuItem}
-				onClick={(ev) => {this.setState({openMenu: null, view: ev.target.getAttribute('view')})}}>
-			</MenuItem>))}
-		</Menu>);
-	}
-
-	/* Locales */
-	getLocale() { return this.state.lang; }
-	setLocale(ln) { this.setState({lang: ln})}
-	lang() {
-		// TODO: build with keys
-	}
-	updateLocale(nextLocale) {
-		this.setState({lang: nextLocale});
-	}
-	renderLanguageButton() {
-		return (
-			<IconButton ref={this.refs.localeAnchor} 
-				aria-owns={menuLocale}
-				aria-haspopup="true"
-				onClick={(ev) => { this.setState({openMenu: menuLocale})}}>
-				<Icon>language</Icon>
-			</IconButton>);
-	}
-	renderLanguageButtonMenu() {
-		return (<Menu ref={this.localeMenu} id={menuLocale}
-			open={this.state.openMenu=='locale'}
-			onClose={()=>{this.setState({openMenu: null})}}
-			anchorEl={this.refs.localeAnchor}>
-			{languages.map((ln) => 
-				<MenuItem button onClick={(ev)=>{this.setState({lang: ev.target.getAttribute('lang')})}} key={ln} lang={ln}>{ln}</MenuItem>
-			)}
-		</Menu>);
-	}
-
+	
 	renderAdminScreen() {
 		return (<AppAdmin app={this} api={this.api.bind(this)} />);
 	}
@@ -225,25 +128,43 @@ class App extends React.Component {
 	}
 
 	renderViewScreen() {
-		return (<AppData ref={this.refs.viewData} app={this} api={this.api.bind(this)} mode={viewInfo} />);
+		return (<AppData ref={this.refs.viewData} app={this} api={this.api.bind(this)} />);
 	}
 
-	renderIndexScreen() {
-		return (<AppData ref={this.refs.viewData} app={this} api={this.api.bind(this)} mode={viewIndex} />);
-	}
-
-	render() {
-		if(!this.hasLogin)
-			return this.renderLoginScreen();
-
+	renderStage() {
 		if(this.state.view=='admin' && this.canAdmin())
 			return this.renderAdminScreen();
 		else if(this.state.view=='manage' && this.canManage())
 			return this.renderManageScreen();
-		else if(this.state.view=='view')
-			return this.renderViewScreen();
 		else
-			return this.renderIndexScreen();
+			return this.renderViewScreen();
+	}
+
+	render() {
+		if(!this.state.hasLogin)
+			return this.renderLoginScreen();
+
+		return (
+			<div style={styles.appContainer}>
+                <AppBar position="sticky" style={styles.appbar}>
+                    <Toolbar style={styles.toolbar}>
+                        <div style={styles.toolbarItem}>
+                            <Typography style={styles.logo}>TAG OPERATION by NMG</Typography>
+                        </div>
+                        <div style={styles.toolbarItem}>
+                            <AppLocale app={this} ref={this.refs.locales} />
+							<AppProfile app={this} ref={this.refs.profile} />
+                        </div>
+                    </Toolbar>
+                </AppBar>
+
+                <Grid container>
+                    <Grid item xs={12}>
+                    </Grid>
+                </Grid>
+                <AppFoot />
+            </div>
+		);
 	}
 }
 export default App;

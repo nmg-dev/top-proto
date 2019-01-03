@@ -10,16 +10,20 @@ class AppProfile extends React.Component {
         super(props);
 
         this.state = {
-            show: false,
+			show: false,
+			anchor: null,
 
             name: null,
             email: null,
             picture: null,			
         }
-    }
-
-    /* authentication */
+	}
 	
+	_onSelect(ev) {
+		let vcode = ev.target.getAttribute('view');
+		this.setState({show: false, anchor: null});
+		this.props.update(vcode);
+	}
 	
 	/* with logins */
 	renderProfileButton() {
@@ -27,28 +31,29 @@ class AppProfile extends React.Component {
 			aria-haspopup="true"
 			aria-owns={menuProfile}
 			onClick={(ev) => {
-				this.setState({show: true, anchor: menuProfile})
+				this.setState({show: true, anchor: ev.target})
 			}}>
 				<Icon>person</Icon>
 		</IconButton>);
 	}
 	renderProfileButtonMenu() {
-		return (<Menu ref={this.refs.profileMenu} id={menuProfile}
+		return (<Menu 
 			open={this.state.show}
 			onClose={()=>{this.setState({show: false, anchor: null})}}
 			anchorEl={this.state.anchor}>
 			<MenuItem>
-				<Chip title={this.state.email}
+				<Chip title={this.props.profile.email}
 					avatar={<Avatar 
 						alt="profile image" 
-						src={this.state.picture} />}
-					label={this.state.name} />
+						src={this.props.profile.icon} />}
+					label={this.props.profile.name} />
 			</MenuItem>
 			<Divider />
 			{this.props.app.listViews().map((v) => (
 			<MenuItem view={v} key={v}
 				style={styles.viewMenuItem}
-				onClick={(ev) => {this.setState({show: true, view: ev.target.getAttribute('view')})}}>
+				onClick={this._onSelect.bind(this)}>
+				{v}
 			</MenuItem>))}
 		</Menu>);
     }

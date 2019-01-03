@@ -1,10 +1,7 @@
 import React from 'react';
 
-import AppLogin from './screens/appLogin.js';
-import AppCommon from './screens/appCommon.js';
-
 import AppConfig from './config.js';
-import { Card, CardHeader, Icon, CardContent, CardActions, Chip, Avatar, IconButton, Divider, Menu, MenuItem, AppBar, Toolbar, Typography, Grid } from '@material-ui/core';
+import { Card, CardHeader, Icon, CardContent, CardActions, Chip, Avatar, IconButton, Divider, Menu, MenuItem, AppBar, Toolbar, Typography, Grid, Paper } from '@material-ui/core';
 
 import AppAdmin from './screens/appAdmin';
 import AppManage from './screens/appManage';
@@ -18,6 +15,9 @@ import AppProfile from './screens/components/appProfile.js';
 import ModApi from './modules/api';
 import ModData from './modules/data';
 import moment from 'moment';
+import AppTools from './screens/components/appTools.js';
+import AppView from './screens/appView.js';
+import AppIndex from './screens/appIndex.js';
 
 const styles = {
 	loginPanel: {
@@ -66,31 +66,39 @@ class App extends React.Component {
 	
 		this.state = {
 			hasLogin: this.api.hasLogin(),
-			view: 'view'
+			view: viewInfo,
+			lang: 'ko',
 		}
+
+		let refs = {};
+		views.forEach((v) => refs[v] = React.createRef());
+		this.refs = refs;
 		window.__app = this;
+
+	}
+
+	updateLocale(nextLocale) {
+		console.log('set locale to', nextLocale);
+		this.setState({lang: nextLocale});
+	}
+
+	updateScreen(nextScreen) {
+		console.log('move view to', nextScreen);
+		this.setState({view: nextScreen});
 	}
 	
 	listViews() {
+		
 		return views;
 	}
 
-	_onLoginServerResponseSuccess(userinfo) {
+	_onLoginServerResponseSuccess(resp) {
 		this.setState({hasLogin: this.api.hasLogin()});
 		this.api.getTags((tags) => {
 			this.data.setTags(tags);
 		});
-		this.api.getCampaigns({
-				//TODO: update
-				from: moment().add(-1, 'year').toDate(),
-				till: moment().toDate()
-			}, 
-			(cs) => {this.data.setCampaigns(cs); },
-			(er) => {console.error(er);}
-		);
 	}
 	_onLoginServerResponseFailure(err) {
-		console.log('login error', err);
 		this.setState({hasLogin: false});
 	}
 	onLoginCallback(gauth) {
@@ -98,11 +106,12 @@ class App extends React.Component {
 		// 
 		let resp = gauth.getAuthResponse();
 		let profile = gauth.getBasicProfile();
-		this.api.getAuth({
+		let gdata = {
 			gid: profile.getId(),
 			email: profile.getEmail(),
 			token: resp.id_token,
-		}, 
+		};
+		this.api.getAuth(gdata, 
 			this._onLoginServerResponseSuccess.bind(this),
 			this._onLoginServerResponseFailure.bind(this));
 	}
@@ -129,26 +138,26 @@ class App extends React.Component {
 			</div>
 		);
 	}
-	
-	renderAdminScreen() {
-		return (<AppAdmin app={this} api={this.api.bind(this)} />);
-	}
 
-	renderManageScreen() {
-		return (<AppManage app={this} api={this.api.bind(this)} />);
-	}
-
-	renderViewScreen() {
-		return (<AppData ref={this.refs.viewData} app={this} api={this.api.bind(this)} />);
-	}
 
 	renderStage() {
-		if(this.state.view=='admin' && this.canAdmin())
-			return this.renderAdminScreen();
-		else if(this.state.view=='manage' && this.canManage())
-			return this.renderManageScreen();
+		if(this.state.view==viewAdmin && this.canAdmin())
+			return (<AppAdmin ref={this.refs.viewAdmin} app={this} api={this.api} />);
+		else if(this.state.view==viewManage && this.canManage())
+			return (<AppManage ref={this.refs.viewManage} app={this} api={this.api} />);
+		else if(this.state.view==viewInfo)
+			return (<AppView ref={this.refs.viewInfo} app={this} api={this.api} data={this.data} />);
 		else
-			return this.renderViewScreen();
+			return (<AppIndex ref={this.refs.viewIndex} app={this} api={this.api} data={this.data} />)
+	}
+
+	isDataView() {
+		return 0<['', viewIndex, viewInfo].indexOf(this.state.view);
+	}
+
+	onFilterChange(filter) {
+		// TODO: state changed
+		console.log(filter);
 	}
 
 	render() {
@@ -163,15 +172,28 @@ class App extends React.Component {
                             <Typography style={styles.logo}>TAG OPERATION by NMG</Typography>
                         </div>
                         <div style={styles.toolbarItem}>
-                            <AppLocale app={this} ref={this.refs.locales} />
-							<AppProfile app={this} ref={this.refs.profile} />
+                            <AppLocale app={this} ref={this.refs.locales} lang={this.state.lang} />
+							<AppProfile app={this} ref={this.refs.profile} 
+								profile={this.api.userProfile()} 
+								update={this.updateScreen.bind(this)} />
                         </div>
                     </Toolbar>
                 </AppBar>
 
                 <Grid container>
                     <Grid item xs={12}>
+						{this.isDataView() ? 
+							<AppTools app={this} 
+								api={this.api} 
+								data={this.data} 
+								views={views}
+								onChange={this.onFilterChange.bind(this)}
+								 /> :
+							<h1>{this.state.view}</h1>}
                     </Grid>
+					<Grid item xs={12}>
+						{this.renderStage()}
+					</Grid>
                 </Grid>
                 <AppFoot />
             </div>

@@ -1,5 +1,4 @@
 import React from 'react';
-import AppCommon from './appCommon';
 
 import moment from 'moment';
 import AppView from './appView';
@@ -39,7 +38,6 @@ class AppData extends React.Component {
 			scoremap: {},			// precalculated score
 			categories: {},			// categories {category_name : { selected: [tagid, tagid...], open: true | false }}
 			showboxes: true,		// show summary boxes
-			
 		}
 
 		this.querybar = React.createRef();

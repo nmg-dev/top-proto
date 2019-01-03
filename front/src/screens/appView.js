@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Paper, TextField, MenuItem, Toolbar, Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Button, Grid, Divider, CardActions, Hidden, Chip, ListItemText, TableHead, TableCell, Table, TableBody, TableRow } from '@material-ui/core';
+import { Paper, TextField, MenuItem, Toolbar, Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Button, Grid, Divider, CardActions, Hidden, Chip, ListItemText, TableHead, TableCell, Table, TableBody, TableRow, List, ListItem } from '@material-ui/core';
 
 import moment from 'moment';
 
@@ -41,26 +41,60 @@ const styles = {
 
 }
 
-const performanceLayout = {
-	width: 300,
-	height: 300
-};
-
-
-
 class AppView extends Component {
 	constructor(props) {
 		super(props);
-
 		this.state = {
-			scoremap: {},			// precalculated score
-			categories: {},			// categories {category_name : { selected: [tagid, tagid...], open: true | false }}
-			showboxes: true,		// show summary boxes
-			period_from: moment().add(-1, 'year'),
-			period_till: moment(),
-		}
+			// show chip filter
+			showFilter: true,
+			showPerform: {},
 
-		this.container = React.createRef();
+			cids: this.props.data.campaigns.map((c)=>c.id),
+			tids: this.props.data.tags.map((t)=>t.id),
+			clss: this.props.data.listTagClasses(),
+		}
+	}
+
+	renderCategoryChips() {
+		return (
+			<Paper>
+				<Card>
+					<CardHeader
+						title={'filter'}
+						action={this.renderCardToggleAction(
+							()=>this.setState({showFilter: !this.state.showFilter}),
+							(err)=>console.error(err)
+						)} />
+					<CardContent>
+						<Collapse in={this.state.showFilter}>
+							<Table>
+								<TableHead>
+									<TableRow>
+										{this.props.data.listTopTagClasses().map((tc) => 
+											<TableCell>{tc}</TableCell>
+										)}
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									<TableRow>
+										{this.props.data.listTopTagClasses().map((tc) => 
+											<TableCell>
+												<List>
+													{this.props.data.listTags(tc).map((tag) => 
+													<ListItem key={tag.id}>{tag.name}</ListItem>
+													)}
+												</List>
+											</TableCell>
+										)}
+									</TableRow>
+								</TableBody>
+							</Table>
+						</Collapse>
+
+					</CardContent>
+				</Card>
+			</Paper>
+		)
 	}
 
 	/* render summary panel */
@@ -198,24 +232,21 @@ class AppView extends Component {
 		}
 	}
 
-	renderBarCards() {
-		let categories = Object.keys(this.state.scoremap).filter((cat)=>this.props.isCategoryPredefined(cat));
-		if(0<=categories.indexOf('category'))
-			categories.splice(categories.indexOf('category'), 1);
+	renderCategoryCards(categories) {
 		return (
-			<Grid container>
+			<Paper>
 				{categories.map((cat) => this.renderCategoryPerformances(cat))}
-			</Grid>
-		)
+			</Paper>
+		);
 	}
 
 
 	render() {
+		console.log('render view');
 		return (
 			<main style={styles.wrapper}>
-				{this.renderSummaryBoxes()}
+				{this.renderCategoryChips()}
 				<Divider />
-				{this.renderBarCards()}
 			</main>
 		)
 	}

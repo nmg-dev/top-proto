@@ -1,12 +1,14 @@
-import AppConfig from '../config.js';
+import Listenable from './listenable';
 
 const AUTH_DEFAULT = { email: '', name: 'NMG', icon: ''};
 const ENDPOINT_AUTH = '/auth';
 const ENDPOINT_TAGS = '/t/';
 const ENDPOINT_CAMPAGIN = '/c/';
 
-class ModApi {
+class ModApi extends Listenable {
     constructor(apiHost, onErrorDefault, onSuccessDefault) {
+        super();
+
         this._host = apiHost;
         this._onError = onErrorDefault;
         this._onSuccess = onSuccessDefault;
@@ -21,6 +23,10 @@ class ModApi {
 
     hasLogin() {
         return this._hasLogin && this._token;
+    }
+
+    userProfile() {
+        return this._profile;
     }
 
     accessToken() {
@@ -40,8 +46,9 @@ class ModApi {
         return err;
     }
     _request(endpoint, options, onSuccess, onError) {
-        if(endpoint!==ENDPOINT_AUTH && !this.hasLogin())
-            return onError('Login required');
+        if(endpoint!==ENDPOINT_AUTH && !this.hasLogin()) {
+            return onError ? onError('Login required') : null;
+        }
         options.credentials = 'include';
         return fetch(this._host + endpoint, options)
             .catch(onError ? onError : this._onError)

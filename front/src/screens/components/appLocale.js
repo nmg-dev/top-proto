@@ -19,8 +19,18 @@ class AppLocale extends React.Component {
             anchor: null,
             lang: languages[0]
         }
-    }
-
+	}
+	
+	_onClose() { this.setState({show: false, anchor: null}); }
+	_onSelect(ev) { 
+		let lcode = ev.target.getAttribute('lang');
+		let lang = languages.filter((v) => v.key==lcode).pop();
+		if(lang) {
+			// TODO: update forward
+			this.props.app.updateLocale(lcode);
+			this.setState({lang: lang, show: false});
+		}
+	}
     getLocale() { return this.state.lang; }
 	setLocale(ln) { this.setState({lang: ln})}
 	lang() {
@@ -41,10 +51,10 @@ class AppLocale extends React.Component {
 	renderLanguageButtonMenu() {
 		return (<Menu 
 			open={this.state.show}
-			onClose={()=>{this.setState({show: false, anchor: null})}}
+			onClose={this._onClose.bind(this)}
 			anchorEl={this.state.anchor}>
 			{languages.map((ln) => 
-				<MenuItem button onClick={(ev)=>{this.setState({lang: ev.target.getAttribute('lang')})}} key={ln} lang={ln}>{ln.label}</MenuItem>
+				<MenuItem button onClick={this._onSelect.bind(this)} key={ln.key} lang={ln.key}>{ln.label}</MenuItem>
 			)}
 		</Menu>);
 	}

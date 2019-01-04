@@ -13,7 +13,7 @@ type Tag struct {
 	Class    string   `json:"class" db:"class"`
 	Name     string   `json:"name" db:"name"`
 	Priority uint     `json:"priority" db:"priority"`
-	I18N     DJsonMap `json:"i18n" db:"i18n"`
+	Property DJsonMap `json:"property" db:"property"`
 }
 
 const attrInsertStmt = `INSERT IGNORE INTO tags (class,name,priority) VALUES (?, ?, ?)`
@@ -94,16 +94,16 @@ func (a Tag) Delete(db *sql.DB) error {
 
 // Bind -
 func (a *Tag) Bind(row Scannable) error {
-	var i18n string
+	var props string
 	sqlErr := row.Scan(
 		&a.ID,
 		&a.Class,
 		&a.Name,
 		&a.Priority,
-		&i18n,
+		&props,
 	)
 
-	json.Unmarshal([]byte(i18n), &a.I18N)
+	json.Unmarshal([]byte(props), &a.Property)
 	if sqlErr != nil {
 		return sqlErr
 	}

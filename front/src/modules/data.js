@@ -2,13 +2,13 @@ import moment from 'moment';
 import Listenable from './listenable';
 
 const PREDEFINED_CATEGORIES = ['category', 'goal', 'channel', 'media'];
-const TOPMOST_CATEGORIES = ['layout', 'background', 'objet', 'button'];
+const TOPMOST_CATEGORIES = ['layout', 'background', 'objet', 'lead'];
 const PREDEFINED_METRICS = [
-    {key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)) },
-    {key: 'cpa', calc: (v) => (v.cnv/Math.max(1,v.cost)) },
-    {key: 'ctr', calc: (v) => (v.clk/Math.max(1,v.imp)) },
-    {key: 'cvr', calc: (v) => (v.cnv/Math.max(1,v.imp)) },
-    {key: 'cnt', calc: (v) => 1, hide: true },
+    {key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)), fmt: (v) => (100*v).toFixed(4)+' %' },
+    {key: 'cpa', calc: (v) => (v.cnv/Math.max(1,v.cost)), fmt: (v) => (100*v).toFixed(4)+' %' },
+    {key: 'ctr', calc: (v) => (v.clk/Math.max(1,v.imp)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
+    {key: 'cvr', calc: (v) => (v.cnv/Math.max(1,v.imp)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
+    {key: 'cnt', calc: (v) => 1, hide: true, fmt: (v)=> v.toLocaleString()+ '.' },
 ];
 
 class ModData extends Listenable {
@@ -62,12 +62,6 @@ class ModData extends Listenable {
     defaultPeriodFrom() { return moment().add(-1, 'year'); }
     defaultPeriodTill() { return moment(); }
 
-    dailymapOf(metric, campaigns) {
-        let fn = metric.calc;
-        let recs = {};
-
-
-    }
 
     _qd(sc, q, qdiv) {
         return (sc[Math.floor((sc.length-1)*q/qdiv)] + sc[Math.ceil((sc.length-1)*q/qdiv)])/2;
@@ -95,14 +89,133 @@ class ModData extends Listenable {
     }
 
     tagScore(metric, tag, cids) {
-        if(!cids)
-            cids = Object.keys(this._campaigns);
         let fn = metric.calc;
         let scs = tag._c
-            .filter((cid)=>0<=cids.indexOf(cid))
+            .filter((cid)=>!cids || cids.length<=0 || 0<=cids.indexOf(cid))
             .map((cid)=>this._campaigns[cid])
             .reduce((acc, c)=>acc.concat(c._r.map((r)=>fn(r))), []);
         return Object.assign(this._scores(scs), {m: metric.key});
+    }
+
+    categoryScore(metric, cls, cids) {
+        let fn = metric.calc;
+        let rs = [];
+        this.listTags(cls).forEach((t) => {
+            rs = rs.concat(
+                t._c.filter((cid)=>!cids || cids.length<=0 || 0<cids.indexOf(cid))
+                    .map((cid)=>this._campaigns[cid])
+                    .reduce((r, c) => r.concat(c._r.map((r)=>fn(r))), [])
+            );
+        });
+        return Object.assign(this._scores(rs), {m: metric.key});
+    }
+
+    plotClassbars(metric, cls, cids, tids) {
+        let cScore = this.categoryScore(metric, cls, cids);
+        let tags = this.listTags(cls).filter((tid)=>!tids || tids.length<=0 || 0<tids.indexOf(tid));
+        let tScores = {};
+        let ts = tags.map((t)=>t.id);
+        let tnames = {};
+        tags.forEach((t) => { 
+            tnames[t.id] = t.name;
+            tScores[t.id] = this.tagScore(metric, t);
+        });
+        ts = ts.sort((l,r)=>tScores[l].avg-tScores[r].avg);
+        
+        return {
+            d: [
+                // tag scores
+                {
+                    name: cls,
+                    x: ts,
+                    y: ts.map((tn)=>tScores[tn].avg),
+                    // error_y: {type: 'data', array: ts.map((tn)=>tScores[tn].stdev), visible: true},
+                    type: 'bar'
+                },
+                // category average
+                {
+                    name: 'AVG.',
+                    x: ts,
+                    y: ts.map(()=>cScore.avg),
+                    // error_y: {type:'data', array: ts.map(()=>cScore.stdev), visible: true},
+                    type: 'scatter+line'
+                },
+                // category median
+                {
+                    name: 'MEDIAN',
+                    x: ts,
+                    y: ts.map(()=>cScore.med),
+                    type: 'scatter+line'
+                }
+            ],
+            l: {
+                title: cls,
+                autosize: true, 
+                width: 360, 
+                height: 400,
+                showlegend: false,
+                xaxis: { showticklabels: true, tickvals: ts, ticktext: ts.map((tn)=>tnames[tn]) },
+                yaxis: { zeroline: false, ticks: '', showticklabels: false },
+                bargap: 0.1,
+            }
+        }
+    }
+
+    plotTimeSeries(metric) {
+        let fn = metric.calc;
+        let values = {};
+
+        this.campaigns.forEach((c) => {
+            c._r.forEach((r)=> {
+                let dk = r.d.format('YYYY-MM-DD');
+                let dv = fn(r);
+                if(!values[dk]) values[dk] = [dv];
+                else values[dk].push(dv);
+            })
+        });
+
+        let days = Object.keys(values).sort();
+        let scores = days.map((d)=>
+            values[d].reduce((sum, v)=>sum+=v, 0)/Math.max(1, values[d].length)
+        );
+        let total = days.reduce((acc, d) => acc += values[d].reduce((sum, v)=>sum+=v, 0), 0);
+        let cnts = days.reduce((acc, d)=> acc += values[d].length, 0);
+
+        console.log(total, cnts);
+
+
+        return [{
+            name: metric.key,
+            x: days,
+            y: scores,
+            type: 'scatter+line'
+        }, {
+            name: 'average',
+            x: days,
+            y: days.map(()=>total/Math.max(1, cnts)),
+            type: 'scatter+line',
+        }]
+    }
+
+    bestRecommandWith(tag, metric) {
+        let cids = this.campaigns
+            .filter((c)=> 0<=tag._c.indexOf(c.id))
+            .map((c)=>c.id);
+
+        let scores = {_title: tag.name};
+        this.listTopTagClasses().forEach((cls) => {
+            let m = null;
+            this.listTags(cls).forEach((t) => {
+                let s = this.tagScore(metric, t, cids);
+                if(m==null || m.avg < s.avg) {
+                    m = Object.assign(s, {tid: t.id, name: t.name});
+                }
+            });
+            m.value = metric.fmt(m.avg);
+            scores[cls] = m;
+        });
+        return scores;
+
     }
 
     dailyScores(metric, campaigns) {
@@ -127,8 +240,10 @@ class ModData extends Listenable {
         return daylogs;
     }
 
-    setTags(tags) {
-        this._tags = tags;
+    getTag(tid) { return this._tags[tid]; }
+    getCampaign(cid) { return this._campaigns[cid]; }
+
+    _initTagdata() {
         this._tagmap = {};
         this.tags = [];
         Object.keys(this._tags).forEach((t) => {
@@ -138,6 +253,11 @@ class ModData extends Listenable {
                 this._tagmap[tag.class] = [];
             this._tagmap[tag.class].push(tag);
         });
+    }
+
+    setTags(tags) {
+        this._tags = tags;
+        this._initTagdata();
 
         this.trigger('tag');
 
@@ -191,6 +311,8 @@ class ModData extends Listenable {
                 }
             });
 
+            this._initTagdata();
+
             this.dailyScores(PREDEFINED_METRICS[3], this.campaigns);
             
             this.trigger('affiliation');
@@ -233,7 +355,7 @@ class ModData extends Listenable {
         let names = [];
         if(this.tags) {
             names = this._uq(this.tags
-                .filter((t)=>TOPMOST_CATEGORIES.indexOf(t.class)<0)
+                .filter((t)=>TOPMOST_CATEGORIES.indexOf(t.class)<0 && PREDEFINED_CATEGORIES.indexOf(t.class)<0)
                 .map((t)=>t.class)
             );
         }

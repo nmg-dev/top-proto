@@ -63,16 +63,17 @@ class App extends React.Component {
 
 		this.api = new ModApi(AppConfig.API_HOST);
 		this.data = new ModData();
+
+		let _refs = {toolbar: React.createRef()};
+		views.forEach((v) => _refs[v] = React.createRef());
 	
 		this.state = {
 			hasLogin: this.api.hasLogin(),
-			view: viewInfo,
+			view: viewIndex,
 			lang: 'ko',
 		}
+		this._refs = _refs;
 
-		let refs = {};
-		views.forEach((v) => refs[v] = React.createRef());
-		this.refs = refs;
 		window.__app = this;
 
 	}
@@ -142,13 +143,22 @@ class App extends React.Component {
 
 	renderStage() {
 		if(this.state.view==viewAdmin && this.canAdmin())
-			return (<AppAdmin ref={this.refs.viewAdmin} app={this} api={this.api} />);
+			return (<AppAdmin ref={this._refs.viewAdmin} app={this} api={this.api} />);
 		else if(this.state.view==viewManage && this.canManage())
-			return (<AppManage ref={this.refs.viewManage} app={this} api={this.api} />);
+			return (<AppManage ref={this._refs.viewManage} app={this} api={this.api} />);
 		else if(this.state.view==viewInfo)
-			return (<AppView ref={this.refs.viewInfo} app={this} api={this.api} data={this.data} />);
+			return (<AppView ref={this._refs.viewInfo} 
+				app={this} 
+				api={this.api} 
+				data={this.data}
+				tools={this._refs.toolbar} />);
 		else
-			return (<AppIndex ref={this.refs.viewIndex} app={this} api={this.api} data={this.data} />)
+			return (<AppIndex 
+				ref={this._refs.viewIndex} 
+				app={this} 
+				api={this.api} 
+				data={this.data} 
+				tools={this._refs.toolbar} />)
 	}
 
 	isDataView() {
@@ -183,7 +193,8 @@ class App extends React.Component {
                 <Grid container>
                     <Grid item xs={12}>
 						{this.isDataView() ? 
-							<AppTools app={this} 
+							<AppTools ref={this._refs.toolbar}
+								app={this} 
 								api={this.api} 
 								data={this.data} 
 								views={views}

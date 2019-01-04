@@ -3,6 +3,9 @@ import Plot from 'react-plotly.js';
 import { Grid } from '@material-ui/core';
 
 class Plots {    
+    bars(cls, values, layout) {
+        
+    }
     pie(values, layout) {
         let pdata = { 
             values: [],

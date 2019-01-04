@@ -1,11 +1,11 @@
 import React from 'react'
-import { Toolbar, Paper, TextField, MenuItem, Divider, FormHelperText } from '@material-ui/core'
+import { Toolbar, Paper, TextField, MenuItem, Divider, CardHeader, CardContent, Card } from '@material-ui/core'
 
 import moment from 'moment'
 
 const styles = {
 	paper: {
-		margin: 'calc(min(2vh, 2vw))'
+		margin: '2vh'
 	},
 	toolbar : {
 		display: 'flex',
@@ -28,17 +28,22 @@ class AppTools extends React.Component {
     constructor(props) {
 		super(props);
 
+		// alias
+		this._app = this.props.app;
+		this._data = this.props.data;
+		// this._tools = this.props.tools;
+
         let _state = {
             kpi: null,
 			period_from: null,
 			period_till: null,
 		};
-		props.data.listPredefinedCategories().forEach((c) => { _state[c] = null });
+		this._data.listPredefinedCategories().forEach((c) => { _state[c] = null });
 		this.state = _state;
 
-		this._listTags = this.props.data.listTags.bind(this.props.data);
+		this._listTags = this._data.listTags.bind(this._data);
 
-		this.props.data.addListener((ev) => {
+		this._data.addListener((ev) => {
 			if(ev=='tag') {
 				this.setState({ 
 					kpi: props.data.defaultMetric(),
@@ -47,6 +52,10 @@ class AppTools extends React.Component {
 				}, this.onPeriodChanged.bind(this));
 			}
 		});
+	}
+
+	getMetric() {
+		return this.state.kpi ? this.state.kpi : this._data.defaultMetric();
 	}
 
 	componentDidUpdate() {
@@ -65,7 +74,7 @@ class AppTools extends React.Component {
 	}
 
 	_onCampaignDataLoadSuccess(cdata) {
-		this.props.data.setCampaigns(cdata);
+		this._data.setCampaigns(cdata);
 
 
 	}
@@ -80,7 +89,7 @@ class AppTools extends React.Component {
 			<Paper style={styles.paper}>
 				<Toolbar component="nav" style={styles.toolbar}>
 					<div style={styles.toolbarGroup}>
-					{this.props.data.listPredefinedCategories().map((pc) => 
+					{this._data.listPredefinedCategories().map((pc) => 
 						(<TextField select
 								name={pc}
 								label={pc}
@@ -104,7 +113,7 @@ class AppTools extends React.Component {
 				</Toolbar>
 				<Toolbar component="nav" style={styles.toolbar}>
 					<div style={styles.toolbarGroup}>
-						<h1>{this.props.app.state.view}</h1>
+						<h1>{this._app.state.view}</h1>
 					</div>
 					<div style={styles.toolbarGroup}>
 						{this.renderKPIPicker()}
@@ -161,14 +170,14 @@ class AppTools extends React.Component {
 				InputLabelProps={styles.toolbarFieldLabel}
 				onChange={(ev)=> {
 					if(ev.target.value) {
-						this.props.data.listMetrics().forEach((mx) => {
+						this._data.listMetrics().forEach((mx) => {
 							if(mx.key == ev.target.value) {
 								this.setState({kpi: mx});
 							}
 						});
 					}
 				}}>
-					{this.props.data.listMetrics().map((mx) => !mx.hide ? <MenuItem key={mx.key} value={mx.key}>{mx.key.toUpperCase()}</MenuItem> : '')}
+					{this._data.listMetrics().map((mx) => !mx.hide ? <MenuItem key={mx.key} value={mx.key}>{mx.key.toUpperCase()}</MenuItem> : '')}
 			</TextField>
 		)
 	}

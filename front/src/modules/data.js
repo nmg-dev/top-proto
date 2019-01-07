@@ -155,8 +155,6 @@ class ModData extends Listenable {
             l: {
                 title: cls,
                 autosize: true, 
-                width: 360, 
-                height: 400,
                 showlegend: false,
                 xaxis: { showticklabels: true, tickvals: ts, ticktext: ts.map((tn)=>tnames[tn]) },
                 yaxis: { zeroline: false, ticks: '', showticklabels: false },
@@ -252,7 +250,7 @@ class ModData extends Listenable {
     getTag(tid) { return this._tags[tid]; }
     getCampaign(cid) { return this._campaigns[cid]; }
 
-    _initTagdata() {
+    initTags() {
         this._tagmap = {};
         this.tags = [];
         Object.keys(this._tags).forEach((t) => {
@@ -266,14 +264,21 @@ class ModData extends Listenable {
 
     setTags(tags) {
         this._tags = tags;
-        this._initTagdata();
+        this.initTags();
 
         this.trigger('tag');
 
         this.setAffiliation(this._affs);
     }
 
-
+    initCampaigns() {
+        this.campaigns = [];
+        Object.keys(this._campaigns).forEach((c) => {
+            this._campaigns[c]._r = this._campaigns[c]._r.sort((l,r)=>l.d.isAfter(r.d));
+            this.campaigns.push(this._campaigns[c]);
+        });
+        // 
+    }
     setCampaigns(cdata) {
         this._campaigns = cdata.campaigns;
         this._records = cdata.records;
@@ -286,12 +291,7 @@ class ModData extends Listenable {
             this._campaigns[r.c]._r.push(r);
         });
 
-        this.campaigns = [];
-        Object.keys(this._campaigns).forEach((c) => {
-            this._campaigns[c]._r = this._campaigns[c]._r.sort((l,r)=>l.d.isAfter(r.d));
-            this.campaigns.push(this._campaigns[c]);
-        });
-
+        this.initCampaigns();
         this.trigger('campaign');
 
         this.setAffiliation(cdata.affiliations);
@@ -320,7 +320,7 @@ class ModData extends Listenable {
                 }
             });
 
-            this._initTagdata();
+            this.initTags();
 
             this.dailyScores(PREDEFINED_METRICS[3], this.campaigns);
             
@@ -329,48 +329,57 @@ class ModData extends Listenable {
     }
 
     filteredTags(cids) {
+        if(!this._affs) return;
         let tids = this._uq(this._affs
             .filter((a)=> 0<=cids.indexOf(a.c))
             .map((a)=>a.t));
+        this.initTags();
         return this.tags.filter((t) => 0<=tids.indexOf(t.id));
     }  
 
     filterExclude(cls, name) {
         if(!this._tagmap[cls] || this._tagmap[cls].length<=0) return;
         let exs = this._tagmap[cls].filter((tag)=>tag.name==name).map((tag)=>tag.id);
+        this.initCampaigns();
         return this.campaigns.filter(
             (c) => c._t.filter((tid) => 0<=exs.indexOf(tid)).length <= 0
-        );
+        ).map((c)=>c.id);
     }
 
     filterInclude(cls, name) {
         if(!this._tagmap[cls] || this._tagmap[cls].length<=0) return;
         let exs = this._tagmap[cls].filter((tag)=>tag.name==name).map((tag)=>tag.id);
+        this.initCampaigns();
         return this.campaigns.filter(
             (c) => c._t.filter((tid) => 0<=exs.indexOf(tid)).length > 0
-        );
+        ).map((c)=>c.id);
     }
 
     applyFilter(cids) {
         if(cids) {
             this.campaigns = cids.map((cid)=>this._campaigns[cid]);
         } else {
-            this.campaigns = Object.keys(this._campaigns).map((cid) => this._campaigns[cid]);
+            this.initCampaigns();
+            // this.campaigns = Object.keys(this._campaigns).map((cid) => this._campaigns[cid]);
         }
         this.tags = this.filteredTags(cids);
+
+        this.trigger('affiliation');
     }
 
-    listTagClasses(includeTopmosts, includePredefineds) {
+    listTagClasses(includeTopmosts, includePredefineds, excludeTags) {
         let names = [];
-        if(this.tags) {
-            names = this._uq(this.tags
-                .filter((t)=>TOPMOST_CATEGORIES.indexOf(t.class)<0 && PREDEFINED_CATEGORIES.indexOf(t.class)<0)
-                .map((t)=>t.class)
-            );
-        }
-        else if(this._tagmap) {
-            names = Object.keys(this._tagmap)
-                .filter((c)=>TOPMOST_CATEGORIES.indexOf(c)<0);
+        if(!excludeTags) {
+            if(this.tags) {
+                names = this._uq(this.tags
+                    .filter((t)=>TOPMOST_CATEGORIES.indexOf(t.class)<0 && PREDEFINED_CATEGORIES.indexOf(t.class)<0)
+                    .map((t)=>t.class)
+                );
+            }
+            else if(this._tagmap) {
+                names = Object.keys(this._tagmap)
+                    .filter((c)=>TOPMOST_CATEGORIES.indexOf(c)<0);
+            }
         }
 
         if(includeTopmosts)

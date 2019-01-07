@@ -75,8 +75,6 @@ class AppTools extends React.Component {
 
 	_onCampaignDataLoadSuccess(cdata) {
 		this._data.setCampaigns(cdata);
-
-
 	}
 
 	_onCampaignDataLoadFailure(err) {
@@ -97,13 +95,16 @@ class AppTools extends React.Component {
 								style={styles.toolbarField}
 								InputLabelProps={styles.toolbarFieldLabel}
 								onChange={(ev) => {
-									console.log(ev.target);
 									this.setState({[ev.target.name]: ev.target.value});
 								}}>
-								<MenuItem key="" value={{_c: null}}> - </MenuItem>
+								<MenuItem key="" value={0}> - </MenuItem>
 								<Divider />
 									{this._listTags(pc).map(
-										(t) => (<MenuItem key={t.id} value={t}>{this.props.app.lang.tr(t.name)}</MenuItem>))}
+										(t) => (<MenuItem 
+											key={t.id} 
+											value={t.id}>
+											{this.props.app.lang.tr(pc + '.' + t.name)}
+										</MenuItem>))}
 							</TextField>)
 					)}
 					</div>
@@ -123,15 +124,14 @@ class AppTools extends React.Component {
 		);
 	}
 
-	renderPredefinePicker(predefinedKey, titleLabel) {
-		return 
-	}
-
 	_periodFrom() {
 		return this.state.period_from ? this.state.period_from.format('YYYY-MM-DD') : '';
 	}
 	_periodTill() {
 		return this.state.period_till ? this.state.period_till.format('YYYY-MM-DD') : '';
+	}
+	periodRange() {
+		return [this._periodFrom(), this._periodTill()];
 	}
 
 	_kpi() {
@@ -147,7 +147,9 @@ class AppTools extends React.Component {
 					label={this.props.app.lang.tr('from')}
 					style={styles.toolbarField}
 					InputLabelProps={styles.toolbarFieldLabel}
-					onChange={(ev)=>{this.setState({period_from: moment(ev.currentTarget.value)})}}
+					onChange={(ev)=>{
+						this.setState({period_from: moment(ev.target.value)});
+					}}
 				/>
 				
 				<TextField
@@ -156,7 +158,9 @@ class AppTools extends React.Component {
 					label={this.props.app.lang.tr('till')}
 					style={styles.toolbarField}
 					InputLabelProps={styles.toolbarFieldLabel}
-					onChange={(ev)=>{this.setState({period_till: moment(ev.currentTarget.value)})}}
+					onChange={(ev)=>{
+						this.setState({period_till: moment(ev.target.value)});
+					}}
 				/>
 			</div>
 		);
@@ -172,7 +176,9 @@ class AppTools extends React.Component {
 					if(ev.target.value) {
 						this._data.listMetrics().forEach((mx) => {
 							if(mx.key == ev.target.value) {
-								this.setState({kpi: mx});
+								this.setState({kpi: mx},
+									()=>this.props.onChange(this.state));
+								return;
 							}
 						});
 					}

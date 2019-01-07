@@ -13,7 +13,7 @@ import AppProfile from './screens/components/appProfile.js';
 // const modData = require('./modules/data');
 import ModApi from './modules/api';
 import ModData from './modules/data';
-import Locale from './modules/lang';
+import ModLang from './modules/lang';
 // import moment from 'moment';
 import AppTools from './screens/components/appTools.js';
 import AppView from './screens/appView.js';
@@ -63,7 +63,19 @@ class App extends React.Component {
 
 		this.api = new ModApi(AppConfig.API_HOST);
 		this.data = new ModData();
-		this.lang = new Locale();
+		this.lang = new ModLang();
+		this._lastUpdated = null;
+
+		this.data.addListener((ev) => {
+			switch(ev) {
+				case 'tag':
+					this.lang.packTags(this.data.tags);
+					return;
+				case 'affiliation':
+					this._lastUpdated = Date.now();
+					return;
+			}
+		});
 
 		let _refs = {toolbar: React.createRef()};
 		views.forEach((v) => _refs[v] = React.createRef());
@@ -72,6 +84,7 @@ class App extends React.Component {
 			hasLogin: this.api.hasLogin(),
 			view: viewIndex,
 			lang: 'ko',
+			dataLoaded: false
 		}
 		this._refs = _refs;
 
@@ -80,7 +93,6 @@ class App extends React.Component {
 	}
 
 	updateLocale(nextLocale) {
-		console.log('set locale to', nextLocale);
 		new Promise((rs,rj)=>{
 			this.lang.setDict(nextLocale);
 			rs();
@@ -89,7 +101,6 @@ class App extends React.Component {
 	}
 
 	updateScreen(nextScreen) {
-		console.log('move view to', nextScreen);
 		this.setState({view: nextScreen});
 	}
 	
@@ -171,8 +182,19 @@ class App extends React.Component {
 	}
 
 	onFilterChange(filter) {
-		// TODO: state changed
-		console.log(filter);
+		// console.error(filter);
+		if(!this._lastUpdated) return;
+
+		let cids = Object.keys(this.data._campaigns).map((cid)=>parseInt(cid));
+		this.data.listTagClasses(true, true, true).forEach((cls) => {
+			// console.log(cls, filter[cls]);
+			if(filter[cls] && filter[cls]) {
+				let tag = this.data.getTag(filter[cls]);
+				let filtered = this.data.filterInclude(cls, tag.name);
+				cids = cids.filter((cid)=>0<=filtered.indexOf(cid));
+			}
+		});
+		this.data.applyFilter(cids);
 	}
 
 	render() {

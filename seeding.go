@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
@@ -33,10 +34,11 @@ func Migrate(clear bool, withSeeding bool) {
 func initTags(db *sql.DB) {
 	// initialize tags
 	tx, _ := db.Begin()
-	tstmt, _ := tx.Prepare(`INSERT INTO tags (class, name) VALUES (?, ?)`)
+	tstmt, _ := tx.Prepare(`INSERT INTO tags (class, name, property) VALUES (?, ?, ?)`)
 	tags := seedingTags()
 	for _, t := range tags {
-		tstmt.Exec(t.Class, t.Name)
+		prs, _ := json.Marshal(t.Property)
+		tstmt.Exec(t.Class, t.Name, prs)
 	}
 	tx.Commit()
 }
@@ -98,18 +100,18 @@ func seedingTags() []Tag {
 		Tag{Class: "channel", Name: "radio", Property: DJsonMap{"ko": "라디오", "en": "Radio"}},
 		Tag{Class: "channel", Name: "physical", Property: DJsonMap{"ko": "오프라인", "en": "Physical"}},
 
-		Tag{Class: "media", Name: "naver"},
-		Tag{Class: "media", Name: "kakao"},
-		Tag{Class: "media", Name: "google"},
-		Tag{Class: "media", Name: "youtube"},
-		Tag{Class: "media", Name: "facebook"},
-		Tag{Class: "media", Name: "honeyscreen"},
-		Tag{Class: "media", Name: "mobion"},
-		Tag{Class: "media", Name: "realclick"},
-		Tag{Class: "media", Name: "cauly"},
-		Tag{Class: "media", Name: "mediunce"},
-		Tag{Class: "media", Name: "diningcode"},
-		Tag{Class: "media", Name: "smr"},
+		Tag{Class: "media", Name: "naver", Property: DJsonMap{"ko": "네이버", "en": "Naver"}},
+		Tag{Class: "media", Name: "kakao", Property: DJsonMap{"ko": "카카오", "en": "Kakao"}},
+		Tag{Class: "media", Name: "google", Property: DJsonMap{"ko": "구글", "en": "Google"}},
+		Tag{Class: "media", Name: "youtube", Property: DJsonMap{"ko": "유튜브", "en": "Youtube"}},
+		Tag{Class: "media", Name: "facebook", Property: DJsonMap{"ko": "페이스북", "en": "Facebook"}},
+		Tag{Class: "media", Name: "honeyscreen", Property: DJsonMap{"ko": "허니스크린", "en": "Honey Screen"}},
+		Tag{Class: "media", Name: "mobion", Property: DJsonMap{"ko": "모비온", "en": "Mobion"}},
+		Tag{Class: "media", Name: "realclick", Property: DJsonMap{"ko": "리얼클릭", "en": "RealClick"}},
+		Tag{Class: "media", Name: "cauly", Property: DJsonMap{"ko": "카울리", "en": "Cauly"}},
+		Tag{Class: "media", Name: "medience", Property: DJsonMap{"ko": "미디언스", "en": "Medience"}},
+		Tag{Class: "media", Name: "diningcode", Property: DJsonMap{"ko": "다이닝코드", "en": "Dining Code"}},
+		Tag{Class: "media", Name: "smr", Property: DJsonMap{"ko": "SMR", "en": "SMR"}},
 
 		Tag{Class: "goal", Name: "click", Property: DJsonMap{"ko": "링크 클릭", "en": "Link Click"}},
 		Tag{Class: "goal", Name: "play", Property: DJsonMap{"ko": "영상 재생", "en": "Video View"}},
@@ -164,7 +166,7 @@ func seedingCampaigns() []Campaign {
 		rets = append(rets, Campaign{
 			Title:      fmt.Sprintf("SAMPLE%02d", i),
 			Memo:       memo,
-			Asset:      fmt.Sprintf("/static/img/to.%02d.png", (i%26 + 1)),
+			Asset:      fmt.Sprintf("/samples/to.%02d.png", (i%26 + 1)),
 			PeriodFrom: pf,
 			PeriodTill: pt,
 			CreatedAt:  pf,

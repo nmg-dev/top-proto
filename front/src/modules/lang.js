@@ -18,15 +18,6 @@ const LANG_DICT = {
         objet: '오브제',
         lead: '카피',
 
-        // option values
-        'layout.left': '좌측', 'layout.right': '우측', 'layout.center': '중앙', 'layout.between': '좌우',
-        'background.blank': '공백', 'background.solid': '단색', 'background.split': '면분할', 'background.image': '이미지',
-        'objet.picture': '사진', 'objet.illust': '일러스트', 'objet.model': '모델',
-        'lead.time': '타임형', 'lead.benefit': '혜택형', 'lead.persuade': '유도형',
-
-
-
-
         //
         from: '기간 시작',
         till: '기간 종료',
@@ -50,31 +41,47 @@ const LANG_DICT = {
         objet: 'objet',
         lead: 'copy text',
 
-        'layout.left': 'Text Left', 'layout.right': 'Text Right', 'layout.center': 'Text Center', 'layout.between': 'Image between text',
-        'background.blank': 'Blank', 'background.solid': 'Solid', 'background.split': 'Split area', 'background.image': 'Image',
-        'objet.picture': 'Picture', 'objet.illust': 'Illustration', 'objet.model': 'Models',
-        'lead.time': 'Time', 'lead.benefit': 'Beneficial', 'lead.persuade': 'Persuade',
-
         //
         from: 'from',
         till: 'till',
     }
 };
 
-class Locale {
+const LANGUAGE_KEYS = [
+    'ko', 'en'
+];
+
+class ModLang {
     constructor(lang) {
         this._dict = LANG_DICT[lang];
-        if(!this._dict)
+        this._lang = 'ko';
+        if(!this._dict) {
             this._dict = LANG_DICT.ko;
+        }
     }
     setDict(lang) {
        this._dict = LANG_DICT[lang]; 
+       this._lang = lang;
+    }
+
+    packTags(tags) {
+        tags.forEach((t) => {
+            if(t.property) {
+                Object.keys(LANG_DICT).forEach((l) => {
+                    if(t.property[l]) {
+                        let _k = t.class + '.' + t.name;
+                        LANG_DICT[l][_k] = t.property[l];
+                    }
+                });
+            }
+        });
+
+        this.setDict(this._lang);
     }
 
     tr(key) {
-        console.log(this._dict[key]);
         return this._dict && this._dict[key] ? this._dict[key] : key;
     }
 }
 
-export default Locale;
+export default ModLang;

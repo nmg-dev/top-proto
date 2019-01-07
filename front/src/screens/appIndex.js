@@ -13,11 +13,12 @@ class AppIndex extends React.Component {
 
         this.state = {
             pdata: {},
-            playout: {
-                width: '100%',
-                height: '100%',
-            },
+            playout: { },
             recommand: {},
+        };
+
+        this._refs = {
+            chart: React.createRef(),
         };
 
         this._data.addListener(this._onDataUpdated.bind(this));
@@ -25,6 +26,7 @@ class AppIndex extends React.Component {
 
     componentDidMount() {
         this._onDataUpdated('affiliation');
+        // this._refs.chart.resizeHandler();
     }
 
     _onDataUpdated(ev) {
@@ -33,6 +35,17 @@ class AppIndex extends React.Component {
             let metric = this.props.tools.current.getMetric();
             this.setState({
                 pdata: this._data.plotTimeSeries(metric),
+                playout: {
+                    autosize: true,
+                    xaxis: { 
+                        autorange: true,
+                        rangeslider: { range: this.props.tools.current.periodRange() },
+                        type: 'date'
+                    },
+                    yaxis: {
+                        type: 'percent',
+                    }
+                },
                 recommand: this._data.listTags('category')
                     .map((t)=>this._data.bestRecommandWith(t, metric))
             });
@@ -46,7 +59,13 @@ class AppIndex extends React.Component {
                 <Grid item xs={12}>
                     <Card>
                         <CardContent>
-                            <Plot data={this.state.pdata} layout={this.state.playout} />
+                            <Plot 
+                                data={this.state.pdata} 
+                                layout={this.state.playout} 
+                                useResizeHandler={true} 
+                                ref={this._refs.chart}
+                                style={{width: '100%', height: '100%'}}
+                                 />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -59,14 +78,16 @@ class AppIndex extends React.Component {
                             <CardContent>
                                 <Table>
                                     <TableHead>
-                                        <TableCell>cls</TableCell>
-                                        <TableCell>option</TableCell>
-                                        <TableCell>{metric.key}</TableCell>
-                                        <TableCell>sample</TableCell>
+                                        <TableRow>
+                                            <TableCell>cls</TableCell>
+                                            <TableCell>option</TableCell>
+                                            <TableCell>{metric.key}</TableCell>
+                                            <TableCell>sample</TableCell>
+                                        </TableRow>
                                     </TableHead>
                                     <TableBody>
                                     {this._data.listTopTagClasses().map((tt) => 
-                                        (<TableRow>
+                                        (<TableRow key={tt}>
                                             <TableCell>{this.props.app.lang.tr(tt)}</TableCell>
                                             <TableCell>{this.props.app.lang.tr(tt+'.'+rcm[tt].name)}</TableCell>
                                             <TableCell>{rcm[tt].value}</TableCell>

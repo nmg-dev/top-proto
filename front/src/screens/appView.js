@@ -69,8 +69,8 @@ class AppView extends Component {
 			pdata: {},
 			playout: {},
 
-			cids: null,
-			tids: null,
+			cids: [],
+			tids: [],
 		}
 
 		this._data.addListener(this._onDataUpdated.bind(this));
@@ -106,18 +106,43 @@ class AppView extends Component {
 					this.props.app.lang.tr(cls + '.' + tn));
 			});
 
-			this.setState({ selectedTags : nextTags, pdata: _pdata, playout: _playout });
+			this.setState({ 
+				selectedTags : nextTags, 
+				pdata: _pdata, 
+				playout: _playout,
+				tids: Object.keys(nextTags).map((tid)=>parseInt(tid)),
+			});
 		}
 	}
 
 	_onToggleFilterSelection(ev) {
-		let tid = parseInt(ev.target.getAttribute('tagid'));
+		let tid = parseInt(ev.currentTarget.getAttribute('tagid'));
 		let pstate = this.state.selectedTags;
+		// console.log(tid, pstate[tid], !pstate[tid]);
 		pstate[tid] = !pstate[tid];
-		ev.stopPropagation();
+		// console.log(tid, pstate[tid]);
+		let cids = [];
+		let tids = [];
 
+		Object.keys(pstate).map((tid)=>parseInt(tid)).forEach((tid) => {
+			if(pstate[tid]) {
+				let tag = this._data.getTag(tid);
+				cids = cids.concat(tag._c);
+			}
+		});
+		if(cids.length<=0) {
+			cids = null;
+			tids = null;
+		} else {
+			cids = this._data._uq(cids);
+			tids = this._data.filteredTags(cids);
+		}
 
-		this.setState({selectedTags: pstate});
+		this.setState({
+			selectedTags: pstate, 
+			cids: cids, 
+			tids: this._data.filteredTags(cids)
+		});
 	}
 	renderCardToggleAction(onclick, hasSet) {
 		return (<IconButton onClick={onclick}><Icon>{hasSet()?'expand_less':'expand_more'}</Icon></IconButton>);
@@ -132,7 +157,7 @@ class AppView extends Component {
 						title={<Icon>filter</Icon>}
 						action={this.renderCardToggleAction(
 							()=>this.setState({showFilter: !this.state.showFilter}),
-							(err)=>console.error(err)
+							()=>this.state.showFilter
 						)} />
 					<CardContent>
 						<Collapse in={this.state.showFilter}>
@@ -144,10 +169,11 @@ class AppView extends Component {
 											{this.props.data.listTags(tc).map(
 												(tag) => <ListItem button
 													tagid={tag.id}
+													disabled={this.state.tids.indexOf(tag.id)<0}
 													onClick={this._onToggleFilterSelection.bind(this)}>
-													<Checkbox tagid={tag.id} 
-															checked={this.state.selectedTags[tag.id]}
-															onChange={this._onToggleFilterSelection.bind(this)} />
+													<Checkbox value={tag.id}
+														disabled={this.state.tids.indexOf(tag.id)<0}
+														checked={this.state.selectedTags[tag.id]?1:0} />
 													{this.props.app.lang.tr(tc + '.' + tag.name)}
 												</ListItem>
 											)}
@@ -171,6 +197,8 @@ class AppView extends Component {
 					<Plot 
 						title={this.props.app.lang.tr(cls)}
 						data={this.state.pdata[cls]} 
+						useResizeHandler
+						style={{width: '100%', height: '100%'}}
 						layout={this.state.playout[cls]} 
 						useResizeHandler={true} />
 				</CardContent>

@@ -53,7 +53,7 @@ class AppProfile extends React.Component {
 			<MenuItem view={v} key={v}
 				style={styles.viewMenuItem}
 				onClick={this._onSelect.bind(this)}>
-				{v}
+				{this.props.app.lang.tr(v, '')}
 			</MenuItem>))}
 		</Menu>);
     }

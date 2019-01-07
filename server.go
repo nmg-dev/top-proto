@@ -34,7 +34,7 @@ func main() {
 	app.Use(gin.Recovery())
 
 	// static index endpoint
-	app.Use(static.Serve("/", static.LocalFile("front/build", false)))
+	app.Use(static.Serve("/", static.LocalFile("front/build", true)))
 
 	// disable CORS
 	app.Use(cors.New(cors.Config{

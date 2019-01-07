@@ -92,7 +92,7 @@ class AppTools extends React.Component {
 					{this._data.listPredefinedCategories().map((pc) => 
 						(<TextField select
 								name={pc}
-								label={pc}
+								label={this.props.app.lang.tr(pc)}
 								value={this.state[pc]}
 								style={styles.toolbarField}
 								InputLabelProps={styles.toolbarFieldLabel}
@@ -103,7 +103,7 @@ class AppTools extends React.Component {
 								<MenuItem key="" value={{_c: null}}> - </MenuItem>
 								<Divider />
 									{this._listTags(pc).map(
-										(t) => (<MenuItem key={t.id} value={t}>{t.name}</MenuItem>))}
+										(t) => (<MenuItem key={t.id} value={t}>{this.props.app.lang.tr(t.name)}</MenuItem>))}
 							</TextField>)
 					)}
 					</div>
@@ -113,7 +113,7 @@ class AppTools extends React.Component {
 				</Toolbar>
 				<Toolbar component="nav" style={styles.toolbar}>
 					<div style={styles.toolbarGroup}>
-						<h1>{this._app.state.view}</h1>
+						<h1>{this._app.lang.tr(this._app.state.view)}</h1>
 					</div>
 					<div style={styles.toolbarGroup}>
 						{this.renderKPIPicker()}
@@ -144,7 +144,7 @@ class AppTools extends React.Component {
 				<TextField
 					type="date"
 					value={this._periodFrom()}
-					label="From"
+					label={this.props.app.lang.tr('from')}
 					style={styles.toolbarField}
 					InputLabelProps={styles.toolbarFieldLabel}
 					onChange={(ev)=>{this.setState({period_from: moment(ev.currentTarget.value)})}}
@@ -153,7 +153,7 @@ class AppTools extends React.Component {
 				<TextField
 					type="date"
 					value={this._periodTill()}
-					label="Till"
+					label={this.props.app.lang.tr('till')}
 					style={styles.toolbarField}
 					InputLabelProps={styles.toolbarFieldLabel}
 					onChange={(ev)=>{this.setState({period_till: moment(ev.currentTarget.value)})}}

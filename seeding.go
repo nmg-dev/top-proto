@@ -44,9 +44,9 @@ func initTags(db *sql.DB) {
 func initCampaigns(db *sql.DB) {
 	campaigns := seedingCampaigns()
 	tx, _ := db.Begin()
-	stmt, _ := tx.Prepare(`INSERT INTO campaigns (title, memo, period_from, period_till, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())`)
+	stmt, _ := tx.Prepare(`INSERT INTO campaigns (title, memo, asset, period_from, period_till, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`)
 	for _, c := range campaigns {
-		stmt.Exec(c.Title, c.Memo, c.PeriodFrom, c.PeriodTill)
+		stmt.Exec(c.Title, c.Memo, c.Asset, c.PeriodFrom, c.PeriodTill)
 	}
 	tx.Commit()
 
@@ -164,6 +164,7 @@ func seedingCampaigns() []Campaign {
 		rets = append(rets, Campaign{
 			Title:      fmt.Sprintf("SAMPLE%02d", i),
 			Memo:       memo,
+			Asset:      fmt.Sprintf("/static/img/to.%02d.png", (i%26 + 1)),
 			PeriodFrom: pf,
 			PeriodTill: pt,
 			CreatedAt:  pf,
@@ -293,6 +294,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   title VARCHAR(200) NULL,
   memo TEXT NULL,
+  asset TEXT NULL,
   period_from TIMESTAMP NOT NULL,
   period_till TIMESTAMP NULL,
   created_at TIMESTAMP NULL,

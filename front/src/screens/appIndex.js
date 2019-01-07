@@ -40,12 +40,7 @@ class AppIndex extends React.Component {
     }
 
     render() {
-        let ttIcons  = {
-            layout: 'format_align_center',
-            background: 'flip_to_back',
-            objet: 'face',
-            leat: 'favorite',
-        }
+        let metric = (this.props.tools.current) ? this.props.tools.current.getMetric() : this._data.defaultMetric();
         return (
             <Grid container spacing={8}>
                 <Grid item xs={12}>
@@ -62,17 +57,26 @@ class AppIndex extends React.Component {
                         <Card>
                             <CardHeader title={rcm._title} />
                             <CardContent>
-                                <List>
+                                <Table>
+                                    <TableHead>
+                                        <TableCell>cls</TableCell>
+                                        <TableCell>option</TableCell>
+                                        <TableCell>{metric.key}</TableCell>
+                                        <TableCell>sample</TableCell>
+                                    </TableHead>
+                                    <TableBody>
                                     {this._data.listTopTagClasses().map((tt) => 
-                                        <ListItem>
-                                            <ListItemIcon><Icon>{ttIcons[tt]}</Icon></ListItemIcon>
-                                            <ListItemText
-                                                primary={rcm[tt].name + ' ' + rcm[tt].value}
-                                                secondary={tt}
-                                            />
-                                        </ListItem>
+                                        (<TableRow>
+                                            <TableCell>{this.props.app.lang.tr(tt)}</TableCell>
+                                            <TableCell>{this.props.app.lang.tr(tt+'.'+rcm[tt].name)}</TableCell>
+                                            <TableCell>{rcm[tt].value}</TableCell>
+                                            <TableCell>
+                                                <img src={rcm[tt].sample} alt="sample" />
+                                            </TableCell>
+                                        </TableRow>)
                                     )}
-                                </List>
+                                    </TableBody>
+                                </Table>
                             </CardContent>
                         </Card>
                 ))}

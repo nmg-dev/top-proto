@@ -11,6 +11,7 @@ type Campaign struct {
 	ID    uint   `json:"id" db:"id"`
 	Title string `json:"title" db:"title"`
 	Memo  string `json:"memo" db:"memo"`
+	Asset string `json:"asset" db:"asset"`
 
 	PeriodFrom time.Time `json:"from" db:"period_from"`
 	PeriodTill time.Time `json:"till" db:"period_till"`
@@ -23,8 +24,8 @@ type Campaign struct {
 	DeletedBy uint      `json:"deleted_by" db:"deleted_by"`
 }
 
-const campaignInsertStmt = `INSERT INTO campaigns (title, memo, period_from, period_till, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, NOW(), ?, NOW(), ?)`
-const campaignUpdateStmt = `UPDATE campaigns SET title=?, memo=?, period_from=?, period_till, updated_at=NOW(), updated_by=? WHERE id=?`
+const campaignInsertStmt = `INSERT INTO campaigns (title, memo, asset, period_from, period_till, created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, NOW(), ?, NOW(), ?)`
+const campaignUpdateStmt = `UPDATE campaigns SET title=?, memo=?, asset=?, period_from=?, period_till, updated_at=NOW(), updated_by=? WHERE id=?`
 const campaignDeleteStmt = `UPDATE campaigns SET deleted_at=NOW(), deleted_by=? WHERE id=?`
 const campaignFindStmt = `SELECT * FROM campaigns WHERE id=?`
 
@@ -33,7 +34,7 @@ func (c *Campaign) insertStatement(db *sql.DB) *sql.Stmt {
 }
 
 func (c *Campaign) insertExecution(stmt *sql.Stmt) (sql.Result, error) {
-	return stmt.Exec(c.Title, c.Memo, c.PeriodFrom, c.PeriodTill, c.CreatedBy, c.CreatedBy)
+	return stmt.Exec(c.Title, c.Memo, c.Asset, c.PeriodFrom, c.PeriodTill, c.CreatedBy, c.CreatedBy)
 }
 
 func (c Campaign) updateStatement(db *sql.DB) *sql.Stmt {
@@ -44,6 +45,7 @@ func (c Campaign) updateExecution(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(
 		c.Title,
 		c.Memo,
+		c.Asset,
 		c.PeriodFrom,
 		c.PeriodTill,
 		c.UpdatedBy,
@@ -94,6 +96,7 @@ func (c *Campaign) Bind(row Scannable) error {
 		&c.ID,
 		&c.Title,
 		&c.Memo,
+		&c.Asset,
 		&c.PeriodFrom,
 		&c.PeriodTill,
 		&c.CreatedAt,

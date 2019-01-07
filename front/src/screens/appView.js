@@ -100,6 +100,10 @@ class AppView extends Component {
 					this.state.tids);
 				_pdata[cls] = pv.d;
 				_playout[cls] = pv.l;
+
+				_playout[cls].title = this.props.app.lang.tr(_playout[cls].title);
+				_playout[cls].xaxis.ticktext = _playout[cls].xaxis.ticktext.map((tn) =>
+					this.props.app.lang.tr(cls + '.' + tn));
 			});
 
 			this.setState({ selectedTags : nextTags, pdata: _pdata, playout: _playout });
@@ -110,6 +114,9 @@ class AppView extends Component {
 		let tid = parseInt(ev.target.getAttribute('tagid'));
 		let pstate = this.state.selectedTags;
 		pstate[tid] = !pstate[tid];
+		ev.stopPropagation();
+
+
 		this.setState({selectedTags: pstate});
 	}
 	renderCardToggleAction(onclick, hasSet) {
@@ -122,7 +129,7 @@ class AppView extends Component {
 			<Paper>
 				<Card>
 					<CardHeader
-						title={'filter'}
+						title={<Icon>filter</Icon>}
 						action={this.renderCardToggleAction(
 							()=>this.setState({showFilter: !this.state.showFilter}),
 							(err)=>console.error(err)
@@ -133,7 +140,7 @@ class AppView extends Component {
 								{topClss.map((tc) => 
 									(<Grid item xs={6} md={3}>
 										<List>
-											<ListSubheader>{tc}</ListSubheader>
+											<ListSubheader>{this.props.app.lang.tr(tc)}</ListSubheader>
 											{this.props.data.listTags(tc).map(
 												(tag) => <ListItem button
 													tagid={tag.id}
@@ -141,7 +148,7 @@ class AppView extends Component {
 													<Checkbox tagid={tag.id} 
 															checked={this.state.selectedTags[tag.id]}
 															onChange={this._onToggleFilterSelection.bind(this)} />
-													{tag.name}
+													{this.props.app.lang.tr(tc + '.' + tag.name)}
 												</ListItem>
 											)}
 										</List>
@@ -159,10 +166,10 @@ class AppView extends Component {
 
 		return (
 			<Card style={styles.pCard}>
-				<CardHeader title={cls} />
+				<CardHeader title={this.props.app.lang.tr(cls)} />
 				<CardContent>
 					<Plot 
-						title={cls}
+						title={this.props.app.lang.tr(cls)}
 						data={this.state.pdata[cls]} 
 						layout={this.state.playout[cls]} 
 						useResizeHandler={true} />

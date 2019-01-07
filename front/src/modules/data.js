@@ -94,7 +94,11 @@ class ModData extends Listenable {
             .filter((cid)=>!cids || cids.length<=0 || 0<=cids.indexOf(cid))
             .map((cid)=>this._campaigns[cid])
             .reduce((acc, c)=>acc.concat(c._r.map((r)=>fn(r))), []);
-        return Object.assign(this._scores(scs), {m: metric.key});
+        
+        let scores = this._scores(scs);
+        
+
+        return Object.assign(scores, {m: metric.key});
     }
 
     categoryScore(metric, cls, cids) {
@@ -208,7 +212,12 @@ class ModData extends Listenable {
             this.listTags(cls).forEach((t) => {
                 let s = this.tagScore(metric, t, cids);
                 if(m==null || m.avg < s.avg) {
-                    m = Object.assign(s, {tid: t.id, name: t.name});
+                    let cs = t._c
+                        .filter((cid)=>0<=cids.indexOf(cid))
+                        .sort((l,r)=>r.id-l.id)
+                        .map((cid)=>this._campaigns[cid]).pop();
+
+                    m = Object.assign(s, {tid: t.id, name: t.name, sample: cs ? cs.asset : ''});
                 }
             });
             m.value = metric.fmt(m.avg);

@@ -5,7 +5,6 @@ import { Card, CardHeader, Icon, CardContent, CardActions, Chip, Avatar, IconBut
 
 import AppAdmin from './screens/appAdmin';
 import AppManage from './screens/appManage';
-import AppData from './screens/appData';
 import AppFoot from './screens/components/appFoot.js';
 import AppLocale from './screens/components/appLocale.js';
 import AppProfile from './screens/components/appProfile.js';
@@ -14,7 +13,8 @@ import AppProfile from './screens/components/appProfile.js';
 // const modData = require('./modules/data');
 import ModApi from './modules/api';
 import ModData from './modules/data';
-import moment from 'moment';
+import Locale from './modules/lang';
+// import moment from 'moment';
 import AppTools from './screens/components/appTools.js';
 import AppView from './screens/appView.js';
 import AppIndex from './screens/appIndex.js';
@@ -63,6 +63,7 @@ class App extends React.Component {
 
 		this.api = new ModApi(AppConfig.API_HOST);
 		this.data = new ModData();
+		this.lang = new Locale();
 
 		let _refs = {toolbar: React.createRef()};
 		views.forEach((v) => _refs[v] = React.createRef());
@@ -80,7 +81,11 @@ class App extends React.Component {
 
 	updateLocale(nextLocale) {
 		console.log('set locale to', nextLocale);
-		this.setState({lang: nextLocale});
+		new Promise((rs,rj)=>{
+			this.lang.setDict(nextLocale);
+			rs();
+		}).then(()=>{ this.setState({lang: nextLocale}); });
+		
 	}
 
 	updateScreen(nextScreen) {
@@ -179,7 +184,9 @@ class App extends React.Component {
                 <AppBar position="sticky" style={styles.appbar}>
                     <Toolbar style={styles.toolbar}>
                         <div style={styles.toolbarItem}>
-                            <Typography style={styles.logo}>TAG OPERATION by NMG</Typography>
+                            <Typography style={styles.logo}>
+								{this.lang.tr('app')}
+							</Typography>
                         </div>
                         <div style={styles.toolbarItem}>
                             <AppLocale app={this} ref={this.refs.locales} lang={this.state.lang} />

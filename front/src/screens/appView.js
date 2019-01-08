@@ -141,7 +141,7 @@ class AppView extends Component {
 		this.setState({
 			selectedTags: pstate, 
 			cids: cids, 
-			tids: this._data.filteredTags(cids)
+			tids: tids,
 		});
 	}
 	renderCardToggleAction(onclick, hasSet) {

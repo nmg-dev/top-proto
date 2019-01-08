@@ -74,7 +74,7 @@ class AppIndex extends React.Component {
                     .map((rc)=>this.state.recommand[rc])
                     .map((rcm)=> (
                         <Card>
-                            <CardHeader title={rcm._title} />
+                            <CardHeader title={this.props.app.lang.tr('category.'+rcm._title)} />
                             <CardContent>
                                 <Table>
                                     <TableHead>

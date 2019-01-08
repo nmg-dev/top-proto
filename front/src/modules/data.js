@@ -4,10 +4,10 @@ import Listenable from './listenable';
 const PREDEFINED_CATEGORIES = ['category', 'goal', 'channel', 'media'];
 const TOPMOST_CATEGORIES = ['layout', 'background', 'objet', 'lead'];
 const PREDEFINED_METRICS = [
-    {key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)), fmt: (v) => (100*v).toFixed(4)+' %' },
-    {key: 'cpa', calc: (v) => (v.cnv/Math.max(1,v.cost)), fmt: (v) => (100*v).toFixed(4)+' %' },
-    {key: 'ctr', calc: (v) => (v.clk/Math.max(1,v.imp)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
-    {key: 'cvr', calc: (v) => (v.cnv/Math.max(1,v.imp)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
+    {key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
+    {key: 'cpa', calc: (v) => (v.cnv/Math.max(1,v.cost)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
+    {key: 'ctr', calc: (v) => (v.clk/Math.max(1,v.imp)), fmt: (v) => (100*v).toFixed(4)+' %' },
+    {key: 'cvr', calc: (v) => (v.cnv/Math.max(1,v.imp)), fmt: (v) => (100*v).toFixed(4)+' %' },
     {key: 'cnt', calc: (v) => 1, hide: true, fmt: (v)=> v.toLocaleString()+ '.' },
 ];
 

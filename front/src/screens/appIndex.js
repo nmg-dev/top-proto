@@ -1,9 +1,13 @@
 import React from 'react';
-import { Paper, Card, CardHeader, CardContent, Grid, TableHead, TableRow, TableBody, Table, TableCell, ListSubheader, ListItem, List, Chip, ListItemText, ListItemIcon, Icon } from '@material-ui/core';
+import { Card, CardHeader, CardContent, Grid, TableHead, TableRow, TableBody, Table, TableCell } from '@material-ui/core';
 
 import Plot from 'react-plotly.js';
 
-const styles = {};
+const styles = {
+    plot: {width: '95%', height: '100%'},
+    indexCard: {margin: '2vh'},
+    tableSample: {maxWidth: '40vw', objectFit: 'cover'},
+};
 
 class AppIndex extends React.Component {
     constructor(props) {
@@ -37,6 +41,7 @@ class AppIndex extends React.Component {
                 pdata: this._data.plotTimeSeries(metric),
                 playout: {
                     autosize: true,
+                    showlegend: false,
                     xaxis: { 
                         autorange: true,
                         rangeslider: { range: this.props.tools.current.periodRange() },
@@ -52,56 +57,57 @@ class AppIndex extends React.Component {
         }
     }
 
+    renderPlotCard() {
+        return (<Card style={styles.indexCard}>
+            <CardContent>
+                <Plot 
+                    data={this.state.pdata} 
+                    layout={this.state.playout} 
+                    useResizeHandler={true} 
+                    ref={this._refs.chart}
+                    style={styles.plot} />
+            </CardContent>
+        </Card>);
+    }
+    renderRecommandTable(rcm, metric) {
+        return (
+            <Card style={styles.indexCard}>
+                <CardHeader title={this.props.app.lang.tr('category.'+rcm._title)} />
+                <CardContent>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>cls</TableCell>
+                                <TableCell>option</TableCell>
+                                <TableCell>{metric.key}</TableCell>
+                                <TableCell>sample</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                        {this._data.listTopTagClasses().map((tt) => 
+                            (<TableRow key={tt}>
+                                <TableCell>{this.props.app.lang.tr(tt)}</TableCell>
+                                <TableCell>{this.props.app.lang.tr(tt+'.'+rcm[tt].name)}</TableCell>
+                                <TableCell>{rcm[tt].value}</TableCell>
+                                <TableCell>
+                                    <img src={rcm[tt].sample} alt="sample" style={styles.tableSample} />
+                                </TableCell>
+                            </TableRow>)
+                        )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>);
+    }
+
     render() {
         let metric = (this.props.tools.current) ? this.props.tools.current.getMetric() : this._data.defaultMetric();
         return (
-            <Grid container spacing={8}>
-                <Grid item xs={12}>
-                    <Card>
-                        <CardContent>
-                            <Plot 
-                                data={this.state.pdata} 
-                                layout={this.state.playout} 
-                                useResizeHandler={true} 
-                                ref={this._refs.chart}
-                                style={{width: '100%', height: '100%'}}
-                                 />
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item xs={12}>
+            <Grid item xs={12}>
+                {this.renderPlotCard()}
                 {Object.keys(this.state.recommand)
                     .map((rc)=>this.state.recommand[rc])
-                    .map((rcm)=> (
-                        <Card>
-                            <CardHeader title={this.props.app.lang.tr('category.'+rcm._title)} />
-                            <CardContent>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>cls</TableCell>
-                                            <TableCell>option</TableCell>
-                                            <TableCell>{metric.key}</TableCell>
-                                            <TableCell>sample</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                    {this._data.listTopTagClasses().map((tt) => 
-                                        (<TableRow key={tt}>
-                                            <TableCell>{this.props.app.lang.tr(tt)}</TableCell>
-                                            <TableCell>{this.props.app.lang.tr(tt+'.'+rcm[tt].name)}</TableCell>
-                                            <TableCell>{rcm[tt].value}</TableCell>
-                                            <TableCell>
-                                                <img src={rcm[tt].sample} alt="sample" />
-                                            </TableCell>
-                                        </TableRow>)
-                                    )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                ))}
-                </Grid>
+                    .map((rcm)=>this.renderRecommandTable(rcm, metric))}
             </Grid>
         );
     }

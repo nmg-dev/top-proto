@@ -225,7 +225,7 @@ func PostOpenAuth(ctx *gin.Context) {
 	}
 
 	// response back
-	ctx.SetCookie(authTokenCookieKey, theUser.Access["token"].(string), 3600, ``, ``, false, false)
+	ctx.SetCookie(authTokenCookieKey, theUser.Access["token"].(string), 8*3600, ``, ``, false, false)
 	ctx.JSON(http.StatusOK, theUser)
 }
 

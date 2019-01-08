@@ -3,7 +3,7 @@ import { IconButton, Icon, Menu, MenuItem } from '@material-ui/core';
 
 const menuLocale = '_menu_locale';
 
-const styles = {};
+// const styles = {};
 
 const languages = [
     {key: 'ko', label: '한국어'},

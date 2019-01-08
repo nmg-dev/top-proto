@@ -116,14 +116,16 @@ class ModData extends Listenable {
 
     plotClassbars(metric, cls, cids, tids) {
         let cScore = this.categoryScore(metric, cls, cids);
-        let tags = this.listTags(cls).filter((tid)=>!tids || tids.length<=0 || 0<tids.indexOf(tid));
+        let tags = this.listTags(cls).map((t)=>t.id)
+            .filter((tid)=>!tids || tids.length<=0 || 0<=tids.indexOf(tid));
         let tScores = {};
-        let ts = tags.map((t)=>t.id);
+        let ts = tags;
         let tnames = {};
-        tags.forEach((t) => { 
-            tnames[t.id] = t.name;
-            tScores[t.id] = this.tagScore(metric, t);
+        tags.forEach((tid) => { 
+            tnames[tid] = this._tags[tid].name;
+            tScores[tid] = this.tagScore(metric, this._tags[tid]);
         });
+        console.log(cls, cids, tids, tags, ts);
         ts = ts.sort((l,r)=>tScores[l].avg-tScores[r].avg);
         
         return {
@@ -153,7 +155,6 @@ class ModData extends Listenable {
                 }
             ],
             l: {
-                title: cls,
                 autosize: true, 
                 showlegend: false,
                 xaxis: { showticklabels: true, tickvals: ts, ticktext: ts.map((tn)=>tnames[tn]) },
@@ -190,7 +191,7 @@ class ModData extends Listenable {
             name: metric.key,
             x: days,
             y: scores,
-            type: 'scatter+line'
+            type: 'bar',
         }, {
             name: 'average',
             x: days,
@@ -250,6 +251,9 @@ class ModData extends Listenable {
     getTag(tid) { return this._tags[tid]; }
     getCampaign(cid) { return this._campaigns[cid]; }
 
+    hasTagId(tid) { return this.tags.reduce((acc,t)=>acc || t.id==tid, false); }
+    hasCampaignId(cid) { return this.campaigns.reduce((acc,c)=>acc || c.id==cid, false); }
+
     initTags() {
         this._tagmap = {};
         this.tags = [];
@@ -272,11 +276,13 @@ class ModData extends Listenable {
     }
 
     initCampaigns() {
-        this.campaigns = [];
-        Object.keys(this._campaigns).forEach((c) => {
-            this._campaigns[c]._r = this._campaigns[c]._r.sort((l,r)=>l.d.isAfter(r.d));
-            this.campaigns.push(this._campaigns[c]);
-        });
+        this.campaigns = Object.keys(this._campaigns)
+            .map((cid)=>this._campaigns[cid]);
+        // .reduce((acc, cid) => {
+        //     this._campaigns[cid]._r = this._campaigns[cid]._r.sort((l,r)=>l.d.isAfter(r.d));
+        //     // this.campaigns.push(this._campaigns[c]);
+        //     acc.push(this._campaigns[])
+        // }, []);
         // 
     }
     setCampaigns(cdata) {
@@ -351,7 +357,7 @@ class ModData extends Listenable {
         let exs = this._tagmap[cls].filter((tag)=>tag.name==name).map((tag)=>tag.id);
         this.initCampaigns();
         return this.campaigns.filter(
-            (c) => c._t.filter((tid) => 0<=exs.indexOf(tid)).length > 0
+            (c) => exs.reduce((acc,tid)=>acc = acc || 0<=c._t.indexOf(tid), false)
         ).map((c)=>c.id);
     }
 

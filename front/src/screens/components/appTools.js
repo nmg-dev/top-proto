@@ -12,8 +12,13 @@ const styles = {
 		justifyContent: 'space-between'
 	},
 	toolbarField: {
-		minWidth: '5vw'
+		minWidth: '10vw'
 	},
+	toolbarMenu: {
+		maxHeight: '50vh',
+		overflowY: 'auto',
+	},
+
 	toolbarFieldLabel: {
 		shrink: true
 	},
@@ -97,14 +102,15 @@ class AppTools extends React.Component {
 								onChange={(ev) => {
 									this.setState({[ev.target.name]: ev.target.value});
 								}}>
-								<MenuItem key="" value={0}> - </MenuItem>
+								<MenuItem key="" value={0}></MenuItem>
 								<Divider />
-									{this._listTags(pc).map(
-										(t) => (<MenuItem 
-											key={t.id} 
-											value={t.id}>
-											{this.props.app.lang.tr(pc + '.' + t.name)}
-										</MenuItem>))}
+								{this._data.listTags(pc).map(
+									(t) => (<MenuItem 
+										key={t.id} 
+										value={t.id}>
+										{this.props.app.lang.tr(pc + '.' + t.name)}
+									</MenuItem>)
+								)}
 							</TextField>)
 					)}
 					</div>

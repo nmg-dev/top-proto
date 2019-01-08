@@ -1,25 +1,35 @@
 import React from 'react';
 
 import AppConfig from './config.js';
-import { Card, CardHeader, Icon, CardContent, CardActions, Chip, Avatar, IconButton, Divider, Menu, MenuItem, AppBar, Toolbar, Typography, Grid, Paper } from '@material-ui/core';
+import { Card, CardHeader, Icon, CardContent, CardActions, AppBar, Toolbar, Grid, Paper } from '@material-ui/core';
 
-import AppAdmin from './screens/appAdmin';
-import AppManage from './screens/appManage';
-import AppFoot from './screens/components/appFoot.js';
-import AppLocale from './screens/components/appLocale.js';
-import AppProfile from './screens/components/appProfile.js';
-
-// const modAPI = require('./modules/api');
-// const modData = require('./modules/data');
 import ModApi from './modules/api';
 import ModData from './modules/data';
 import ModLang from './modules/lang';
-// import moment from 'moment';
+
 import AppTools from './screens/components/appTools.js';
+import AppLocale from './screens/components/appLocale.js';
+import AppProfile from './screens/components/appProfile.js';
+
+import AppAdmin from './screens/appAdmin';
+import AppManage from './screens/appManage';
 import AppView from './screens/appView.js';
 import AppIndex from './screens/appIndex.js';
 
 const styles = {
+	appbar: {
+		display: 'block',
+	},
+	toolbar: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		color: '#fff',
+	},
+	logo: {
+		color: '#fff',
+
+	},
 	loginPanel: {
 		width: '100vw',
 		height: '100vh',
@@ -48,9 +58,18 @@ const styles = {
 	viewMenuItem: {
 		textTransform: 'upper',
 	},
+
+	footer: {
+
+    },
+    footerSection: {
+        
+    },
+    footerCard: {
+        height: '20vh'
+    },
 }
 
-const languages = ['en', 'ko'];
 const viewIndex = 'index';
 const viewInfo = 'view';
 const viewAdmin = 'admin';
@@ -82,7 +101,7 @@ class App extends React.Component {
 	
 		this.state = {
 			hasLogin: this.api.hasLogin(),
-			view: viewIndex,
+			view: viewInfo,
 			lang: 'ko',
 			dataLoaded: false
 		}
@@ -157,25 +176,6 @@ class App extends React.Component {
 	}
 
 
-	renderStage() {
-		if(this.state.view==viewAdmin && this.canAdmin())
-			return (<AppAdmin ref={this._refs.viewAdmin} app={this} api={this.api} />);
-		else if(this.state.view==viewManage && this.canManage())
-			return (<AppManage ref={this._refs.viewManage} app={this} api={this.api} />);
-		else if(this.state.view==viewInfo)
-			return (<AppView ref={this._refs.viewInfo} 
-				app={this} 
-				api={this.api} 
-				data={this.data}
-				tools={this._refs.toolbar} />);
-		else
-			return (<AppIndex 
-				ref={this._refs.viewIndex} 
-				app={this} 
-				api={this.api} 
-				data={this.data} 
-				tools={this._refs.toolbar} />)
-	}
 
 	isDataView() {
 		return 0<['', viewIndex, viewInfo].indexOf(this.state.view);
@@ -197,29 +197,74 @@ class App extends React.Component {
 		this.data.applyFilter(cids);
 	}
 
+	renderHeader() {
+		return(
+			<AppBar position="sticky" style={styles.appbar}>
+				<Toolbar style={styles.toolbar}>
+					<div style={styles.toolbarItem}>
+						<h1 style={styles.logo}>
+							{this.lang.tr('app')}
+						</h1>
+					</div>
+					<div style={styles.toolbarItem}>
+						<AppLocale app={this} ref={this.refs.locales} lang={this.state.lang} />
+						<AppProfile app={this} ref={this.refs.profile} 
+							profile={this.api.userProfile()} 
+							update={this.updateScreen.bind(this)} />
+					</div>
+				</Toolbar>
+			</AppBar>
+		);
+	}
+
+	renderFooter() {
+        return (
+            <Paper className={this.props.footer} style={styles.footer}>
+                <Grid container>
+                    <Grid className={this.props.footerSection} item md={4}>
+                       
+                    </Grid>
+                    <Grid className={this.props.footerSection} item md={4}>
+                        
+                    </Grid>
+                    <Grid className={this.props.footerSection} item md={4}>
+                        
+                    </Grid>
+                </Grid>
+		    </Paper>
+        );
+	}
+	
+	
+	renderStage() {
+		if(this.state.view==viewAdmin && this.canAdmin())
+			return (<AppAdmin ref={this._refs.viewAdmin} app={this} api={this.api} />);
+		else if(this.state.view==viewManage && this.canManage())
+			return (<AppManage ref={this._refs.viewManage} app={this} api={this.api} />);
+		else if(this.state.view==viewInfo)
+			return (<AppView ref={this._refs.viewInfo} 
+				app={this} 
+				api={this.api} 
+				data={this.data}
+				tools={this._refs.toolbar} />);
+		else
+			return (<AppIndex 
+				ref={this._refs.viewIndex} 
+				app={this} 
+				api={this.api} 
+				data={this.data} 
+				tools={this._refs.toolbar} />)
+	}
+
 	render() {
 		if(!this.state.hasLogin)
 			return this.renderLoginScreen();
 
 		return (
 			<div style={styles.appContainer}>
-                <AppBar position="sticky" style={styles.appbar}>
-                    <Toolbar style={styles.toolbar}>
-                        <div style={styles.toolbarItem}>
-                            <Typography style={styles.logo}>
-								{this.lang.tr('app')}
-							</Typography>
-                        </div>
-                        <div style={styles.toolbarItem}>
-                            <AppLocale app={this} ref={this.refs.locales} lang={this.state.lang} />
-							<AppProfile app={this} ref={this.refs.profile} 
-								profile={this.api.userProfile()} 
-								update={this.updateScreen.bind(this)} />
-                        </div>
-                    </Toolbar>
-                </AppBar>
+                {this.renderHeader()}
 
-                <Grid container>
+                <Grid container spacing={32}>
                     <Grid item xs={12}>
 						{this.isDataView() ? 
 							<AppTools ref={this._refs.toolbar}
@@ -231,11 +276,10 @@ class App extends React.Component {
 								 /> :
 							<h1>{this.state.view}</h1>}
                     </Grid>
-					<Grid item xs={12}>
-						{this.renderStage()}
-					</Grid>
+					{this.renderStage()}
                 </Grid>
-                <AppFoot />
+
+				{this.renderFooter}
             </div>
 		);
 	}

@@ -1,52 +1,13 @@
 import React, { Component } from 'react';
-import { Paper, Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Button, Grid, Divider, CardActions, Hidden, Chip, ListItemText, TableHead, TableCell, Table, TableBody, TableRow, List, ListItem, ListItemSecondaryAction, Checkbox } from '@material-ui/core';
+import { Card, CardHeader, CardContent, ListSubheader, Collapse, IconButton, Icon, Grid, List, ListItem, Checkbox } from '@material-ui/core';
 
 import Plot from 'react-plotly.js';
 
 
 const styles = {
-	wrapper : {
-		padding: '2vh',
+	filterCard: {
+		margin: '2vh',
 	},
-	toolbar: {
-		display: 'flex',
-		alignItems: 'stretch',
-		justifyContent: 'space-between',
-		padding: 16,
-
-	},
-	toolbarField: {
-		minWidth: '10vw',
-	},
-	summaryGrid: {
-		maxHeight: 84,
-		overflowY: 'auto',
-	},
-	summaryPaper: {
-		marginTop: 16,
-	},
-	chipContainer: {
-		display: 'flex',
-		alignItems: 'baseline',
-		justifyContent: 'flex-start'
-	},
-
-	pCardSheet: {
-		marginTop: 16,
-	},
-
-	pCard: {
-	},
-	performanceMean: { color: 'secondary' },
-	performanceBias: { color: 'highlight' },
-	performanceChipActive: {  },
-	performanceChipDeactive: {},
-
-}
-
-const plotLayout = {
-	
-
 }
 
 class AppView extends Component {
@@ -78,7 +39,44 @@ class AppView extends Component {
 
 	componentDidMount() {
         this._onDataUpdated('affiliation');
-    }
+	}
+
+	selectedTids() {
+		return Object.keys(this.state.selectedTags)
+			.map((tid)=>parseInt(tid))
+			.filter((tid)=>this.state.selectedTags[tid]);
+	}
+	
+	buildChartData() {
+		let metric = this.props.tools.current.getMetric();
+		let clss = this._data.listTagClasses(true);
+		let _pdata = {};
+		clss.forEach((cls)=> {
+			let pv = this._data.plotClassbars(metric, 
+				cls, 
+				this.state.cids, 
+				this.selectedTids());
+			_pdata[cls] = pv.d;
+		});
+
+		return _pdata;
+	}
+
+	buildChartLayout() {
+		let metric = this.props.tools.current.getMetric();
+		let clss = this._data.listTagClasses(true);
+		let _playout = {};
+		clss.forEach((cls)=> {
+			let pv = this._data.plotClassbars(metric, 
+				cls, 
+				this.state.cids, 
+				this.selectedTids());
+			_playout[cls] = pv.l;
+			_playout[cls].xaxis.ticktext = _playout[cls].xaxis.ticktext.map((tn) =>
+				this.props.app.lang.tr(cls + '.' + tn));
+		});
+		return _playout;
+	}
 
 	_onDataUpdated(ev) {
 		if(ev=='affiliation') {
@@ -89,57 +87,46 @@ class AppView extends Component {
 				});
 			});
 
-			let metric = this.props.tools.current.getMetric();
-			let clss = this._data.listTagClasses(true);
-			let _pdata = {};
-			let _playout = {};
-			clss.forEach((cls)=> {
-				let pv = this._data.plotClassbars(metric, 
-					cls, 
-					this.state.cids, 
-					this.state.tids);
-				_pdata[cls] = pv.d;
-				_playout[cls] = pv.l;
-
-				_playout[cls].title = this.props.app.lang.tr(_playout[cls].title);
-				_playout[cls].xaxis.ticktext = _playout[cls].xaxis.ticktext.map((tn) =>
-					this.props.app.lang.tr(cls + '.' + tn));
-			});
-
 			this.setState({ 
 				selectedTags : nextTags, 
-				pdata: _pdata, 
-				playout: _playout,
+				pdata: this.buildChartData(), 
+				playout: this.buildChartLayout(),
+				cids: this._data.campaigns.map((c)=>c.id),
 				tids: Object.keys(nextTags).map((tid)=>parseInt(tid)),
-			});
+			}, ()=>{console.log(this.state)});
 		}
 	}
 
 	_onToggleFilterSelection(ev) {
-		let tid = parseInt(ev.currentTarget.getAttribute('tagid'));
+		let selectedTid = parseInt(ev.currentTarget.getAttribute('tagid'));
 		let pstate = this.state.selectedTags;
-		// console.log(tid, pstate[tid], !pstate[tid]);
-		pstate[tid] = !pstate[tid];
-		// console.log(tid, pstate[tid]);
-		let cids = [];
-		let tids = [];
+		let tids = this.state.tids;
+		let tag = this._data.getTag(selectedTid);
 
-		Object.keys(pstate).map((tid)=>parseInt(tid)).forEach((tid) => {
-			if(pstate[tid]) {
-				let tag = this._data.getTag(tid);
-				cids = cids.concat(tag._c);
-			}
-		});
-		if(cids.length<=0) {
-			cids = null;
-			tids = null;
-		} else {
-			cids = this._data._uq(cids);
-			tids = this._data.filteredTags(cids);
+		let cids = this.state.cids;
+
+		pstate[selectedTid] = !pstate[selectedTid];
+
+		// on toggle up
+		if(pstate[selectedTid]) {
+			let fullCids = this._data.campaigns.map((c)=>c.id);
+			let appends = tag._c.filter((cid)=>0<=fullCids.indexOf(cid));
+			cids = this._data._uq(cids.concat(appends)).sort();
+
+			// let appends = tag._c.filter((cid)=>this._data.hasCampaignId(cid));
+			// cids = this._data._uq(cids.concat(appends)).sort();
+			tids.push(tag.id);
+		} 
+		// on toggle down
+		else {
+			cids = cids.filter((cid)=>tag._c.indexOf(cid)<0);
+			tids.splice(tids.indexOf(tag.id), 1);
 		}
 
 		this.setState({
-			selectedTags: pstate, 
+			selectedTags: pstate,
+			pdata: this.buildChartData(),
+			playout: this.buildChartLayout(),
 			cids: cids, 
 			tids: tids,
 		});
@@ -149,53 +136,50 @@ class AppView extends Component {
 	}
 	renderCategoryFilterPane() {
 		let topClss = this.props.data.listTopTagClasses();
-		console.log(this.state.selectedTags);
-		return (
-			<Paper>
-				<Card>
-					<CardHeader
-						title={<Icon>filter</Icon>}
-						action={this.renderCardToggleAction(
-							()=>this.setState({showFilter: !this.state.showFilter}),
-							()=>this.state.showFilter
-						)} />
-					<CardContent>
-						<Collapse in={this.state.showFilter}>
-							<Grid container>
-								{topClss.map((tc) => 
-									(<Grid item xs={6} md={3}>
-										<List>
-											<ListSubheader>{this.props.app.lang.tr(tc)}</ListSubheader>
-											{this.props.data.listTags(tc).map(
-												(tag) => <ListItem button
-													tagid={tag.id}
-													disabled={this.state.tids.indexOf(tag.id)<0}
-													onClick={this._onToggleFilterSelection.bind(this)}>
-													<Checkbox value={tag.id}
-														disabled={this.state.tids.indexOf(tag.id)<0}
-														checked={this.state.selectedTags[tag.id]?1:0} />
-													{this.props.app.lang.tr(tc + '.' + tag.name)}
-												</ListItem>
-											)}
-										</List>
-									</Grid>)
-								)}
-							</Grid>
-						</Collapse>
-					</CardContent>
-				</Card>
-			</Paper>
-		)
+		return (<Card style={styles.filterCard}>
+				<CardHeader
+					title={<Icon>filter</Icon>}
+					action={this.renderCardToggleAction(
+						()=>this.setState({showFilter: !this.state.showFilter}),
+						()=>this.state.showFilter
+					)} 
+					subheader={<div>
+						<span className="mean"></span>
+						<span className="median"></span>
+						<span className="std.dev"></span>
+					</div>}
+					/>
+				<CardContent>
+					<Collapse in={this.state.showFilter}>
+						<Grid container spacing={8}>
+							{topClss.map((tc) => 
+								(<Grid item xs={6} md={3}>
+									<List>
+										<ListSubheader>{this.props.app.lang.tr(tc)}</ListSubheader>
+										{this.props.data.listTags(tc).map(
+											(tag) => <ListItem button
+												tagid={tag.id}
+												onClick={this._onToggleFilterSelection.bind(this)}>
+												<Checkbox value={tag.id}
+													checked={this.state.selectedTags[tag.id]?1:0} />
+												{this.props.app.lang.tr(tc + '.' + tag.name)}
+											</ListItem>
+										)}
+									</List>
+								</Grid>)
+							)}
+						</Grid>
+					</Collapse>
+				</CardContent>
+			</Card>);
 	}
 
 	renderPerformanceCard(cls) {
-
 		return (
-			<Card style={styles.pCard}>
+			<Card style={styles.filterCard}>
 				<CardHeader title={this.props.app.lang.tr(cls)} />
 				<CardContent>
 					<Plot 
-						title={this.props.app.lang.tr(cls)}
 						data={this.state.pdata[cls]} 
 						useResizeHandler
 						style={{width: '100%', height: '100%'}}
@@ -207,23 +191,17 @@ class AppView extends Component {
 	}
 
 	render() {
-		return (
-			<main style={styles.wrapper}>
+		return (<Grid item xs={12}>
 				{this.renderCategoryFilterPane()}
-				<Divider />
-				<Grid container spacing={8}>
-					{this._data.listTagClasses(true).map((cls) => (
-						<Grid item xs={12} sm={6} lg={3}>
-							{this.renderPerformanceCard(cls)}
-						</Grid>	
-					))}
+				<Grid container spacing={4}>
+				{this._data.listTagClasses(true).map((cls) => (
+					<Grid item xs={12} sm={6} lg={3}>
+						{this.renderPerformanceCard(cls)}
+					</Grid>	
+				))}
 				</Grid>
-				<Divider />
-				<Grid container spacing={8}>
-						
-				</Grid>
-			</main>
-		)
+			</Grid>
+		);
 	}
 
 	

@@ -93,10 +93,10 @@ class AppTools extends React.Component {
 				<Toolbar component="nav" style={styles.toolbar}>
 					<div style={styles.toolbarGroup}>
 					{this._data.listPredefinedCategories().map((pc) => 
-						(<TextField select
+						(<TextField select key={pc}
 								name={pc}
 								label={this.props.app.lang.tr(pc)}
-								value={this.state[pc]}
+								value={this.state[pc] || ''}
 								style={styles.toolbarField}
 								InputLabelProps={styles.toolbarFieldLabel}
 								onChange={(ev) => {

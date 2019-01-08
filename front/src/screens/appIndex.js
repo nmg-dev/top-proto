@@ -16,8 +16,8 @@ class AppIndex extends React.Component {
         this._data = props.data;
 
         this.state = {
-            pdata: {},
-            playout: { },
+            pdata: [],
+            playout: {},
             recommand: {},
         };
 
@@ -35,7 +35,6 @@ class AppIndex extends React.Component {
 
     _onDataUpdated(ev) {
         if(ev=='affiliation') {
-            console.log('index data updated');
             let metric = this.props.tools.current.getMetric();
             this.setState({
                 pdata: this._data.plotTimeSeries(metric),
@@ -85,7 +84,7 @@ class AppIndex extends React.Component {
                         </TableHead>
                         <TableBody>
                         {this._data.listTopTagClasses().map((tt) => 
-                            (<TableRow key={tt}>
+                            (<TableRow key={tt+'.'+rcm[tt].name}>
                                 <TableCell>{this.props.app.lang.tr(tt)}</TableCell>
                                 <TableCell>{this.props.app.lang.tr(tt+'.'+rcm[tt].name)}</TableCell>
                                 <TableCell>{rcm[tt].value}</TableCell>

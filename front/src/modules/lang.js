@@ -8,6 +8,13 @@ const LANG_DICT = {
         admin: '시스템관리',
 
         //
+        cid: '캠페인ID',
+        date: '날짜',
+        impression: '노출',
+        click: '클릭',
+        conversion: '전환',
+        cost: '비용 (한국 원)',
+
         category: '업종',
         goal: '목표',
         channel: '채널',
@@ -30,6 +37,13 @@ const LANG_DICT = {
         manage: 'manage',
         admin: 'admin',
 
+        //
+        cid: 'campaign ID',
+        date: 'Date',
+        impression: 'Impressions',
+        click: 'Clicks',
+        conversion: 'Conversions',
+        cost: 'Cost (KRW)',
         //
         category: 'category',
         goal: 'goal',

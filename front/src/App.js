@@ -74,7 +74,7 @@ const viewIndex = 'index';
 const viewInfo = 'view';
 const viewAdmin = 'admin';
 const viewManage = 'manage';
-const views = [viewIndex, viewInfo, viewManage, viewAdmin];
+const views = [viewIndex, viewInfo];
 
 class App extends React.Component {
 	constructor(props) {
@@ -101,7 +101,7 @@ class App extends React.Component {
 	
 		this.state = {
 			hasLogin: this.api.hasLogin(),
-			view: viewInfo,
+			view: viewIndex,
 			lang: 'ko',
 			dataLoaded: false
 		}
@@ -124,22 +124,32 @@ class App extends React.Component {
 	}
 	
 	listViews() {
+		let vs = Object.assign(views, {});
+		if(this.state.can_input && !vs.indexOf(viewManage)<=0)
+			vs.push(viewManage);
+
+		if(this.state.can_admin && vs.indexOf(viewAdmin)<=0)
+			vs.push(viewAdmin);
 		
-		return views;
+		vs = vs.filter((v,vi)=>vs.indexOf(v)===vi);
+		return vs;
 	}
 
 	_onLoginServerResponseSuccess(resp) {
-		this.setState({hasLogin: this.api.hasLogin()});
-		this.api.getTags((tags) => {
-			this.data.setTags(tags);
+		this.setState({
+			hasLogin: this.api.hasLogin(),
+			can_admin: resp.can_admin,
+			can_input: resp.can_input,
+		}, ()=>{
+			this.api.getTags((tags) => {
+				this.data.setTags(tags);
+			});
 		});
 	}
 	_onLoginServerResponseFailure(err) {
 		this.setState({hasLogin: false});
 	}
 	onLoginCallback(gauth) {
-		// console.log(gauth);
-		// 
 		let resp = gauth.getAuthResponse();
 		let profile = gauth.getBasicProfile();
 		let gdata = {
@@ -182,12 +192,10 @@ class App extends React.Component {
 	}
 
 	onFilterChange(filter) {
-		// console.error(filter);
 		if(!this._lastUpdated) return;
 
 		let cids = Object.keys(this.data._campaigns).map((cid)=>parseInt(cid));
 		this.data.listTagClasses(true, true, true).forEach((cls) => {
-			// console.log(cls, filter[cls]);
 			if(filter[cls] && filter[cls]) {
 				let tag = this.data.getTag(filter[cls]);
 				let filtered = this.data.filterInclude(cls, tag.name);
@@ -210,6 +218,10 @@ class App extends React.Component {
 						<AppLocale app={this} ref={this.refs.locales} lang={this.state.lang} />
 						<AppProfile app={this} ref={this.refs.profile} 
 							profile={this.api.userProfile()} 
+							permission={{
+								can_admin: this.state.can_admin,
+								can_manage: this.state.can_manage,
+							}}
 							update={this.updateScreen.bind(this)} />
 					</div>
 				</Toolbar>
@@ -237,10 +249,15 @@ class App extends React.Component {
 	
 	
 	renderStage() {
-		if(this.state.view==viewAdmin && this.canAdmin())
-			return (<AppAdmin ref={this._refs.viewAdmin} app={this} api={this.api} />);
-		else if(this.state.view==viewManage && this.canManage())
-			return (<AppManage ref={this._refs.viewManage} app={this} api={this.api} />);
+		if(this.state.view==viewAdmin && this.state.can_admin)
+			return (<AppAdmin ref={this._refs.viewAdmin} 
+				app={this} 
+				api={this.api} />);
+		else if(this.state.view==viewManage && this.state.can_input)
+			return (<AppManage ref={this._refs.viewManage} 
+				app={this} 
+				api={this.api}
+				data={this.data} />);
 		else if(this.state.view==viewInfo)
 			return (<AppView ref={this._refs.viewInfo} 
 				app={this} 
@@ -253,7 +270,7 @@ class App extends React.Component {
 				app={this} 
 				api={this.api} 
 				data={this.data} 
-				tools={this._refs.toolbar} />)
+				tools={this._refs.toolbar} />);
 	}
 
 	render() {
@@ -279,7 +296,7 @@ class App extends React.Component {
 					{this.renderStage()}
                 </Grid>
 
-				{this.renderFooter}
+				{this.renderFooter()}
             </div>
 		);
 	}

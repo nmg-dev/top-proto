@@ -93,7 +93,7 @@ class AppView extends Component {
 				playout: this.buildChartLayout(),
 				cids: this._data.campaigns.map((c)=>c.id),
 				tids: Object.keys(nextTags).map((tid)=>parseInt(tid)),
-			}, ()=>{console.log(this.state)});
+			});
 		}
 	}
 

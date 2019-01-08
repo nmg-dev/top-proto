@@ -16,7 +16,9 @@ class AppProfile extends React.Component {
             name: null,
             email: null,
             picture: null,			
-        }
+		}
+
+		this._listViews = props.app.listViews.bind(props.app);
 	}
 	
 	_onSelect(ev) {
@@ -37,6 +39,7 @@ class AppProfile extends React.Component {
 		</IconButton>);
 	}
 	renderProfileButtonMenu() {
+		console.log(this._listViews());
 		return (<Menu 
 			open={this.state.show}
 			onClose={()=>{this.setState({show: false, anchor: null})}}
@@ -49,12 +52,12 @@ class AppProfile extends React.Component {
 					label={this.props.profile.name} />
 			</MenuItem>
 			<Divider />
-			{this.props.app.listViews().map((v) => (
+			{this._listViews().map((v) => 
 			<MenuItem view={v} key={v}
 				style={styles.viewMenuItem}
 				onClick={this._onSelect.bind(this)}>
 				{this.props.app.lang.tr(v, '')}
-			</MenuItem>))}
+			</MenuItem>)}
 		</Menu>);
     }
     

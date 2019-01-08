@@ -125,7 +125,6 @@ class ModData extends Listenable {
             tnames[tid] = this._tags[tid].name;
             tScores[tid] = this.tagScore(metric, this._tags[tid]);
         });
-        console.log(cls, cids, tids, tags, ts);
         ts = ts.sort((l,r)=>tScores[l].avg-tScores[r].avg);
         
         return {
@@ -184,9 +183,6 @@ class ModData extends Listenable {
         let total = days.reduce((acc, d) => acc += values[d].reduce((sum, v)=>sum+=v, 0), 0);
         let cnts = days.reduce((acc, d)=> acc += values[d].length, 0);
 
-        console.log(total, cnts);
-
-
         return [{
             name: metric.key,
             x: days,
@@ -244,7 +240,6 @@ class ModData extends Listenable {
         Object.keys(daylogs).forEach((ds) => {
             daylogs[ds] = Object.assign(this._scores(daylogs[ds]), {m: metric.key});
         });
-        // console.log(daylogs);
         return daylogs;
     }
 

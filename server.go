@@ -1,10 +1,9 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,20 +33,22 @@ func main() {
 	app.Use(gin.Recovery())
 
 	// static index endpoint
-	app.Use(static.Serve("/", static.LocalFile("front/build", true)))
+	app.Static(`/img`, `./img`)
+	app.Static(`/js`, `./js`)
+	app.Static(`/css`, `./css`)
 
-	// disable CORS
-	app.Use(cors.New(cors.Config{
-		// for debug!
-		AllowOrigins: []string{
-			"http://localhost:3000",
-			"http://to.nextmediagroup.co.kr:8080",
-			// "http://to.nextmediagroup.co.kr",
-			// "https://to.nextmediagroup.co.kr"
-		},
-	}))
+	app.LoadHTMLGlob(`./views/*.tmpl`)
+	// app.Use(static.Serve("/", static.LocalFile("front/build", true)))
 
 	GroupDatabaseConnection(app)
+
+	app.GET(``, func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, `index.tmpl`, "")
+	})
+
+	app.GET(`/info`, func(ctx *gin.Context) {
+		// ctx.HTML(http.StatusOK, )
+	})
 
 	// campaign CRUD
 	app.Run() // listen and serve on 0.0.0.0:8080

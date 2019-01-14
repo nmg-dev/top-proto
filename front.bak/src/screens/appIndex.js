@@ -103,10 +103,10 @@ class AppIndex extends React.Component {
         let metric = (this.props.tools.current) ? this.props.tools.current.getMetric() : this._data.defaultMetric();
         return (
             <Grid item xs={12}>
-                {this.renderPlotCard()}
                 {Object.keys(this.state.recommand)
                     .map((rc)=>this.state.recommand[rc])
                     .map((rcm)=>this.renderRecommandTable(rcm, metric))}
+                {this.renderPlotCard()}
             </Grid>
         );
     }

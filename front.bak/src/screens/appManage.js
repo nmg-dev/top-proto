@@ -34,6 +34,7 @@ class AppManage extends Component {
 		return (
 			<TableHead>
 				<TableRow>
+					<TableCell>#</TableCell>
 					{this.state.columns.map((col, idx)=>(<TableCell>
 						<TextField select key={col.name} value={col.index} label={col.name} index={idx}
 							InputLabelProps={{shrink: true}}
@@ -46,6 +47,7 @@ class AppManage extends Component {
 								// this.setState({columns: cols});
 							}}>
 							<MenuItem key="" value={null}>(IGNORE)</MenuItem>
+							{!this.state.includeHeader ? '' :<MenuItem key="" value={col.name}>{col.name} (AS-IS)</MenuItem>}
 							<Divider />
 							{DEFAULT_INDICES.map((d)=>(
 								<MenuItem key={d} value={d}>{this.props.app.lang.tr(d)}</MenuItem>
@@ -67,7 +69,9 @@ class AppManage extends Component {
 
 	_renderContentTableBody() {
 		return (<TableBody>
-			{this.state.contents.map((line) => (<TableRow>
+			{this.state.contents.filter((l,no)=>no<20)
+				.map((line, no) => (<TableRow>
+					<TableCell><sub>{no+1}:</sub></TableCell>
 					{line.split(this.state.delimiter)
 						.map((tok,ti) => (<TableCell key={ti}>{tok.trim()}</TableCell>))}
 			</TableRow>))}
@@ -231,14 +235,13 @@ class AppManage extends Component {
 		return (
 			<Card>
 				<CardHeader
-					title="upload"
 					subheader={this.state.file ? this.state.file.name : ''}
-					action={<IconButton onClick={this.onOpenFileSelector.bind(this)}>
+					title={<IconButton onClick={this.onOpenFileSelector.bind(this)}>
 						<Icon>backup</Icon>
 						<input type="file" style={{display: 'none'}} 
 							ref={this._refs.fin} 
 							onInput={this.onOpenFileComplete.bind(this)}
-							accept="text/*"
+							accept=".txt,.csv,.tsv"
 						/>
 					</IconButton>}
 				/>

@@ -1,11 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+var __app = ReactDOM.render(<App />, document.getElementById('root'));
+
+window._onGoogleLoginSuccess = __app.onLoginCallback.bind(__app);
+
+window._onGoogleLoginFailure = function(err) {
+	console.error(err.error);
+	__app.setState({login: false, user: null});
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -120,38 +120,61 @@ func seedingTags() []Tag {
 		Tag{Class: "goal", Name: "lead", Property: DJsonMap{"ko": "리드 수집", "en": "Lead collection"}},
 		Tag{Class: "goal", Name: "branding", Property: DJsonMap{"ko": "브랜딩", "en": "Branding"}},
 
-		Tag{Class: "conversion", Name: "click"},
+		Tag{Class: "keytopic", Name: "premium", Property: DJsonMap{"ko": "프리미엄", "en": "Premium"}},
+		Tag{Class: "keytopic", Name: "local", Property: DJsonMap{"ko": "지역", "en": "Local"}},
+		Tag{Class: "keytopic", Name: "mobile", Property: DJsonMap{"ko": "모바일", "en": "Mobile"}},
+		Tag{Class: "keytopic", Name: "earlybird", Property: DJsonMap{"ko": "얼리버드", "en": "Earlybird"}},
+		Tag{Class: "keytopic", Name: "dayspecial", Property: DJsonMap{"ko": "기간특성", "en": "Day Special"}},
+		Tag{Class: "keytopic", Name: "discount", Property: DJsonMap{"ko": "세일 강조", "en": "Discount"}},
+		Tag{Class: "keytopic", Name: "saving.insurance", Property: DJsonMap{"ko": "저축성보험", "en": "Saving Insurance"}},
+		Tag{Class: "keytopic", Name: "assurance", Property: DJsonMap{"ko": "보장성보험", "en": "Assuarance"}},
+
+		Tag{Class: "keyword", Name: "price_off", Property: DJsonMap{"ko": "할인율", "en": "Price off"}},
+		Tag{Class: "keyword", Name: "price_special", Property: DJsonMap{"ko": "특가", "en": "Special Price"}},
+		Tag{Class: "keyword", Name: "plus_one", Property: DJsonMap{"ko": "1+1", "en": "1+1"}},
+		Tag{Class: "keyword", Name: "special_interest_rate", Property: DJsonMap{"ko": "금리우대", "en": "Special interest rate"}},
+		Tag{Class: "keyword", Name: "capital_guarantee", Property: DJsonMap{"ko": "원금보장", "en": "Guarantee Capital"}},
+		Tag{Class: "keyword", Name: "tax_exemption", Property: DJsonMap{"ko": "비과세", "en": "Tax Exemption"}},
+		Tag{Class: "keyword", Name: "tax_payback", Property: DJsonMap{"ko": "연말정산 환급", "en": "Tax Payback"}},
+		Tag{Class: "keyword", Name: "low_fee", Property: DJsonMap{"ko": "수수료할인", "en": "Tax Payback"}},
+
+		Tag{Class: "trigger", Name: "reward", Property: DJsonMap{"ko": "리워드", "en": "Rewards"}},
+		Tag{Class: "trigger", Name: "benefit", Property: DJsonMap{"ko": "제품 이점", "en": "Rewards"}},
+		Tag{Class: "trigger", Name: "credibility", Property: DJsonMap{"ko": "신뢰성", "en": "Rewards"}},
+		Tag{Class: "trigger", Name: "seasonality", Property: DJsonMap{"ko": "시즌성", "en": "Rewards"}},
+		Tag{Class: "trigger", Name: "urgency", Property: DJsonMap{"ko": "시간 제한", "en": "Rewards"}},
+		Tag{Class: "trigger", Name: "persuasive", Property: DJsonMap{"ko": "설득형", "en": "Rewards"}},
+
+		Tag{Class: "adcopy", Name: "suggestion", Property: DJsonMap{"ko": "청유형", "en": "Rewards"}},
+		Tag{Class: "adcopy", Name: "questionare", Property: DJsonMap{"ko": "의문형", "en": "Rewards"}},
+		Tag{Class: "adcopy", Name: "attension", Property: DJsonMap{"ko": "주목형", "en": "Rewards"}},
+
+		Tag{Class: "background", Name: "blank", Property: DJsonMap{"ko": "공백", "en": "Blank", "image": "bg_blank.png"}},
+		Tag{Class: "background", Name: "solid_light", Property: DJsonMap{"ko": "단색 (밝은색)", "en": "Solid", "image": "bg_solid.png"}},
+		Tag{Class: "background", Name: "solid_dark", Property: DJsonMap{"ko": "단색 (어두운색)", "en": "Solid", "image": "bg_solid.png"}},
+		Tag{Class: "background", Name: "image", Property: DJsonMap{"ko": "이미지", "en": "Image", "image": "bg_image.png"}},
+		Tag{Class: "background", Name: "split", Property: DJsonMap{"ko": "면분할", "en": "Split area", "image": "bg_split.png"}},
+
+		Tag{Class: "objet", Name: "photo", Property: DJsonMap{"ko": "실사", "en": "Picture", "image": "object_picture.png"}},
+		Tag{Class: "objet", Name: "illust", Property: DJsonMap{"ko": "일러스트", "en": "Illust", "image": "object_illust.png"}},
+		Tag{Class: "objet", Name: "text", Property: DJsonMap{"ko": "텍스트", "en": "Text Only", "image": "object_model.png"}},
+		Tag{Class: "objet", Name: "model", Property: DJsonMap{"ko": "모델", "en": "Model", "image": "object_model.png"}},
+
+		Tag{Class: "layout", Name: "center", Property: DJsonMap{"ko": "중앙", "en": "Model", "image": "object_model.png"}},
+		Tag{Class: "layout", Name: "sides", Property: DJsonMap{"ko": "양 옆", "en": "Model", "image": "object_model.png"}},
+		Tag{Class: "layout", Name: "left", Property: DJsonMap{"ko": "좌측", "en": "Model", "image": "object_model.png"}},
+		Tag{Class: "layout", Name: "right", Property: DJsonMap{"ko": "우측", "en": "Model", "image": "object_model.png"}},
+
+		Tag{Class: "ctas", Name: "signup"},
 		Tag{Class: "conversion", Name: "impression"},
 		Tag{Class: "conversion", Name: "transaction"},
 		Tag{Class: "conversion", Name: "install"},
 		Tag{Class: "conversion", Name: "engage"},
 
-		Tag{Class: "layout", Name: "left", Property: DJsonMap{"ko": "텍스트 좌측", "en": "Text left", "image": "layout_left.png"}},
-		Tag{Class: "layout", Name: "right", Property: DJsonMap{"ko": "텍스트 우측", "en": "Text right", "image": "layout_right.png"}},
-		Tag{Class: "layout", Name: "center", Property: DJsonMap{"ko": "텍스트 중앙", "en": "Text center", "image": "layout_center.png"}},
-		Tag{Class: "layout", Name: "between", Property: DJsonMap{"ko": "텍스트 좌우", "en": "Text between", "image": "layout_between.png"}},
-
-		Tag{Class: "background", Name: "blank", Property: DJsonMap{"ko": "공백", "en": "Blank", "image": "bg_blank.png"}},
-		Tag{Class: "background", Name: "solid", Property: DJsonMap{"ko": "단색", "en": "Solid", "image": "bg_solid.png"}},
-		Tag{Class: "background", Name: "split", Property: DJsonMap{"ko": "면분할", "en": "Split area", "image": "bg_split.png"}},
-		Tag{Class: "background", Name: "image", Property: DJsonMap{"ko": "이미지", "en": "Image", "image": "bg_image.png"}},
-
-		Tag{Class: "objet", Name: "picture", Property: DJsonMap{"ko": "실사", "en": "Picture", "image": "object_picture.png"}},
-		Tag{Class: "objet", Name: "illust", Property: DJsonMap{"ko": "일러스트", "en": "Illust", "image": "object_illust.png"}},
-		Tag{Class: "objet", Name: "model", Property: DJsonMap{"ko": "모델", "en": "Model", "image": "object_model.png"}},
-
-		Tag{Class: "lead", Name: "time", Property: DJsonMap{"ko": "타임형", "en": "Time", "image": "lead_time.png"}},
-		Tag{Class: "lead", Name: "benefit", Property: DJsonMap{"ko": "혜택형", "en": "Beneficial", "image": "lead_benefit.png"}},
-		Tag{Class: "lead", Name: "persuade", Property: DJsonMap{"ko": "유도형", "en": "Persuasive", "image": "lead_persuade.png"}},
-
-		Tag{Class: "issue", Name: "special offer"},
-		Tag{Class: "issue", Name: "local"},
-		Tag{Class: "issue", Name: "sales"},
-		Tag{Class: "issue", Name: "premium"},
-
 		Tag{Class: "trigger", Name: "seasonality"},
 		Tag{Class: "trigger", Name: "discount"},
 		Tag{Class: "trigger", Name: "beneficial"},
+
 		Tag{Class: "trigger", Name: "credibility"},
 	}
 }

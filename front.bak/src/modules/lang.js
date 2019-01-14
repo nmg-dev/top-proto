@@ -2,7 +2,7 @@ const LANG_DICT = {
     ko: {
         //
         app: '태그 오퍼레이션 v0.alpha',
-        index: '인덱스',
+        index: '대시보드',
         view: '상세보기',
         manage: '캠페인관리',
         admin: '시스템관리',

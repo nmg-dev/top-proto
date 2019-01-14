@@ -1,0 +1,102 @@
+*,body {
+  margin: 0;
+  padding: 0;
+
+  background-color: transparent;
+  color: #333;
+  font-weight: 300;
+  font-family: 'Noto Sans KR', sans-serif;
+
+  --bg-dark: '#262626';
+  --bg-light: '#F2F2F2';
+  --bg-select: '#DEEBF7';
+
+  --data-grey: '#D9D9D9';
+  --data-primary: '#20ADE3';
+  --data-secondary: '#002060';
+  --data-dark: '#1F4E79';
+  --data-light: '#9DC3E6';
+
+  --font-normal: '#262626';
+  --font-dark: '#002060';
+  --font-light: '#595959';
+  --font-white: '#eeeeee';
+}
+
+.wrap-container>div {
+  padding-top: 60;
+}
+
+.bg-light {
+  color: var(--font-normal);
+  background-color: var(--bg-light);
+  
+  font-size: 0.5em;
+}
+
+.bg-dark {
+  color: var(--font-white);
+  background-color: var(--bg-dark);
+}
+
+.query-control {
+  margin: 20px;
+  margin-left: 0px;
+}
+
+.kpi-control {
+  margin: 20px;
+  margin-left: 0px;
+  border-radius: 0;
+}
+
+.query-control .label-text,.kpi-control .label-text {
+  padding-left: 24px;
+  padding-right: 36px;
+  text-align: left;
+}
+.query-control .label-icon {
+  align-items: center;
+}
+.query-control .label-icon {
+  font-size: 1.75em;
+}
+.kpi-control i.fa-chevron-down {
+  padding-top: 8px;
+}
+.query-control i.fa-chevron-down {
+  padding-top: 26px;
+}
+
+div.card.panel {
+  border-top: none;
+  border-left: none;
+  border-radius: 8px;
+
+  width: 100%;
+  padding-top: 5vw;
+  padding-bottom: 5vw;
+  padding-left: 10vw;
+  padding-right: 10vw;
+
+  text-align: center;
+}
+
+div.card.panel .panel-title {
+  font-size: 0.5em;
+  font-weight: 700;
+  border-bottom: 1.5px solid #262626;
+}
+
+div.card.panel .section-title  {
+  font-weight: 700;
+  padding: 20px;
+  padding-bottom: 8px;
+}
+div.card.panel .section-text {
+  font-size: 1.0em;
+  font-weight: 300;
+  color: var(--font-light);
+}
+
+

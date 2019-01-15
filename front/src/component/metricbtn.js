@@ -55,7 +55,7 @@ class MetricBtn extends React.Component {
 
     render() {
         return (<div className="button-group kpi-control">
-            <button type="input-group-btn" className="btn shadow-sm" disabled
+            <button type="input-group-btn" className="btn shadow-sm"
                 style={styles.btn}
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div className="label-icon"><i className="fas fa-ruler" /></div>

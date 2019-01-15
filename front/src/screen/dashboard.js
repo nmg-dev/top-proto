@@ -1,7 +1,7 @@
 import React from 'react';
 import Querybar from '../component/querybar';
 import CardPanel from '../component/cardpanel';
-import {LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts';
+import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts';
 
 const samples_design = [
     {c: 'Background', t: '무색'},
@@ -76,7 +76,8 @@ class DashboardScreen extends React.Component {
     }
 
     renderContentChart() {
-        return (<LineChart data={sample_data} width={window.innerWidth*0.7} height={400}>
+        return (<ResponsiveContainer width="95%" height={280}>
+        <LineChart data={sample_data}>
             <XAxis dataKey="t" 
                 />
             <YAxis stroke="transparent" />
@@ -84,7 +85,7 @@ class DashboardScreen extends React.Component {
                 stroke="#002060" strokeWidth="3" 
                 dot={{r: 5}} />
             <Tooltip />
-        </LineChart>);
+        </LineChart></ResponsiveContainer>);
     }
 
     renderClassTable(cls) {

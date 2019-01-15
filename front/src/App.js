@@ -31,21 +31,25 @@ class App extends React.Component {
   constructor(ps) {
     super(ps);
     this.state = {
-      view: 'dashboard',
-      // view: 'creative',
+      // view: 'dashboard',
+      view: 'predict',
       showSidebar: true,
     }
   }
 
+  componentDidMount() {
+    document.title = 'TagOperation beta by NextMediaGroup';
+  }
+
   renderSidebar() {
     return (<div className="sidebar background-dark">
-      {this.state.showSidebar ? (<ul>
+      {this.state.showSidebar ? (<div style={{minWidth: 200}}><ul style={{position: 'fixed'}}>
         <li class="sidebar-item"><img alt="sidebar logo" src="/img/logo_md.png" /></li>
             {views.map((vs)=>(<li key={vs.v} view={vs.v}
               className={'sidebar-item'+(this.state.view==vs.v?' active':'')}
               onClick={this._onViewUpdate.bind(this)}>
             {vs.ko}</li>))}
-      </ul>) : ''}
+      </ul></div>) : ''}
       <div class="sidebar-holder" onClick={()=>this.setState({showSidebar: !this.state.showSidebar})}>
         <i className={'fas fa-chevron-' + (this.state.showSidebar ? 'left' : 'right')} />
       </div>
@@ -74,8 +78,8 @@ class App extends React.Component {
 
   _onViewUpdate(ev) {
     let v = ev.target.getAttribute('view');
-    if(v=='predict') 
-      return;
+    // if(v=='predict') 
+    //   return;
     this.setState({
       view: v
     });

@@ -39,7 +39,7 @@ class CategoryBar extends React.Component {
                             <CategoryBtn placeholder="All" options={[]} /> 
                         </div>
                     </div>))}
-                </div>                
+                </div>        
             </div>))}
             </div>
         </div>);

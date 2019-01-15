@@ -5,7 +5,12 @@ import CategoryBar from '../component/categorybar';
 import Plot from 'react-plotly.js';
 import DropBtn from '../component/dropbtn';
 
-const bar_colors = ['#D9D9D9','#002060','#9DC3E6','#1F4E79','#20ADE3',];
+import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell} from 'recharts';
+
+const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
+
+
+
 var sample_data = [
     {title: 'Layout', labels: ['중앙','좌우','우측','좌측'], data: [168,194,243,435]},
     {title: 'Background', labels: ['밝은단색','무색','면분할','어두운단색'], data: [112,204,271,320]},
@@ -23,13 +28,6 @@ var sample_data = [
     {title: 'Attribution4', labels: ['혜택형','유도형','타임형'], data: [204,231,242]},
 ];
 
-// reverse order
-sample_data = sample_data.map((dv)=>{
-    dv.labels = dv.labels.reverse();
-    dv.data = dv.data.reverse();
-    return dv;
-});
-
 class CreativeScreen extends React.Component {
     constructor(ps) {
         super(ps);
@@ -41,19 +39,31 @@ class CreativeScreen extends React.Component {
 
     renderContent() {
         return (<div class="flex-container">
-            <div class="row">
+            <div class="row section-title">
                 <div class="col">
-                    <h1 class="panel-title">Element Analysis</h1>
-                    <h5 class="panel-subtitle">소재 요소 상세 분석</h5>
+                    <h3 className="title">Element Analysis</h3>
+                    <h5 className="subtitle">소재 요소 상세 분석</h5>
                 </div>
             </div>
 
             <div class="row">
-                {sample_data.map((dt) => <div class="col-sm-12 col-md-6 col-lg-3 m-0 p-4 creative-chart-wrapper">
+                {sample_data.map((dt) => <div class="col-sm-12 col-md-6 col-lg-3 m-0 p-1">
                     <div class="creative-chart-link"><a data-toggle="dialog" disabled href="#">자세히 보기&gt;</a></div>
-                    <Plot style={{width: '95%', height: 300}} data={dt.labels.map((lb,idx)=>{
-                        return {type: 'bar', orientation: 'h', name: lb, text: [dt.data[idx]], textposition: 'auto', y: [lb], x: [dt.data[idx]], marker: {color: bar_colors[idx]}}; 
-                    })} layout={{autosize: true, showlegend: false, xaxis: {showgrid: false, showline: false, showticklabels: false}, title: dt.title}} config={{displayModeBar: false}} />
+                    <div class="creative-chart-wrapper">
+                        <h5>{dt.title}</h5>
+                        <ResponsiveContainer width="95%" height={180}>
+                            <BarChart data={dt.labels.map((lb,idx)=>({l:lb, d:dt.data[idx]}))}
+                                layout="vertical" barCategoryGap={0} >
+                                <XAxis type="number" tick={false} />
+                                <YAxis type="category" dataKey="l" tick={{stroke: 'transparent'}} />
+                                <Tooltip />
+                                <Bar dataKey="d" isAnimationActive={false} label={{position: 'end', fill: '#fff'}}>
+                                    {dt.labels.map((lb,idx)=><Cell key={'cell-'+idx+'-'+lb} fill={bar_colors[idx]} />)}
+                                </Bar>
+                                
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>)}
             </div>
         </div>);

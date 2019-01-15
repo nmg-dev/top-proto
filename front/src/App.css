@@ -23,6 +23,11 @@
   --font-white: #eeeeee;
 }
 
+.wrap-container{
+  min-width: 90vw;
+  min-height: calc(100vh - 56px);
+}
+
 .wrap-container>div {
   padding-top: 60;
 }
@@ -105,7 +110,13 @@
 .categorybar .design {
   color: var(--font-normal);
 }
-.categorybar .query-control i.fa-chevron-down {
+
+.categorytable .query-control {
+  margin: 0;
+}
+
+.categorybar .query-control i.fa-chevron-down,
+.categorytable .query-control i.fa-chevron-down {
   padding-top: 4px;
 }
 
@@ -115,6 +126,13 @@
   border-radius: 6px;
   border: 2px solid var(--data-grey); 
 }
+
+.categorytable .query-control .query-btn {
+  width: 100%;
+  font-size: 1.0em;
+  border: 0px;
+}
+
 .categorybar .label-text {
   width: 100%;
   padding-left: 4px;
@@ -265,11 +283,12 @@ div.card.panel .creative-chart-link {
   text-align: right;
   line-height: 1.5em;
 }
-.plot-container {
+.creative-chart-wrapper {
   border: 1px solid var(--bg-light);
   border-radius: 2px;
   margin: 4px;
 }
-.plot-container .svg-container {
+.creative-chart-wrapper .recharts-wrapper {
   width: 100%;
+  overflow: hidden;
 }

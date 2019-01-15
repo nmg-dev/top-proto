@@ -54,15 +54,15 @@ class MetricBtn extends React.Component {
     }
 
     render() {
-        return (<div class="button-group kpi-control">
-            <button type="input-group-btn" className="btn shadow-sm"
+        return (<div className="button-group kpi-control">
+            <button type="input-group-btn" className="btn shadow-sm" disabled
                 style={styles.btn}
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="label-icon"><i class="fas fa-ruler" /></div>
-                <div class="label-text text-muted">
+                <div className="label-icon"><i className="fas fa-ruler" /></div>
+                <div className="label-text text-muted">
                     {this.displayText()}
                 </div>
-                <i class="fas fa-chevron-down" />
+                <i className="fas fa-chevron-down" />
             </button>
             <div className="dropdown-menu">
                 {METRICS.filter((m)=>!m.hide).map((m)=> {

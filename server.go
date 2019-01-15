@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,14 +37,14 @@ func main() {
 	app.Static(`/js`, `./js`)
 	app.Static(`/css`, `./css`)
 
-	app.LoadHTMLGlob(`./views/*.tmpl`)
-	// app.Use(static.Serve("/", static.LocalFile("front/build", true)))
+	app.Use(static.Serve("/", static.LocalFile("front/build", true)))
 
 	GroupDatabaseConnection(app)
 
-	app.GET(``, func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, `index.tmpl`, "")
-	})
+	// app.LoadHTMLGlob(`./views/*.tmpl`)
+	// app.GET(``, func(ctx *gin.Context) {
+	// 	ctx.HTML(http.StatusOK, `index.tmpl`, "")
+	// })
 
 	app.GET(`/info`, func(ctx *gin.Context) {
 		// ctx.HTML(http.StatusOK, )

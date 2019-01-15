@@ -1,20 +1,11 @@
 import React from 'react';
 
-const styles = {
-    btn: {
-        backgroundColor: '#fff',
-        display: 'flex',
-        minWidth: '5vw',
-        alignItems: 'flex-start'
-    }
-}
 
-class DropBtn extends React.Component {
+class CategoryBtn extends React.Component {
     constructor(ps) {
         super(ps);
 
         this.state = this.props.initStage ? this.props.initStage : {
-            label: this.props.label,
             values: [],
         };
     }
@@ -56,23 +47,19 @@ class DropBtn extends React.Component {
 
     render() {
         return (<div class="button-group query-control">
-            <button type="input-group-btn" className="btn shadow" disabled
-                style={styles.btn}
+            <button type="input-group-btn" className="query-btn btn" disabled
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="label-icon">{this.props.icon}</div>
-                <div class="label-text">
-                    <b>{this.props.title}</b>
-                    <div class="text-muted">
-                        {this.displayText()}
-                    </div>
+                <div class="label-text text-muted">
+                    {this.displayText()}
                 </div>
                 <i class="fas fa-chevron-down" />
             </button>
             <div className="dropdown-menu">
+                <a className="dropdown-item" href="#">All</a>
                 {this.props.options.map(this.renderItem.bind(this))}
             </div>
         </div>);
     }
 }
 
-export default DropBtn;
+export default CategoryBtn;

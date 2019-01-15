@@ -17,22 +17,39 @@ const styles = {
   },
   sidebar: {},
   sidebarItem: {},
+  sidebarholder: {},
 }
 
 
 const views = [
   {v: 'dashboard', ko: '업종별 분석', en: 'Dashboard'},
   {v: 'creative', ko: '크리에이티브 분석', en: 'Dashboard'},
-  {v: 'predict', ko: '예상 효율 확인', en: 'Dashboard'},
+  {v: 'predict', ko: '예상 효율 확인', en: 'Dashboard', disabled: true},
 ];
 
 class App extends React.Component {
   constructor(ps) {
     super(ps);
     this.state = {
-      view: 'dashboard',
+      // view: 'dashboard',
+      view: 'creative',
       showSidebar: true,
     }
+  }
+
+  renderSidebar() {
+    return (<div className="sidebar background-dark">
+      {this.state.showSidebar ? (<ul>
+        <li class="sidebar-item"><img alt="sidebar logo" src="/img/logo_md.png" /></li>
+            {views.map((vs)=>(<li key={vs.v} view={vs.v}
+              className={'sidebar-item'+(this.state.view==vs.v?' active':'')}
+              onClick={this._onViewUpdate.bind(this)}>
+            {vs.ko}</li>))}
+      </ul>) : ''}
+      <div class="sidebar-holder" onClick={()=>this.setState({showSidebar: !this.state.showSidebar})}>
+        <i className={'fas fa-chevron-' + (this.state.showSidebar ? 'left' : 'right')} />
+      </div>
+    </div>);
   }
 
   renderStagedView(v) {
@@ -47,24 +64,20 @@ class App extends React.Component {
 
   render() {
     return (<div style={styles.default}>
-      <Navigation className="bg-dark" />
-      <main className="bg-light wrap-container" style={styles.container}>
-        <div className="bg-dark">
-            <ul style={styles.sidebar}>
-                <li style={styles.sidebarItem}><img alt="sidebar logo" src="/img/logo_md.png" /></li>
-                {views.map((vs)=><li style={styles.sidebarItem} key={vs.v}>
-                    <a view={vs.v} onClick={this._onViewUpdate.bind(this)}>{vs.ko}</a>
-                </li>)}
-            </ul> 
-        </div>
+      <Navigation className="background-dark" />
+      <main className="background-light wrap-container" style={styles.container}>
+        {this.renderSidebar()}
         {this.renderStagedView(this.state.view)}
       </main>
     </div>) 
   }
 
   _onViewUpdate(ev) {
+    let v = ev.target.getAttribute('view');
+    if(v=='predict') 
+      return;
     this.setState({
-      view: ev.target.getAttribute('view')
+      view: v
     });
   }
 }

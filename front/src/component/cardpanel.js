@@ -17,7 +17,7 @@ class CardPanel extends React.Component {
     }
 
     render() {
-        return (<div class="card panel shadow" style={this.props.style}>
+        return (<div class="card panel shadow m-0 p-4" style={this.props.style}>
             {this.renderCardImage()}
             {this.renderCardTitle()}
             <div class="card-text">

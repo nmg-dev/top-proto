@@ -31,8 +31,8 @@ class App extends React.Component {
   constructor(ps) {
     super(ps);
     this.state = {
-      // view: 'dashboard',
-      view: 'creative',
+      view: 'dashboard',
+      // view: 'creative',
       showSidebar: true,
     }
   }

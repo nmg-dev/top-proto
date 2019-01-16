@@ -55,18 +55,18 @@ class DropBtn extends React.Component {
     }
 
     render() {
-        return (<div class="button-group query-control">
+        return (<div className="button-group query-control">
             <button type="input-group-btn" className="btn shadow" disabled
                 style={styles.btn}
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="label-icon">{this.props.icon}</div>
-                <div class="label-text">
+                <div className="label-icon">{this.props.icon}</div>
+                <div className="label-text">
                     <b>{this.props.title}</b>
-                    <div class="text-muted">
+                    <div className="text-muted">
                         {this.displayText()}
                     </div>
                 </div>
-                <i class="fas fa-chevron-down" />
+                <i className="fas fa-chevron-down" />
             </button>
             <div className="dropdown-menu">
                 {this.props.options.map(this.renderItem.bind(this))}

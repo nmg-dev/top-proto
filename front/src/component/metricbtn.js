@@ -18,6 +18,13 @@ const METRICS = [
 ];
 
 class MetricBtn extends React.Component {
+    static ListMetricNames() {
+        return METRICS.map((m)=>m.key);
+    }
+    static GetMetricByKey(mk) {
+        return METRICS.reduce((found,m) => found = !found && m.key===mk ? m : found);
+    }
+
     constructor(ps) {
         super(ps);
 

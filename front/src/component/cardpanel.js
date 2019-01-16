@@ -11,16 +11,16 @@ class CardPanel extends React.Component {
     }
 
     renderCardTitle() {
-        return this.props.title ? <h5 class="card-title">
+        return this.props.title ? <h5 className="card-title">
             {this.props.title}
         </h5> : '';
     }
 
     render() {
-        return (<div class="card panel shadow m-0 p-4" style={this.props.style}>
+        return (<div className="card panel shadow m-0 p-4" style={this.props.style}>
             {this.renderCardImage()}
             {this.renderCardTitle()}
-            <div class="card-text">
+            <div className="card-text">
                 {this.props.body}
             </div>
         </div>);

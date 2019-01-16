@@ -53,25 +53,25 @@ class Querybar extends React.Component {
                     </div>
                 </div>
                 <div style={styles.cardRow}>
-                    <DropBtn icon={<i class="fas fa-industry" />}
+                    <DropBtn icon={<i className="fas fa-industry" />}
                         title="업종"
                         placeholder="업종 선택"
                         options={[
                             {key: 'a', label: 'A'},
                         ]} />
-                    <DropBtn icon={<i class="fas fa-broadcast-tower" />}
+                    <DropBtn icon={<i className="fas fa-broadcast-tower" />}
                         title="채널" placeholder="채널 선택"
                         options={[
                             {key: 'a', label: 'A'},
                         ]} />
 
-                    <DropBtn icon={<i class="fas fa-video" />}
+                    <DropBtn icon={<i className="fas fa-video" />}
                         title="광고미디어" placeholder="미디어 선택"
                         options={[
                             {key: 'a', label: 'A'},
                         ]} />
-                    <DropBtn icon={<i class="fas fa-microphone" />}
-                        title="목표" placeholder="목표 선택"
+                    <DropBtn icon={<i className="fas fa-microphone" />}
+                        title="광고목적" placeholder="광고목적 선택"
                         options={[
                             {key: 'a', label: 'A'},
                         ]} />

@@ -1,5 +1,4 @@
 import React from 'react';
-import CardPanel from '../component/cardpanel';
 import CategoryBtn from '../component/categorybtn';
 import AppScreen from './appScreen';
 
@@ -24,11 +23,14 @@ const table_options = {
     ],
 }
 
-class PredictScreen extends AppScreen {
+class SimulationScreen extends AppScreen {
+    static ACCESSOR = 'simulation';
     constructor(ps) {
-        super(ps);
+        super(ps, SimulationScreen.ACCESSOR);
         this.state = {};
     }
+    accessor() { return SimulationScreen.ACCESSOR; }
+    getTitle() { return '예상효율 확인' }
 
     renderOptionTable(options, clsLabel, styles) {
         return (<table className="table categorytable" style={styles}>
@@ -78,4 +80,4 @@ class PredictScreen extends AppScreen {
     }
 }
 
-export default PredictScreen;
+export default SimulationScreen;

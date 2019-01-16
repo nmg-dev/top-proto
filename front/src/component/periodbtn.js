@@ -1,22 +1,10 @@
 import React from 'react';
 import moment from 'moment';
 
-const DATE_FORMAT = 'YYYY-MM-DD';
-
-
-const styles = {
-    btn: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    labels: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-    }
-}
+// const DATE_FORMAT = 'YYYY-MM-DD';
 
 class PeriodBtn extends React.Component {
+    static DATE_FORMAT = 'YYYY-MM-DD';
     constructor(ps) {
         super(ps);
 
@@ -27,20 +15,19 @@ class PeriodBtn extends React.Component {
     }
 
     render() {
-        return (<div class="button-group kpi-control">
-            <button type="input-group-btn" className="btn shadow-sm" disabled
-                style={styles.btn}
+        return (<div className="button-group kpi-control">
+            <button type="input-group-btn" className="btn shadow-sm period-control" disabled
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="label-icon"><i class="fas fa-calendar" /></div>
-                <div class="label-text">
+                <div className="label-icon"><i className="fas fa-calendar" /></div>
+                <div className="label-text">
                     <b>{this.props.title}</b>
-                    <div class="text-muted">
-                        {this.state.from.format(DATE_FORMAT)}
+                    <div className="text-muted">
+                        {this.state.from.format(PeriodBtn.DATE_FORMAT)}
                         ~
-                        {this.state.till.format(DATE_FORMAT)}
+                        {this.state.till.format(PeriodBtn.DATE_FORMAT)}
                     </div>
                 </div>
-                <i class="fas fa-chevron-down" />
+                <i className="fas fa-chevron-down" />
             </button>
         </div>);
     }

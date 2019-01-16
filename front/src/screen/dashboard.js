@@ -63,23 +63,27 @@ const table_titles = {
 }
  
 class DashboardScreen extends AppScreen {
+    static _ACCESSOR = 'dashboard';
+    static _TITLE = {ko: '업종별 분석', en: 'By industry'};
+
     constructor(ps) {
-        super(ps);
-        this.state = {};
+        super(ps, DashboardScreen.ACCESSOR);
+        if(!DashboardScreen.INSTANCE)
+            DashboardScreen.INSTANCE = this;
     }
+    
 
     renderElementCard(cls, title) {
-        return (<div class="section col-3" key={cls+':'+title}>
-            <h5 class="section-title">{cls}</h5>
-            <div class="section-text">{title}</div>
+        return (<div className="section col-3" key={cls+':'+title}>
+            <h5 className="section-title">{title}</h5>
+            <div className="section-text">{cls}</div>
         </div>);
     }
 
     renderContentChart() {
         return (<ResponsiveContainer width="95%" height={280}>
         <LineChart data={sample_data}>
-            <XAxis dataKey="t" 
-                />
+            <XAxis dataKey="t" />
             <YAxis stroke="transparent" />
             <Line dataKey="y" 
                 stroke="#002060" strokeWidth="3" 
@@ -89,25 +93,25 @@ class DashboardScreen extends AppScreen {
     }
 
     renderClassTable(cls) {
-        return (<table class="table">
+        return (<table className="table">
             <thead>
                 <tr>
                     <th>속성</th>
-                    {table_columns.map((c)=><th key={cls+':'+c}>{c}</th>)}
+                    {table_columns.map((c)=><th>{c}</th>)}
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <th>옵션</th>
-                    {table_values[cls].map((v)=><td key={cls+':v:'+v.l}>{v.l}</td>)}
+                    {table_values[cls].map((v)=><td>{v.l}</td>)}
                 </tr>
                 <tr>
                     <th>CPC</th>
-                    {table_values[cls].map((v)=><td key={cls+':v:'+v.v}>{v.v}</td>)}
+                    {table_values[cls].map((v)=><td>{v.v}</td>)}
                 </tr>
                 <tr>
                     <th>예시</th>
-                    <td colspan={table_values[cls].length} align="center">
+                    <td colSpan={table_values[cls].length} align="center">
                         {this.renderClassTableSampleImage(cls)}
                     </td>
                 </tr>
@@ -120,26 +124,26 @@ class DashboardScreen extends AppScreen {
     }
 
     renderContent() {
-        return (<div class="flex-container">
-            <div class="row">
-                <div class="col"><h3 class="panel-title">Best Creative Element</h3></div>
+        return (<div className="flex-container">
+            <div className="row">
+                <div className="col"><h3 className="panel-title">Best Creative Element</h3></div>
             </div>
-            <div class="row">
+            <div className="row">
                 {samples_design.map((d)=>this.renderElementCard(d.c, d.t))}
             </div>
-            <div class="row">
+            <div className="row">
                 {samples_topic.map((d)=>this.renderElementCard(d.c, d.t))}
             </div>
-            <div class="row">
-                <div class="col">
+            <div className="row">
+                <div className="col">
                     {this.renderContentChart()}
                 </div>
             </div>
-            <div class="row panel-details">
-                <div class="col">
+            <div className="row panel-details">
+                <div className="col">
                     <h3>Industry Analysis</h3>
                     {['fnb','houseware'].map((cls)=>{
-                        return (<div class="panel-category-detail">
+                        return (<div className="panel-category-detail">
                             <h5>{table_titles[cls]}</h5>
                             {this.renderClassTable(cls)}
                         </div>);

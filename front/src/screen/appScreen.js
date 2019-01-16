@@ -1,7 +1,12 @@
 import React from 'react';
 import CardPanel from '../component/cardpanel';
 
+
+
+
 class AppScreen extends React.Component {
+    static views = {};
+
     constructor(ps) {
         super(ps);
     }
@@ -16,12 +21,15 @@ class AppScreen extends React.Component {
     renderContent() { return ''; }
 
     render() {
-        return (<div className="container-flex panel-wrapper">
+        return (
+            <div className="container-fluid panel-wrapper">
                 <div className="row">
                     {this.renderHeaderbar()}
                 </div>
                 <div className="row">
-                    <CardPanel body={this.renderContent()} />
+                    <div className="col">
+                        <CardPanel body={this.renderContent()} />
+                    </div>
                 </div>
             </div>
         );

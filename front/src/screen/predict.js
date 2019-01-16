@@ -1,6 +1,7 @@
 import React from 'react';
 import CardPanel from '../component/cardpanel';
 import CategoryBtn from '../component/categorybtn';
+import AppScreen from './appScreen';
 
 const table_options = {
     design: [
@@ -23,7 +24,7 @@ const table_options = {
     ],
 }
 
-class PredictScreen extends React.Component {
+class PredictScreen extends AppScreen {
     constructor(ps) {
         super(ps);
         this.state = {};
@@ -72,19 +73,6 @@ class PredictScreen extends React.Component {
                     <button class="btn btn-default shadow">리셋</button>
                     <button class="btn btn-outline-default shadow">예상효율 확인하기</button>
                 </div>
-            </div>
-        </div>);
-    }
-
-    render() {
-        return (<div className="container-flex panel-wrapper">
-            <div className="row">
-                <div className="col">
-                    <img src="/img/logo_lg.png" alt="logo-large" />
-                </div>
-            </div>
-            <div className="row">
-                <CardPanel body={this.renderContent()} />
             </div>
         </div>);
     }

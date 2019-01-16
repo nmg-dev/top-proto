@@ -1,7 +1,7 @@
 import React from 'react';
 import Querybar from '../component/querybar';
-import CardPanel from '../component/cardpanel';
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts';
+import AppScreen from './appScreen';
 
 const samples_design = [
     {c: 'Background', t: '무색'},
@@ -62,7 +62,7 @@ const table_titles = {
     fnb: '식음료', houseware: '가정용품',
 }
  
-class DashboardScreen extends React.Component {
+class DashboardScreen extends AppScreen {
     constructor(ps) {
         super(ps);
         this.state = {};
@@ -149,16 +149,10 @@ class DashboardScreen extends React.Component {
         </div>);
     }
 
-    render() {
-        return (<div className="container-flex panel-wrapper">
-                <div className="row">
-                    <Querybar />
-                </div>
-                <div className="row">
-                    <CardPanel 
-                        body={this.renderContent()} />
-                </div>
-            </div>);
+    renderHeaderbar() {
+        return (<div className="col">
+            <Querybar />
+        </div>)
     }
 }
 

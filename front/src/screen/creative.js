@@ -1,11 +1,9 @@
 import React from 'react';
 import Querybar from '../component/querybar';
-import CardPanel from '../component/cardpanel';
 import CategoryBar from '../component/categorybar';
-import Plot from 'react-plotly.js';
-import DropBtn from '../component/dropbtn';
 
 import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell} from 'recharts';
+import AppScreen from './appScreen';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
 
@@ -28,7 +26,7 @@ var sample_data = [
     {title: 'Attribution4', labels: ['혜택형','유도형','타임형'], data: [204,231,242]},
 ];
 
-class CreativeScreen extends React.Component {
+class CreativeScreen extends AppScreen {
     constructor(ps) {
         super(ps);
         this.state = {};
@@ -68,19 +66,12 @@ class CreativeScreen extends React.Component {
             </div>
         </div>);
     }
-    
-    render() {
-        return (<div className="container-flex panel-wrapper">
-                <div className="row">
-                    <Querybar />
-                    <CategoryBar />
-                </div>
-                <div className="row">
-                    <CardPanel 
-                        body={this.renderContent()} />
-                </div>
-            </div>
-        );
+
+    renderHeaderbar() {
+        return (<div className="col">
+            <Querybar />
+            <CategoryBar />
+        </div>);
     }
 }
 

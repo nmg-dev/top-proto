@@ -9,6 +9,7 @@ import DropBtn from '../component/dropbtn';
 import PeriodBtn from '../component/periodbtn';
 import CreativeDialog from '../component/creativeDialog';
 import ApplicationContext from '../AppContext';
+import Metric from '../module/metric';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
 
@@ -71,47 +72,6 @@ class CreativeScreen extends AppScreen {
                 </BarChart>
             </ResponsiveContainer>
         </div>);
-    }
-
-    renderContentDialog(dt) {
-        if(!this._dialogs[dt.title])
-            this._dialogs[dt.title] = React.createRef();
-        return (<Dialog ref={this._dialogs[dt.title]}
-            title={dt.title + 'Details'} subtitle="요소 상세 분석"
-            content={<div>
-                <div>
-                    <DropBtn icon={<i class="fas fa-ruler" />} title={dt.title} placeholder="ALL" />
-                    <PeriodBtn />
-                </div>
-                <div>
-                    <ResponsiveContainer>
-                        <LineChart></LineChart>
-                    </ResponsiveContainer>
-                </div>
-                <div>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>날짜</th>
-                                <th>CTR</th>
-                                <th>CPC</th>
-                                <th>CVR</th>
-                                <th>CPA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2019-01-01</td>
-                                <td>1.0 %</td>
-                                <td>200 <i class="fas fa-krw" /></td>
-                                <td>0.5 %</td>
-                                <td>1,000 <i class="fas fa-krw" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>}
-        />)
     }
 
     renderContent() {

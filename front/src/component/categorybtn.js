@@ -47,7 +47,7 @@ class CategoryBtn extends React.Component {
 
     render() {
         return (<div class="button-group query-control">
-            <button type="input-group-btn" className="query-btn btn" disabled
+            <button type="input-group-btn" className="query-btn btn"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div class="label-text text-muted">
                     {this.displayText()}

@@ -1,4 +1,6 @@
 import React from 'react';
+import ApplicationContext from '../AppContext';
+import Metric from '../module/metric';
 
 const styles = {
     btn: {
@@ -9,27 +11,14 @@ const styles = {
     }
 }
 
-const METRICS = [
-    {key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
-    {key: 'cpa', calc: (v) => (v.cnv/Math.max(1,v.cost)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
-    {key: 'ctr', calc: (v) => (v.clk/Math.max(1,v.imp)), fmt: (v) => (100*v).toFixed(4)+' %' },
-    {key: 'cvr', calc: (v) => (v.cnv/Math.max(1,v.imp)), fmt: (v) => (100*v).toFixed(4)+' %' },
-    {key: 'cnt', calc: (v) => 1, hide: true, fmt: (v)=> v.toLocaleString()+ '.' },
-];
 
 class MetricBtn extends React.Component {
-    static ListMetricNames() {
-        return METRICS.map((m)=>m.key);
-    }
-    static GetMetricByKey(mk) {
-        return METRICS.reduce((found,m) => found = !found && m.key===mk ? m : found);
-    }
-
+    // static contextType = ApplicationContext;
     constructor(ps) {
         super(ps);
 
         this.state = this.props.initStage ? this.props.initStage : {
-            kpi: METRICS[0].key,
+            kpi: Metric.DefaultKey(),
         };
     }
 
@@ -72,13 +61,13 @@ class MetricBtn extends React.Component {
                 <i className="fas fa-chevron-down" />
             </button>
             <div className="dropdown-menu">
-                {METRICS.filter((m)=>!m.hide).map((m)=> {
+                {Metric.List().map((m)=> {
                     let clsName = 'dropdown-item';
-                    if(m.key===this.state.kpi)
+                    if(m.key()===this.state.kpi)
                         clsName += ' active';
-                    return (<a key={m.key} href="#" className={clsName}
+                    return (<a key={m.key()} href="#" className={clsName}
                         onClick={this.onClickItem.bind(this)}>
-                        {m.key.toUpperCase()}
+                        {m.label()}
                     </a>);
                 })}
             </div>

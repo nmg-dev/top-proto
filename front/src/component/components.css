@@ -192,3 +192,7 @@
     border-bottom: 1px solid var(--data-grey);
 }
 
+/* category dialog */
+.table.creative-modal .kpi-column {
+    background-color: var(--data-light);
+}

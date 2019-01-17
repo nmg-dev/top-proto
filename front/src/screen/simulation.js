@@ -1,6 +1,9 @@
 import React from 'react';
 import CategoryBtn from '../component/categorybtn';
 import AppScreen from './appScreen';
+import ApplicationContext from '../AppContext';
+import Metric from '../module/metric';
+import AttributeMeta from '../module/ameta';
 
 const table_options = {
     design: [
@@ -24,13 +27,50 @@ const table_options = {
 }
 
 class SimulationScreen extends AppScreen {
-    static ACCESSOR = 'simulation';
+    static contextType = ApplicationContext;
+
     constructor(ps) {
         super(ps, SimulationScreen.ACCESSOR);
-        this.state = {};
+        this.state = {
+            history: [],
+            options: {},
+        };
+        this._refs = {};
     }
-    accessor() { return SimulationScreen.ACCESSOR; }
-    getTitle() { return '예상효율 확인' }
+    appendHistory() {
+        // retrive options
+        let rs = {
+            opts: {},
+            vals: {},
+        };
+        Object.values(this._refs)
+            .map((rf)=>rf.current)
+            .forEach((el)=> {
+                if(el) {
+                    let ok = el.props.name;
+                    let ov = el.displayText();
+                    // console.log(ok, ov);
+                    rs.opts[ok] = ov;
+                }
+            });
+        Metric.Keys().forEach((mk)=>{
+            rs.vals[mk] = Math.random();
+        });
+        // console.log(rs);
+        let hist = this.state.history;
+        hist.push(rs);
+        this.setState({
+            history: hist
+        });
+    }
+
+    resetOptions() {
+        Object.values(this._refs)
+            .map((rf)=>rf.current)
+            .forEach((el)=> {
+                if(el) el.setState({values: []});
+            });
+    }
 
     renderOptionTable(options, clsLabel, styles) {
         return (<table className="table categorytable" style={styles}>
@@ -41,14 +81,38 @@ class SimulationScreen extends AppScreen {
                 </tr>
             </thead>
             <tbody>
-                {options.map((opt)=><tr>
-                    <th>{opt.label}</th>
-                    <td>
-                        <CategoryBtn placeholder="ALL" options={[]} />
-                    </td>
-                </tr>)}
+                {options.map((opt)=> {
+                    if(!this._refs[opt.name])
+                        this._refs[opt.name] = React.createRef();
+                    return (<tr>
+                        <th>{opt.label}</th>
+                        <td>
+                            <CategoryBtn key={'result-opt-'+opt.name} name={opt.name} ref={this._refs[opt.name]} placeholder="ALL" options={[]} />
+                        </td>
+                    </tr>);
+                })}
             </tbody>
         </table>);
+    }
+
+    renderResultSection(rs) {
+        console.log(rs);
+        return(<div class="row section-result">
+            <div class="col">
+                <div>
+                    {AttributeMeta.AllClasses().map((opt)=>
+                        <span class="simulate-option">{rs.opts[opt]}</span>)}
+                </div>
+                <table class="table simulate-table">
+                    <thead>
+                        <tr>{Metric.List().map((m)=><th>{m.label()}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                        <tr>{Metric.List().map((m)=><td>{m.format(rs.vals[m.key()])}</td>)}</tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>);
     }
 
     renderContent() {
@@ -67,14 +131,19 @@ class SimulationScreen extends AppScreen {
                     {this.renderOptionTable(table_options.adcopy, '콘텐츠 속성')}
                 </div>
                 <div class="col-sm-12 col-lg-4">
-                    {this.renderOptionTable(table_options.adcopy, '캠페인 조건')}
+                    {this.renderOptionTable(table_options.optional, '캠페인 조건')}
                 </div>
             </div>
             <div class="row">
                 <div class="col" align="right">
                     <button class="btn btn-default shadow">리셋</button>
-                    <button class="btn btn-outline-default shadow">예상효율 확인하기</button>
+                    <button class="btn shadow" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
+                    {/* <button class="btn shadow" onClick={()=>window.print()}>출력하기</button> */}
                 </div>
+            </div>
+
+            <div class="printable">
+                {this.state.history.map((rs)=>this.renderResultSection(rs))}
             </div>
         </div>);
     }

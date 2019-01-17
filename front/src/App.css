@@ -43,3 +43,15 @@
   color: var(--font-white);
   background-color: var(--bg-dark);
 }
+
+
+@media print {
+  body { visibility: hidden; }
+  .printable { 
+    visibility: visible; 
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+  }
+}

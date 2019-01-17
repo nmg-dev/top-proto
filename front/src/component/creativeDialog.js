@@ -5,6 +5,7 @@ import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recha
 import MetricBtn from './metricbtn';
 import CategoryBtn from './categorybtn';
 import PeriodBtn from './periodbtn';
+import Metric from '../module/metric';
 
 const sample_data = [
     { t: '2018년 10월 1주차',	y: 500},
@@ -50,10 +51,16 @@ class CreativeDialog extends Dialog {
         </div>);
     }
 
+    onClickMetricTableColumn(ev) {
+        this.setState({kpi: ev.target.getAttribute('metric')});
+    }
+
     renderModalBody() {
+        let range = [];
+        range[29] = 0;
+        range.fill(0, 0);
         return (<div className="modal-body">
             <div className="d-flex">
-                <MetricBtn />
                 <CategoryBtn options={[]} />
                 <PeriodBtn />
             </div>
@@ -68,38 +75,24 @@ class CreativeDialog extends Dialog {
                 </ResponsiveContainer>
             </div>
             <div>
-                <table class="table">
+                <table class="table creative-modal">
                     <thead>
                         <tr>
                             <th>날짜</th>
-                            <th className="kpi-column">CPC</th>
-                            <th>CPA</th>
-                            <th>CTR</th>
-                            <th>CVR</th>
+                            {Metric.List().map((m)=>(<th metric={m.key()}
+                                className={this.state.kpi===m.key()?'kpi-column':''}
+                                onClick={this.onClickMetricTableColumn.bind(this)}>
+                                    {m.label()}
+                                </th>))}
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
+                    <tbody class="creative-modal-result">
+                        {range.map(()=><tr>
                             <td>2019-01-01</td>
-                            <td className="kpi-column">5.00 %</td>
-                            <td>1.00 %</td>
-                            <td>500 KRW</td>
-                            <td>1,500 KRW</td>
-                        </tr>
-                        <tr>
-                            <td>2019-01-02</td>
-                            <td className="kpi-column">5.00 %</td>
-                            <td>1.00 %</td>
-                            <td>500 KRW</td>
-                            <td>1,500 KRW</td>
-                        </tr>
-                        <tr>
-                            <td>2019-01-03</td>
-                            <td className="kpi-column">5.00 %</td>
-                            <td>1.00 %</td>
-                            <td>500 KRW</td>
-                            <td>1,500 KRW</td>
-                        </tr>
+                            {Metric.List().map((m)=><td className={this.state.kpi===m.key()?'kpi-column':''}>
+                                {m.format(Math.random())}
+                            </td>)}
+                        </tr>)}
                     </tbody>
                 </table>
             </div>

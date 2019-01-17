@@ -4,25 +4,29 @@ import DashboardScreen from '../screen/dashboard';
 import CreativeScreen from '../screen/creative';
 import SimulationScreen from '../screen/simulation';
 
+const DASHBOARD_SCREEN = 'dashboard';
+const CREATIVE_SCREEN = 'creative';
+const SIMULATION_SCREEN = 'simulation';
+
 class Sidebar extends React.Component {
     static ViewKeys = [
-        DashboardScreen.name,
-        CreativeScreen.name,
-        SimulationScreen.name,
+        DASHBOARD_SCREEN,
+        CREATIVE_SCREEN,
+        SIMULATION_SCREEN,
     ];
 
     static ViewTitles = {
         ko: {
-            [DashboardScreen.name]: '업종별 분석',
-            [CreativeScreen.name]: '크리에이티브 분석',
-            [SimulationScreen.name]: '예상효율 확인'
+            [DASHBOARD_SCREEN]: '업종별 분석',
+            [CREATIVE_SCREEN]: '크리에이티브 분석',
+            [SIMULATION_SCREEN]: '예상효율 확인'
         }
     };
 
     static ViewRenders = {};
 
     static indexViewAccessor() {
-        return DashboardScreen.name;
+        return DASHBOARD_SCREEN;
     }
 
     static ViewTitleOf(vk) {
@@ -34,10 +38,10 @@ class Sidebar extends React.Component {
         // let vk = this.state.view;
         if(!Sidebar.ViewRenders[vk]) {
             switch(vk) {
-            case CreativeScreen.name:
+            case CREATIVE_SCREEN:
                 Sidebar.ViewRenders[vk] = (<CreativeScreen />);
                 break; 
-            case SimulationScreen.name:
+            case SIMULATION_SCREEN:
                 Sidebar.ViewRenders[vk] = (<SimulationScreen />);
                 break;
             default:

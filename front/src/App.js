@@ -2,7 +2,6 @@ import React from 'react';
 import './App.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 import ApplicationContext from './AppContext';
 import Navigation from './component/navigation';
 import Sidebar from './component/sidebar';

@@ -2,7 +2,6 @@ import React from 'react';
 import Dialog from './dialog';
 
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts'
-import MetricBtn from './metricbtn';
 import CategoryBtn from './categorybtn';
 import PeriodBtn from './periodbtn';
 import Metric from '../module/metric';
@@ -61,7 +60,7 @@ class CreativeDialog extends Dialog {
         range.fill(0, 0);
         return (<div className="modal-body">
             <div className="d-flex">
-                <CategoryBtn options={[]} />
+                <CategoryBtn placeholder="All" options={[]} />
                 <PeriodBtn />
             </div>
             <div>

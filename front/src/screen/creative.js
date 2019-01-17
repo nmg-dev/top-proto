@@ -90,7 +90,6 @@ class CreativeScreen extends AppScreen {
                             onClick={this.showDetailDialog.bind(this)}>자세히 보기&gt;</a>
                     </div>
                     {this.renderContentChart(dt)}
-                    
                 </div>)}
             </div>
             <CreativeDialog ref={this._dialog} />

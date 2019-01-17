@@ -2,6 +2,7 @@ import React from 'react';
 import Querybar from '../component/querybar';
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts';
 import AppScreen from './appScreen';
+import CreativePreview from '../component/creativePreview';
 
 const samples_design = [
     {c: 'Background', t: '무색'},
@@ -82,14 +83,15 @@ class DashboardScreen extends AppScreen {
 
     renderContentChart() {
         return (<ResponsiveContainer width="95%" height={280}>
-        <LineChart data={sample_data}>
-            <XAxis dataKey="t" />
-            <YAxis stroke="transparent" />
-            <Line dataKey="y" 
-                stroke="#002060" strokeWidth="3" 
-                dot={{r: 5}} />
-            <Tooltip />
-        </LineChart></ResponsiveContainer>);
+            <LineChart data={sample_data}>
+                <XAxis dataKey="t" />
+                <YAxis stroke="transparent" />
+                <Line dataKey="y" 
+                    stroke="#002060" strokeWidth="3" 
+                    dot={{r: 5}} />
+                <Tooltip />
+            </LineChart>
+        </ResponsiveContainer>);
     }
 
     renderClassTable(cls) {
@@ -112,7 +114,7 @@ class DashboardScreen extends AppScreen {
                 <tr>
                     <th>예시</th>
                     <td colSpan={table_values[cls].length} align="center">
-                        {this.renderClassTableSampleImage(cls)}
+                        <CreativePreview />
                     </td>
                 </tr>
             </tbody>

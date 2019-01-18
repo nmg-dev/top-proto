@@ -96,7 +96,6 @@ class SimulationScreen extends AppScreen {
     }
 
     renderResultSection(rs) {
-        console.log(rs);
         return(<div class="row section-result">
             <div class="col">
                 <div>
@@ -147,6 +146,10 @@ class SimulationScreen extends AppScreen {
             </div>
         </div>);
     }
+
+    renderQueryTopControls() { return '' }
+    renderQueryMidControls() { return '' }
+    renderQueryBottomControls() { return '' }
 }
 
 export default SimulationScreen;

@@ -56,8 +56,7 @@ class DropBtn extends React.Component {
 
     render() {
         return (<div className="button-group query-control">
-            <button type="input-group-btn" className="btn shadow" disabled
-                style={styles.btn}
+            <button type="input-group-btn" className="btn query-btn shadow" disabled
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div className="label-icon">{this.props.icon}</div>
                 <div className="label-text">

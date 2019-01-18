@@ -126,8 +126,8 @@ class DashboardScreen extends AppScreen {
     }
 
     renderContent() {
-        return (<div className="flex-container">
-            <div className="row">
+        return (<div className="container m-0 p-1">
+            <div className="row panel-header">
                 <div className="col"><h3 className="panel-title">Best Creative Element</h3></div>
             </div>
             <div className="row">
@@ -155,11 +155,8 @@ class DashboardScreen extends AppScreen {
         </div>);
     }
 
-    renderHeaderbar() {
-        return (<div className="col">
-            <Querybar />
-        </div>)
-    }
+    // ignore category controls
+    renderQueryBottomControls() { return '' }
 }
 
 export default DashboardScreen;

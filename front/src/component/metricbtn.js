@@ -1,19 +1,8 @@
 import React from 'react';
-import ApplicationContext from '../AppContext';
 import Metric from '../module/metric';
-
-const styles = {
-    btn: {
-        backgroundColor: '#fff',
-        display: 'flex',
-        minWidth: '5vw',
-        alignItems: 'flex-start'
-    }
-}
 
 
 class MetricBtn extends React.Component {
-    // static contextType = ApplicationContext;
     constructor(ps) {
         super(ps);
 
@@ -50,11 +39,12 @@ class MetricBtn extends React.Component {
     }
 
     render() {
-        return (<div className="button-group kpi-control">
-            <button type="input-group-btn" className="btn shadow-sm"
-                style={styles.btn}
+        return (<div className="button-group query-control top-control">
+            <button type="input-group-btn" className="btn"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div className="label-icon"><i className="fas fa-ruler" /></div>
+                <div className="label-icon m-0 p-0">
+                    <img src="/img/icon-metric.png" />
+                </div>
                 <div className="label-text text-muted">
                     {this.displayText()}
                 </div>

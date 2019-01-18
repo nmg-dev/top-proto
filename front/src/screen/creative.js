@@ -1,15 +1,10 @@
 import React from 'react';
 import Querybar from '../component/querybar';
-import CategoryBar from '../component/categorybar';
 import {ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Cell} from 'recharts';
 import AppScreen from './appScreen';
-import Dialog from '../component/dialog';
 
-import DropBtn from '../component/dropbtn';
-import PeriodBtn from '../component/periodbtn';
 import CreativeDialog from '../component/creativeDialog';
 import ApplicationContext from '../AppContext';
-import Metric from '../module/metric';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
 
@@ -93,13 +88,6 @@ class CreativeScreen extends AppScreen {
                 </div>)}
             </div>
             <CreativeDialog ref={this._dialog} />
-        </div>);
-    }
-
-    renderHeaderbar() {
-        return (<div className="col">
-            <Querybar />
-            <CategoryBar />
         </div>);
     }
 }

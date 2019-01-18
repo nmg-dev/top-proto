@@ -6,18 +6,6 @@ import ApplicationContext from './AppContext';
 import Navigation from './component/navigation';
 import Sidebar from './component/sidebar';
 
-const styles = {
-	default: {},
-	container: {
-		display: 'flex',
-		marginTop: '56px',
-	},
-	sidebar: {},
-	sidebarItem: {},
-	sidebarholder: {},
-}
-
-
 class App extends React.Component {
 	constructor(ps) {
 		super(ps);
@@ -36,9 +24,9 @@ class App extends React.Component {
 	
 	render() {
 		return (<ApplicationContext.Provider>
-			<div style={styles.default}>
+			<div>
 				<Navigation className="background-dark" />
-				<main className="background-light wrap-container" style={styles.container}>
+				<main className="background-light wrap-container">
 					<Sidebar onClickItem={this._onViewUpdate.bind(this)} />
 					{this.renderStagedView()}
 				</main>

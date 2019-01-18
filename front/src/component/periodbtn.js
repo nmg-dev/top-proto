@@ -15,17 +15,16 @@ class PeriodBtn extends React.Component {
     }
 
     render() {
-        return (<div className="button-group kpi-control">
-            <button type="input-group-btn" className="btn shadow-sm period-control" disabled
+        return (<div className="button-group query-control top-control" style={{marginRight: 0}}>
+            <button type="input-group-btn" className="btn shadow-sm period-control"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div className="label-icon"><i className="fas fa-calendar" /></div>
-                <div className="label-text">
-                    <b>{this.props.title}</b>
-                    <div className="text-muted">
-                        {this.state.from.format(PeriodBtn.DATE_FORMAT)}
-                        ~
-                        {this.state.till.format(PeriodBtn.DATE_FORMAT)}
-                    </div>
+                <div className="label-icon">
+                    <img src="/img/icon-calendar.png" alt="calendar icon" />
+                </div>
+                <div className="label-text text-muted">
+                    {this.state.from.format(PeriodBtn.DATE_FORMAT)}
+                     ~ 
+                    {this.state.till.format(PeriodBtn.DATE_FORMAT)}
                 </div>
                 <i className="fas fa-chevron-down" />
             </button>

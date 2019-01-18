@@ -1,15 +1,20 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700,700i|Noto+Serif+JP:300');
+
 *,body {
   margin: 0;
   padding: 0;
 
   background-color: transparent;
   color: #333;
+  
   font-weight: 300;
   font-family: 'Noto Sans KR', sans-serif;
+
 
   --bg-dark: #262626;
   --bg-light: #F2F2F2;
   --bg-select: #DEEBF7;
+  --bg-white: #FFFFFF;
 
   --data-grey: #D9D9D9;
   --data-primary: #20ADE3;
@@ -21,15 +26,107 @@
   --font-dark: #002060;
   --font-light: #595959;
   --font-white: #eeeeee;
+
+  --gnb-height: 76px;
+  --sidebar-width: 218px;
+
+  --font-size-0: 15px;
+  --font-size-1: 18px;
+  --font-size-2: 20px;
+  --font-size-3: 23px;
+  --font-size-4: 25px;
+  --font-size-5: 28px;
+
+  --padding-0: 14px;
+  --padding-1: 25px;
+  --padding-3: 35px;
+  --padding-4: 65px;
+
+  --section-title-font-size: 40px;
+  --section-subtitle-font-size: var(--font-size-2);
+}
+
+.gnb.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--gnb-height);
+}
+.gnb.navbar .navbar-brand img {
+  width: var(--sidebar-width);
+}
+.gnb.navbar .navbar-nav {
+  display: flex;
+  flex-direction: row;
+  font-size: var(--font-size-4);
+}
+.gnb.navbar .navbar-nav li {
+  text-indent: var(--padding-0);
+}
+
+
+/* sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  color: var(--font-white);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+
+}
+.sidebar .sidebar-inner {
+  width: var(--sidebar-width);
+  overflow: hidden;
+}
+.sidebar .sidebar-inner>ul {
+  width: calc(var(--sidebar-width) - 2*var(--padding-0));
+  padding-left: var(--padding-0);
+  position: fixed;
+}
+.sidebar .sidebar-item {
+  margin-top: var(--padding-3);
+  display: block;
+  color: var(--font-light);
+  cursor: pointer;
+
+  font-size: var(--font-size-2);
+  font-weight: 700;
+}
+.sidebar .sidebar-item.logo {
+  padding-left: 0px;
+  width: calc(var(--sidebar-width) - var(--padding-0));
+}
+.sidebar .sidebar-item.active {
+  color: var(--font-white);
+  font-size: calc(var(--font-size-2) + 1px);
+  text-decoration: underline;
+  text-decoration-line: 4px solid; 
+}
+.sidebar .sidebar-item:nth-child(1) {
+  margin-bottom: 10vh;
+}
+.sidebar .sidebar-holder {
+  width: 20px;
+  height: 100%;
+  justify-content: center;
+  align-self: center;
+  font-size: var(--font-size-1);
+  color: var(--font-white);
+}
+.sidebar .sidebar-holder i {
+  color: var(--font-white);
+  position: fixed;
+  top: 50%;
 }
 
 .wrap-container{
+  display: flex;
+  flex-direction: row;
   min-width: 90vw;
   min-height: calc(100vh - 56px);
-}
-
-.wrap-container>div {
-  padding-top: 60;
+  margin-top: var(--gnb-height);
 }
 
 .background-light {
@@ -43,6 +140,105 @@
   color: var(--font-white);
   background-color: var(--bg-dark);
 }
+
+.panel-wrapper {
+  padding-top: var(--padding-1);
+  padding-left: var(--padding-0);
+}
+
+/* querybar */
+
+.querybar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: var(--padding-3);
+  margin-bottom: var(--padding-1);
+}
+
+.querybar .querybar-top {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.querybar .querybar-top .querybar-title {
+  display: flex;
+}
+.querybar .querybar-top .querybar-title sup { 
+  color: var(--data-primary); 
+  font-size: var(--font-size-3);
+  font-style: italic;
+}
+
+.querybar .querybar-top .querybar-controls {
+  display: flex;  
+}
+
+.querybar .querybar-mid {
+  display: flex;
+  flex-direction: row;
+}
+
+.querybar .querybar-mid .query-control .query-btn {
+  display: flex;
+  justify-content: space-between;
+  width: 15vw;
+}
+
+
+
+/* card panel */
+.card.panel {
+  border-top: none;
+  border-left: none;
+  border-radius: 8px;
+
+  width: 100%;
+  padding-top: 5vw;
+  padding-bottom: 5vw;
+  padding-left: 10vw;
+  padding-right: 10vw;
+
+  text-align: center;
+}
+.card.panel .row {
+  width: 100%;
+  margin-top: 12px;
+  margin-bottom: 32px;
+}
+.card.panel .row.panel-header {
+  text-align: center;
+  border-bottom: 2px solid var(--font-normal);
+}
+.card.panel .panel-title {
+  font-family: 'Noto Serif JP', Arial;
+  font-size: var(--font-size-5);
+  font-style: italic;
+}
+
+.card.panel .panel-subtitle{
+  text-align: left;
+}
+
+.card.panel .section-title  {
+  font-weight: 700;
+  padding: 20px;
+  padding-bottom: 8px;
+}
+.card.panel .section-text {
+  font-size: 1.0em;
+  font-weight: 300;
+  color: var(--font-light);
+}
+.card.panel .panel-details {
+  text-align: left;
+}
+.card.panel .panel-details h3 {
+  font-weight: 700;
+  line-height: 3.0em;
+  border-bottom: 1px solid var(--data-grey);
+}
+
 
 
 @media print {

@@ -71,15 +71,15 @@ class Sidebar extends React.Component {
     }
 
     render() {
-        return (<div className="sidebar background-dark">
-            {this.state.showSidebar ? (<div style={{minWidth: 200}}><ul style={{position: 'fixed'}}>
-            <li className="sidebar-item"><img alt="sidebar logo" src="/img/logo_md.png" /></li>
+        return (<div className="sidebar background-dark m-0 p-0">
+            {this.state.showSidebar ? (<div className="sidebar-inner"><ul>
+            <li className="sidebar-item.logo"><img alt="sidebar logo" src="/img/logo_md.png" /></li>
                 {Sidebar.ViewKeys.map((vk)=>(<li key={vk} view={vk}
                     className={'sidebar-item '+(this.state.view==vk?' active':'')}
                     onClick={this.onViewListClicked.bind(this)}>
                 {Sidebar.ViewTitleOf(vk)}</li>))}
             </ul></div>) : ''}
-            <div className="sidebar-holder" onClick={()=>this.setState({showSidebar: !this.state.showSidebar})}>
+            <div className="sidebar-holder m-0 p-2" onClick={()=>this.setState({showSidebar: !this.state.showSidebar})}>
             <i className={'fas fa-chevron-' + (this.state.showSidebar ? 'left' : 'right')} />
             </div>
         </div>);

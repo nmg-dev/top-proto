@@ -29,7 +29,6 @@ var sample_data = [
 ];
 
 class CreativeScreen extends AppScreen {
-    static contextType = ApplicationContext;
     constructor(ps) {
         super(ps, CreativeScreen.ACCESSOR);
         this.state = {};   

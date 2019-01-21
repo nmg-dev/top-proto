@@ -107,8 +107,9 @@ class SimulationScreen extends AppScreen {
                 <div>
                     <span class="simulate-option">
                     {AttributeMeta.AllClasses()
-                        .filter((opt)=>rs.opts[opt]!=='ALL')
-                        .map((opt)=>rs.opts[opt])}
+                        // .filter((opt)=>rs.opts[opt]!=='ALL')
+                        .map((opt)=>rs.opts[opt])
+                        .join('•')}
                     </span>
                 </div>
                 <table class="table simulate-result-table">

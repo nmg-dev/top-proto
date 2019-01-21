@@ -48,8 +48,8 @@ class AppScreen extends React.Component {
 
     renderQueryBottomControls() {
         return (<div className="categorybar">
-            {this._queryBottomControlWrap('Message Type', AttributeMeta.Message)}
             {this._queryBottomControlWrap('Design Type', AttributeMeta.Design)}
+            {this._queryBottomControlWrap('Message Type', AttributeMeta.Message)}
         </div>)
     }
 

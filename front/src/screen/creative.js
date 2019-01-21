@@ -5,6 +5,7 @@ import AppScreen from './appScreen';
 
 import CreativeDialog from '../component/creativeDialog';
 import ApplicationContext from '../AppContext';
+import CreativePreview from '../component/creativePreview';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
 
@@ -70,16 +71,24 @@ class CreativeScreen extends AppScreen {
     }
 
     renderContent() {
-        return (<div class="flex-container">
-            <div class="row section-title">
-                <div class="col">
-                    <h3 className="title">Element Analysis</h3>
-                    <h5 className="subtitle">소재 요소 상세 분석</h5>
+        return (<div class="section panel-details">
+            <div class="row section-title p-0">
+                <div class="col p-0">
+                    <h3>Element Analysis</h3>
+                    <h5>소재 요소 상세 분석</h5>
                 </div>
             </div>
+            <div class="row creative-previews">
+                {[0,0,0].map((pv, rank)=>(
+                    <div class="col-sm-12 col-md-4">
+                        <h5>{rank+1} 순위 조합</h5>
+                        <CreativePreview />
+                    </div>
+                ))}
+            </div>
 
-            <div class="row">
-                {sample_data.map((dt) => <div class="col-sm-12 col-md-6 col-lg-3 m-0 p-1">
+            <div class="row panel-charts">
+                {sample_data.map((dt) => <div class="col-sm-12 col-md-6 col-lg-3 m-0 p-1 ">
                     <div class="creative-chart-link">
                         <a dataKey={dt.title}
                             onClick={this.showDetailDialog.bind(this)}>자세히 보기&gt;</a>

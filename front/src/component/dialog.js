@@ -57,7 +57,7 @@ class Dialog extends React.Component {
 
     render() {
         return (<div ref={this._modal}
-            className='modal fade show' tabindex="-1" role="dialog" 
+            className='modal fade show' tabIndex="-1" role="dialog" 
             aria-hidden="false">
         <div className="modal-dialog" role="document">
           <div className="modal-content">

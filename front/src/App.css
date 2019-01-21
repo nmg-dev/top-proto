@@ -30,17 +30,26 @@
   --gnb-height: 76px;
   --sidebar-width: 218px;
 
+  --font-size--1: 12px;
   --font-size-0: 15px;
   --font-size-1: 18px;
   --font-size-2: 20px;
   --font-size-3: 23px;
   --font-size-4: 25px;
   --font-size-5: 28px;
+  --font-size-6: 30px;
+  --font-size-7: 35px;
+  --font-size-8: 40px;
+  --font-size-9: 55px;
+
 
   --padding-0: 14px;
   --padding-1: 25px;
-  --padding-3: 35px;
+  --padding-2: 35px;
+  --padding-3: 45px;
   --padding-4: 65px;
+  --padding-5: 80px;
+  --padding-6: 100px;
 
   --section-title-font-size: 40px;
   --section-subtitle-font-size: var(--font-size-2);
@@ -62,6 +71,9 @@
 }
 .gnb.navbar .navbar-nav li {
   text-indent: var(--padding-0);
+}
+.gnb.navbar .navbar-nav li i {
+  color: var(--font-white);
 }
 
 
@@ -191,7 +203,7 @@
 .card.panel {
   border-top: none;
   border-left: none;
-  border-radius: 8px;
+  border-radius: 2px;
 
   width: 100%;
   padding-top: 5vw;
@@ -202,13 +214,12 @@
   text-align: center;
 }
 .card.panel .row {
-  width: 100%;
-  margin-top: 12px;
-  margin-bottom: 32px;
+  margin: 0px;
 }
 .card.panel .row.panel-header {
   text-align: center;
   border-bottom: 2px solid var(--font-normal);
+  margin: 0px;
 }
 .card.panel .panel-title {
   font-family: 'Noto Serif JP', Arial;
@@ -222,12 +233,12 @@
 
 .card.panel .section-title  {
   font-weight: 700;
-  padding: 20px;
-  padding-bottom: 8px;
+  font-size: var(--font-size-7);
+  padding: var(--padding-1);
 }
 .card.panel .section-text {
-  font-size: 1.0em;
   font-weight: 300;
+  font-size: var(--font-size-1);
   color: var(--font-light);
 }
 .card.panel .panel-details {
@@ -235,11 +246,20 @@
 }
 .card.panel .panel-details h3 {
   font-weight: 700;
-  line-height: 3.0em;
+  line-height: 1.25em;
+}
+.card.panel .panel-details h5 {
+  font-weight: 500;
+}
+.card.panel .panel-details .section-title {
   border-bottom: 1px solid var(--data-grey);
 }
 
 
+/* recharts */
+text.recharts-text {
+  font-size: var(--font-size--1);
+}
 
 @media print {
   body { visibility: hidden; }

@@ -63,7 +63,7 @@
 .categorybar .categorybar-wrapper .wrapper-title  {
     font-size: var(--font-size-2);
     font-weight: 700;
-    border-bottom: 2px solid var(--font-normal);
+    border-bottom: 2px solid var(--data-grey);
     padding-top: var(--padding-0);
     padding-bottom: var(--padding-0);
 }
@@ -72,16 +72,10 @@
     flex-direction: row;
     align-items: baseline;
     justify-content: space-between;
-    margin-top: var(--padding-0);
+    
 }
 .categorybar .categorybar-subwrapper .control-title {
-    margin: 0;
-    padding: 0;
     font-size: var(--font-size-0);
-}
-.categorybar .categorybar-subwrapper .query-control {
-    margin: 0;
-    padding: 0;
 }
 .categorybar .query-control i.fa-chevron-down,
 .categorytable .query-control i.fa-chevron-down {
@@ -90,15 +84,11 @@
 
 .categorybar .query-control .query-btn {
     width: 8.5vw;
-    font-size: 1.0em;
+    font-size: var(--font-size--1);
     border-radius: 6px;
     border: 2px solid var(--data-grey); 
 }
-.categorytable .query-control .query-btn {
-    width: 100%;
-    font-size: 1.0em;
-    border: 0px;
-}
+
 .categorybar .label-text {
     width: 100%;
     padding-left: 4px;
@@ -106,8 +96,15 @@
 
 
 /* category dialog */
-.table.creative-modal .kpi-column {
-    background-color: var(--data-light);
+.modal .query-control {
+    border-radius: 2px;
+    border: 1px solid var(--bg-dark);
+    box-shadow: none;
+}
+
+.modal .query-control i.fa-chevron-down {
+    padding: 0px;
+    padding-top: 8px;
 }
 
 /* component preview */

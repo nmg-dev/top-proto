@@ -45,11 +45,11 @@ class AppScreen extends React.Component {
     _queryBottomControlWrap(title, attrMeta) {
         let tc = 'class-' + title.toLowerCase();
         return (<div className="categorybar-wrapper">
-            <h3 className={'wrapper-title m-0 p-0 ' + tc} >{title}</h3>
+            <h3 className={'wrapper-title m-1 p-1 ' + tc} >{title}</h3>
             <div className="categorybar-subwrapper">
                 {attrMeta.classes().map((cls)=>(<div className="categorybar-control-wrapper">
-                    <h5 className={'control-title '+tc}>{cls}</h5>
-                    <div className="button-group category-control">
+                    <h5 className={'control-title m-1 p-1 '+tc}>{cls}</h5>
+                    <div className="button-group category-control m-0 p-0">
                         <CategoryBtn placeholder="ALL" options={[]} />
                     </div>
                 </div>))}

@@ -4,24 +4,6 @@ div.panel-category-detail {
     margin-bottom: 24px;
 }
 
-div.panel-category-detail thead th {
-    font-size: 1.25em;
-    font-weight: 500;
-    background-color: var(--bg-light);
-}
-
-div.panel-category-detail thead th:nth-child(1) {
-    font-weight: 700;
-}
-
-div.panel-category-detail tbody td {
-    font-size: 1.25em;
-}
-
-div.panel-category-detail tbody td:nth-child(n+4) {
-    background-color: #9DC3E6,
-}
-
 div.panel-category-detail h5 {
     font-weight: 700;
     line-height: 2.5em;
@@ -31,11 +13,59 @@ div.panel-category-detail h5 {
     cursor: pointer;
 }
 
+.card.panel .row.dashboard-card-design,
+.card.panel .row.dashboard-card-message,
+.card.panel .row.dashboard-card-chart
+ {
+    margin-top: var(--padding-2);
+}
+.card.panel .row.dashboard-card-message {
+    margin-bottom: var(--padding-1);
+}
+.card.panel .row.dashboard-card-chart
+ {
+    margin-bottom: var(--padding-5);
+}
+
+.card.panel .panel-details h3 {
+    font-size: var(--font-size-8);
+}
+.card.panel .panel-details h5 {
+    font-weight: 500;
+    font-size: var(--font-size-4);
+}
+
+.card.panel .panel-details table.table {
+    font-size: var(--font-size-0);
+}
+
+.card.panel .panel-details thead {
+    background-color: var(--bg-light);
+    border-top: 2px solid var(--data-grey);
+    
+}
+.card.panel .panel-details tr {
+    border-bottom: 1px solid var(--data-grey);
+}
+.card.panel .panel-details th {
+    font-weight: 600;
+}
+.card.panel .panel-details tbody td {
+    font-weight: 300;
+}
+.card.panel .panel-details tbody td.class-design {
+    background-color: var(--bg-select);
+}
+.card.panel .panel-details tbody td.cell-value {
+    text-align: right;
+}
+
 /* creative screen specific */
 .creative-chart-link {
-    font-size: 1.5em;
+    font-size: var(--font-size--1);
+    font-weight: 700;
     text-align: right;
-    line-height: 1.5em;
+    color: var(--data-primary);
 }
 .creative-chart-wrapper {
     border: 1px solid var(--bg-light);
@@ -47,4 +77,57 @@ div.panel-category-detail h5 {
     overflow: hidden;
 }
 
+.creative-chart-wrapper h5 {
+    font-size: var(--font-size-0);
+    font-weight: 700;
+    text-align: center;
+}
+
+.card.panel .row.creative-previews {
+    margin-top: var(--padding-3);
+    margin-bottom: var(--padding-1);
+}
+
+.card.panel .row.creative-previews h5 {
+    font-size: var(--font-size-1);
+    font-weight: 700;
+}
+
+.card.panel .row.panel-charts {
+    margin-top: var(--padding-3);
+    margin-bottom: var(--padding-1);
+}
+
+.modal table.creative-modal .kpi-column {
+    background-color: var(--bg-select);
+    
+}
+
 /* simulation screen specific */
+.card.panel .panel-details .section-content {
+    margin-top: var(--padding-3);
+    margin-bottom: var(--padding-1);
+}
+
+.card.panel .panel-details .section-controls {
+    margin-bottom: var(--padding-3);
+    padding-bottom: var(--padding-1);
+    border-bottom: 2px solid var(--data-grey);
+}
+
+.card.panel .panel-details .section-controls button.btn {
+    min-width: 5vw;
+    border: 1px solid var(--bg-dark);
+}
+
+.card.panel table.simulate-table .query-control i.fa-chevron-down {
+    padding-top: 6px;
+}
+.card.panel table.table.simulate-table thead th {
+    text-align: center;
+}
+.card.panel table.table.simulate-table tbody th,
+.card.panel table.table.simulate-table td {
+    text-align: center;
+    vertical-align: middle;
+}

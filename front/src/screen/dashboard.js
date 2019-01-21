@@ -74,18 +74,18 @@ class DashboardScreen extends AppScreen {
     }
     
 
-    renderElementCard(cls, title) {
+    renderElementCard(ctype, cls, title) {
         return (<div className="section col-3" key={cls+':'+title}>
-            <h5 className="section-title">{title}</h5>
+            <h5 className={'section-title p-0 class-'+ctype}>{title}</h5>
             <div className="section-text">{cls}</div>
         </div>);
     }
 
     renderContentChart() {
-        return (<ResponsiveContainer width="95%" height={280}>
+        return (<ResponsiveContainer width="95%" height={0.45*window.innerHeight}>
             <LineChart data={sample_data}>
                 <XAxis dataKey="t" />
-                <YAxis stroke="transparent" />
+                <YAxis tick={false} stroke="transparent" />
                 <Line dataKey="y" 
                     stroke="#002060" strokeWidth="3" 
                     dot={{r: 5}} />
@@ -105,11 +105,11 @@ class DashboardScreen extends AppScreen {
             <tbody>
                 <tr>
                     <th>옵션</th>
-                    {table_values[cls].map((v)=><td>{v.l}</td>)}
+                    {table_values[cls].map((v)=><td className="class-design">{v.l}</td>)}
                 </tr>
                 <tr>
                     <th>CPC</th>
-                    {table_values[cls].map((v)=><td>{v.v}</td>)}
+                    {table_values[cls].map((v)=><td className="class-design cell-value">{v.v}</td>)}
                 </tr>
                 <tr>
                     <th>예시</th>
@@ -126,24 +126,26 @@ class DashboardScreen extends AppScreen {
     }
 
     renderContent() {
-        return (<div className="container m-0 p-1">
+        return (<div className="m-0 p-1">
             <div className="row panel-header">
-                <div className="col"><h3 className="panel-title">Best Creative Element</h3></div>
+                <div className="col">
+                    <h3 className="panel-title">Best Creative Element</h3>
+                </div>
             </div>
-            <div className="row">
-                {samples_design.map((d)=>this.renderElementCard(d.c, d.t))}
+            <div className="row dashboard-card-design">
+                {samples_design.map((d)=>this.renderElementCard('design', d.c, d.t))}
             </div>
-            <div className="row">
-                {samples_topic.map((d)=>this.renderElementCard(d.c, d.t))}
+            <div className="row dashboard-card-message">
+                {samples_topic.map((d)=>this.renderElementCard('message', d.c, d.t))}
             </div>
-            <div className="row">
+            <div className="row dashboard-card-chart">
                 <div className="col">
                     {this.renderContentChart()}
                 </div>
             </div>
             <div className="row panel-details">
                 <div className="col">
-                    <h3>Industry Analysis</h3>
+                    <h3 class="section-title p-0">Industry Analysis</h3>
                     {['fnb','houseware'].map((cls)=>{
                         return (<div className="panel-category-detail">
                             <h5>{table_titles[cls]}</h5>

@@ -73,7 +73,7 @@ class SimulationScreen extends AppScreen {
     }
 
     renderOptionTable(options, clsLabel, styles) {
-        return (<table className="table categorytable" style={styles}>
+        return (<table className="table simulate-table" style={styles}>
             <thead>
                 <tr>
                     <th>{clsLabel}</th>
@@ -102,7 +102,7 @@ class SimulationScreen extends AppScreen {
                     {AttributeMeta.AllClasses().map((opt)=>
                         <span class="simulate-option">{rs.opts[opt]}</span>)}
                 </div>
-                <table class="table simulate-table">
+                <table class="table simulate-result-table">
                     <thead>
                         <tr>{Metric.List().map((m)=><th>{m.label()}</th>)}</tr>
                     </thead>
@@ -115,14 +115,14 @@ class SimulationScreen extends AppScreen {
     }
 
     renderContent() {
-        return (<div class="flex-container" style={{height: '100%'}}>
-            <div class="row section-title">
-                <div class="col">
+        return (<div class="section panel-details m-0 p-0">
+            <div class="row section-title m-0 p-0">
+                <div class="col m-0 p-0">
                     <h3 className="title">Creative Simulation</h3>
                     <h5 className="subtitle">소재요소별 효율 시뮬레이션</h5>
                 </div>
             </div>
-            <div class="row section-separator">
+            <div class="row section-content">
                 <div class="col-sm-12 col-lg-4">
                     {this.renderOptionTable(table_options.design, '디자인 속성', {backgroundColor: 'var(--bg-light);'})}
                 </div>
@@ -133,15 +133,16 @@ class SimulationScreen extends AppScreen {
                     {this.renderOptionTable(table_options.optional, '캠페인 조건')}
                 </div>
             </div>
-            <div class="row">
+            <div class="row section-controls">
                 <div class="col" align="right">
-                    <button class="btn btn-default shadow">리셋</button>
-                    <button class="btn shadow" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
+                    <button class="btn btn-default m-1 p-2">리셋</button>
+                    <button class="btn m-1 p-2" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
                     {/* <button class="btn shadow" onClick={()=>window.print()}>출력하기</button> */}
                 </div>
             </div>
 
             <div class="printable">
+            <h3>Results</h3>
                 {this.state.history.map((rs)=>this.renderResultSection(rs))}
             </div>
         </div>);

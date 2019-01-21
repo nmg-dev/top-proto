@@ -46,10 +46,10 @@ class CategoryBtn extends React.Component {
     }
 
     render() {
-        return (<div class="button-group query-control">
+        return (<div className={'button-group query-control m-1 p-0 ' +this.props.className}>
             <button type="input-group-btn" className="query-btn btn"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="label-text text-muted">
+                <div className={'label-text text-muted ' + this.props.labelClass}>
                     {this.displayText()}
                 </div>
                 <i class="fas fa-chevron-down" />

@@ -59,8 +59,8 @@ class CreativeDialog extends Dialog {
         range[29] = 0;
         range.fill(0, 0);
         return (<div className="modal-body">
-            <div className="d-flex">
-                <CategoryBtn placeholder="All" options={[]} />
+            <div className="d-flex justify-content-end align-items-baseline">
+                <CategoryBtn placeholder="All" options={[]} className="btn" />
                 <PeriodBtn />
             </div>
             <div>

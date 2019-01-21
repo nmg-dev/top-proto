@@ -3,7 +3,8 @@ import CategoryBtn from '../component/categorybtn';
 import AppScreen from './appScreen';
 import ApplicationContext from '../AppContext';
 import Metric from '../module/metric';
-import AttributeMeta from '../module/ameta';
+import AttributeMeta from '../module/attrMeta';
+import App from '../App';
 
 const table_options = {
     design: [
@@ -87,7 +88,12 @@ class SimulationScreen extends AppScreen {
                     return (<tr>
                         <th>{opt.label}</th>
                         <td>
-                            <CategoryBtn key={'result-opt-'+opt.name} name={opt.name} ref={this._refs[opt.name]} placeholder="ALL" options={[]} />
+                            <CategoryBtn 
+                                key={'result-opt-'+opt.name} 
+                                name={opt.name} 
+                                ref={this._refs[opt.name]} 
+                                placeholder="ALL" 
+                                options={App.data.listTagOptions(opt.name)} />
                         </td>
                     </tr>);
                 })}
@@ -99,8 +105,11 @@ class SimulationScreen extends AppScreen {
         return(<div class="row section-result">
             <div class="col">
                 <div>
-                    {AttributeMeta.AllClasses().map((opt)=>
-                        <span class="simulate-option">{rs.opts[opt]}</span>)}
+                    <span class="simulate-option">
+                    {AttributeMeta.AllClasses()
+                        .filter((opt)=>rs.opts[opt]!=='ALL')
+                        .map((opt)=>rs.opts[opt])}
+                    </span>
                 </div>
                 <table class="table simulate-result-table">
                     <thead>
@@ -143,7 +152,7 @@ class SimulationScreen extends AppScreen {
 
             <div class="printable">
             <h3>Results</h3>
-                {this.state.history.map((rs)=>this.renderResultSection(rs))}
+                {this.state.history.reverse().map((rs)=>this.renderResultSection(rs))}
             </div>
         </div>);
     }

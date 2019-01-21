@@ -56,7 +56,7 @@ class DropBtn extends React.Component {
 
     render() {
         return (<div className="button-group query-control">
-            <button type="input-group-btn" className="btn query-btn shadow" disabled
+            <button type="input-group-btn" className="btn query-btn shadow" 
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div className="label-icon">{this.props.icon}</div>
                 <div className="label-text">
@@ -68,6 +68,8 @@ class DropBtn extends React.Component {
                 <i className="fas fa-chevron-down" />
             </button>
             <div className="dropdown-menu">
+                <a className="dropdown-item" href="#" onClick={()=>this.setState({values: []})}>ALL</a>
+                <div class="dropdown-divider"></div>
                 {this.props.options.map(this.renderItem.bind(this))}
             </div>
         </div>);

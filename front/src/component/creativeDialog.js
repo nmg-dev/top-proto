@@ -5,6 +5,7 @@ import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recha
 import CategoryBtn from './categorybtn';
 import PeriodBtn from './periodbtn';
 import Metric from '../module/metric';
+import App from '../App';
 
 const sample_data = [
     { t: '2018년 10월 1주차',	y: 500},
@@ -61,7 +62,7 @@ class CreativeDialog extends Dialog {
         return (<div className="modal-body">
             <div className="d-flex justify-content-end align-items-baseline">
                 <CategoryBtn placeholder="All" options={[]} className="btn" />
-                <PeriodBtn />
+                <PeriodBtn from={App.period.from} till={App.period.till} />
             </div>
             <div>
                 <ResponsiveContainer width="100%" height={250}>

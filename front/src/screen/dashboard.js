@@ -1,5 +1,4 @@
 import React from 'react';
-import Querybar from '../component/querybar';
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts';
 import AppScreen from './appScreen';
 import CreativePreview from '../component/creativePreview';

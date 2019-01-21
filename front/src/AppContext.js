@@ -1,6 +1,6 @@
 import React from 'react';
 import Metric from './module/metric';
-import AttributeMeta from './module/ameta';
+import AttributeMeta from './module/attrMeta';
 
 
 const ApplicationContext = React.createContext({

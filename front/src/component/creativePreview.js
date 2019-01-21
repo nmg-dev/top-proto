@@ -1,5 +1,5 @@
 import React from 'react';
-import AttributeMeta from '../module/ameta';
+import AttributeMeta from '../module/attrMeta';
 
 const defaultRect = {x: 10, y: 0, w: 729, h: 147};
 const classes = ['layout','background','objet','button', 

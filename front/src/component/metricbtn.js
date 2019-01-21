@@ -7,7 +7,7 @@ class MetricBtn extends React.Component {
         super(ps);
 
         this.state = this.props.initStage ? this.props.initStage : {
-            kpi: Metric.DefaultKey(),
+            kpi: this.props.kpi,
         };
     }
 

@@ -56,6 +56,7 @@ class CategoryBtn extends React.Component {
             </button>
             <div className="dropdown-menu">
                 <a className="dropdown-item" href="#">All</a>
+                <div className="dropdown-divider"></div>
                 {this.props.options.map(this.renderItem.bind(this))}
             </div>
         </div>);

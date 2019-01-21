@@ -3,7 +3,10 @@ import React from 'react';
 import DashboardScreen from '../screen/dashboard';
 import CreativeScreen from '../screen/creative';
 import SimulationScreen from '../screen/simulation';
+import LoginScreen from '../screen/login';
+import App from '../App';
 
+const LOGIN_SCREEN = 'login';
 const DASHBOARD_SCREEN = 'dashboard';
 const CREATIVE_SCREEN = 'creative';
 const SIMULATION_SCREEN = 'simulation';
@@ -36,6 +39,8 @@ class Sidebar extends React.Component {
 
     static renderStagedAppScreen(vk) {
         // let vk = this.state.view;
+        if(!App.api.hasLogin())
+            return (<LoginScreen />);
         if(!Sidebar.ViewRenders[vk]) {
             switch(vk) {
             case CREATIVE_SCREEN:

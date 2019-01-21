@@ -1,6 +1,6 @@
 import React from 'react';
 
-import AttributeMeta from '../module/ameta';
+import AttributeMeta from '../module/attrMeta';
 
 import Querybar from '../component/querybar';
 import MetricBtn from '../component/metricbtn';
@@ -8,6 +8,7 @@ import PeriodBtn from '../component/periodbtn';
 import CategoryBtn from '../component/categorybtn';
 import DropBtn from '../component/dropbtn';
 import CardPanel from '../component/cardpanel';
+import App from '../App';
 
 const queryDrops = [
     {title: '업종', cls: 'category'},
@@ -15,6 +16,13 @@ const queryDrops = [
     {title: '미디어', cls: 'media'},
     {title: '광고목적', cls: 'goal'},
 ]
+
+const QueryDropLabels = {
+    category: '업종',
+    channel: '채널',
+    media: '미디어',
+    goal: '광고목적',
+};
 
 
 class AppScreen extends React.Component {
@@ -25,14 +33,17 @@ class AppScreen extends React.Component {
     }
 
     renderQueryTopControls() {
-        return [<MetricBtn />, <PeriodBtn />];
+        return [<MetricBtn kpi={App.kpi} />, <PeriodBtn from={App.period.from} till={App.period.till} />];
     }
 
     renderQueryMidControls() {
-        return queryDrops.map((q) => <DropBtn title={q.title}
-            placeholder={q.title + ' 선택'}
-            icon={<img className="query-dropdown" src={'/img/icon-'+q.cls+'.png'} />}
-            options={[]} />);
+        // console.log(AttributeMeta.Config.classes());
+        return AttributeMeta.Config.classes().map((cls) => (
+            <DropBtn title={QueryDropLabels[cls]}
+                placeholder={QueryDropLabels[cls] + ' 선택'}
+                icon={<img className="query-dropdown" src={'/img/icon-'+cls+'.png'} />}
+                options={App.data.listTagOptions(cls)} />
+        ));
     }
 
     renderQueryBottomControls() {
@@ -50,7 +61,7 @@ class AppScreen extends React.Component {
                 {attrMeta.classes().map((cls)=>(<div className="categorybar-control-wrapper">
                     <h5 className={'control-title m-1 p-1 '+tc}>{cls}</h5>
                     <div className="button-group category-control m-0 p-0">
-                        <CategoryBtn placeholder="ALL" options={[]} />
+                        <CategoryBtn placeholder="ALL" options={App.data.listTagOptions(cls)} />
                     </div>
                 </div>))}
             </div>

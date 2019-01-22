@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
@@ -33,7 +32,7 @@ func main() {
 	// recovery
 	app.Use(gin.Recovery())
 	// to debug! CORS allow all origin
-	app.Use(cors.Default())
+	// app.Use(cors.Default())
 
 	// static index endpoint
 	app.Static(`/img`, `./img`)

@@ -31,6 +31,7 @@ const KeyCampaignQuery = `__cq__`
 // PostCampaignQuery
 func PostCampaignQuery(ctx *gin.Context) {
 	db := getDatabase(ctx)
+	defer db.Close()
 	var cquery CampaignQuery
 	ctx.BindJSON(&cquery)
 	campaignIds := FindCampaignIdsWithin(db, cquery.PeriodFrom, cquery.PeriodTill, cquery.CampaignIds)

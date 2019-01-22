@@ -209,6 +209,8 @@ func PostOpenAuth(ctx *gin.Context) {
 
 	// database check for existing user
 	db := getDatabase(ctx)
+	defer db.Close()
+
 	theUser.SearchEmail(db)
 	if theUser.ID <= 0 {
 		theUser.CanAdmin = false

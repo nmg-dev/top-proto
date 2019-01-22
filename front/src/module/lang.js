@@ -61,37 +61,176 @@ const LANG_DICT = {
     }
 };
 
-const LANGUAGE_KEYS = [
-    'ko', 'en'
-];
+const LANG_NAMES = {
+    ach: "Acoli",
+    af: "Afrikaans",
+    ak: "Akan",
+    am: "አማርኛ",
+    ar: "العربية",
+    ay: "Aymara",
+    az: "azərbaycan",
+    ban: "Balinese",
+    be: "беларуская",
+    bem: "Ichibemba",
+    bg: "български",
+    bho: "Bhojpuri",
+    bn: "বাংলা",
+    br: "brezhoneg",
+    bs: "bosanski",
+    ca: "català",
+    ceb: "Cebuano",
+    chr: "ᏣᎳᎩ",
+    ckb: "کوردیی ناوەندی",
+    co: "Corsican",
+    crs: "Seselwa Creole French",
+    cs: "Čeština",
+    cy: "Cymraeg",
+    da: "Dansk",
+    de: "Deutsch",
+    ee: "Eʋegbe",
+    el: "Ελληνικά",
+    en: "English",
+    eo: "esperanto",
+    es: "Español",
+    et: "eesti",
+    eu: "euskara",
+    fa: "فارسی",
+    fi: "Suomi",
+    fil: "Filipino",
+    fo: "føroyskt",
+    fr: "Français",
+    fy: "Frysk",
+    ga: "Gaeilge",
+    gaa: "Ga",
+    gd: "Gàidhlig",
+    gl: "galego",
+    gn: "Guarani",
+    gu: "ગુજરાતી",
+    ha: "Hausa",
+    haw: "ʻŌlelo Hawaiʻi",
+    hi: "हिन्दी",
+    hr: "Hrvatski",
+    ht: "Haitian Creole",
+    hu: "magyar",
+    hy: "հայերեն",
+    ia: "interlingua",
+    id: "Indonesia",
+    ig: "Igbo",
+    is: "íslenska",
+    it: "Italiano",
+    iw: "עברית",
+    ja: "日本語",
+    jv: "Jawa",
+    ka: "ქართული",
+    kg: "Kongo",
+    kk: "қазақ тілі",
+    km: "ខ្មែរ",
+    kn: "ಕನ್ನಡ",
+    ko: "한국어",
+    kri: "Krio",
+    ku: "kurdî",
+    ky: "кыргызча",
+    la: "Latin",
+    lg: "Luganda",
+    ln: "lingála",
+    lo: "ລາວ",
+    loz: "Lozi",
+    lt: "lietuvių",
+    lua: "Luba-Lulua",
+    lv: "latviešu",
+    mfe: "kreol morisien",
+    mg: "Malagasy",
+    mi: "Māori",
+    mk: "македонски",
+    ml: "മലയാളം",
+    mn: "монгол",
+    mr: "मराठी",
+    ms: "Melayu",
+    mt: "Malti",
+    my: "မြန်မာ",
+    ne: "नेपाली",
+    nl: "Nederlands",
+    nn: "nynorsk",
+    no: "norsk",
+    nso: "Northern Sotho",
+    ny: "Nyanja",
+    nyn: "Runyankore",
+    oc: "Occitan",
+    om: "Oromoo",
+    or: "ଓଡ଼ିଆ",
+    pa: "ਪੰਜਾਬੀ",
+    pcm: "Nigerian Pidgin",
+    pl: "polski",
+    ps: "پښتو",
+    pt: "Português",
+    qu: "Runasimi",
+    rm: "rumantsch",
+    rn: "Ikirundi",
+    ro: "română",
+    ru: "Русский",
+    rw: "Kinyarwanda",
+    sa: "Sanskrit",
+    sd: "سنڌي",
+    si: "සිංහල",
+    sk: "Slovenčina",
+    sl: "slovenščina",
+    sn: "chiShona",
+    so: "Soomaali",
+    sq: "shqip",
+    sr: "српски",
+    st: "Southern Sotho",
+    su: "Sundanese",
+    sv: "Svenska",
+    sw: "Kiswahili",
+    ta: "தமிழ்",
+    te: "తెలుగు",
+    tg: "тоҷикӣ",
+    th: "ไทย",
+    ti: "ትግርኛ",
+    tk: "türkmen dili",
+    tlh: "Klingon",
+    tn: "Tswana",
+    to: "lea fakatonga",
+    tr: "Türkçe",
+    tt: "татар",
+    tum: "Tumbuka",
+    ug: "ئۇيغۇرچە",
+    uk: "Українська",
+    ur: "اردو",
+    uz: "o‘zbek",
+    vi: "Tiếng Việt",
+    wo: "Wolof",
+    xh: "isiXhosa",
+    yi: "ייִדיש",
+    yo: "Èdè Yorùbá",
+    yue: "粵語",
+    CN: "简体中文",
+    TW: "繁體中文",
+    zu: "isiZulu",
+}
 
 class ModLang {
-    static currentDict;
-    static currentLang = 'ko';
-    static setDict(lang) {
-       this._dict = LANG_DICT[lang]; 
-       this._lang = lang;
+    constructor(lang) {
+        if(!lang) lang = 'ko';
+        this.set(lang);
     }
 
-    static packTags(tags) {
-        tags.forEach((t) => {
-            if(t.property) {
-                Object.keys(LANG_DICT).forEach((l) => {
-                    if(t.property[l]) {
-                        let _k = t.class + '.' + t.name;
-                        LANG_DICT[l][_k] = t.property[l];
-                    }
-                });
-            }
+    static Langs() {
+        return Object.keys(LANG_DICT);
+    }
+
+    static Names() {
+        return ModLang.Langs().map((lcode)=> {
+            return { value: lcode, label: LANG_NAMES[lcode] };
         });
-
-        ModLang.currentDict = LANG_DICT[l];
     }
 
-    static tr(key) {
-        if(ModLang.currentDict[key]) {
-            return ModLang.currentDict[key];
+    set(lcode) {
+        if(LANG_DICT[lcode]) {
+            this.now = lcode;
+            this._dict = LANG_DICT[lcode];
         }
+        return this.now;
     }
 }
 

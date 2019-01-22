@@ -17,12 +17,14 @@ type TagMeta struct {
 
 func GetTagAll(ctx *gin.Context) {
 	db := getDatabase(ctx)
+	defer db.Close()
 	resp := ListAllTags(db)
 	ctx.JSON(http.StatusOK, resp)
 }
 
 func GetTagWithClass(ctx *gin.Context) {
 	db := getDatabase(ctx)
+	defer db.Close()
 	cls := ctx.Param("class")
 
 	resp := ListTagsWithClass(db, cls)

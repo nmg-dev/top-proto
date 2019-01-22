@@ -16,7 +16,7 @@ class ModApi extends Listenable {
         this._hasLogin = false;
         this._token = null;
         this._can_admin = false;
-        this._can_manage = false;
+        this._can_input = false;
 
         this._profile = AUTH_DEFAULT;
     }
@@ -30,15 +30,15 @@ class ModApi extends Listenable {
     }
 
     accessToken() {
-        return this.login() ? this._token : null;
+        return this.hasLogin() ? this._token : null;
     }
 
     canAdmin() {
-        return this.login() && this._can_admin;
+        return this.hasLogin() && this._can_admin;
     }
 
     canManage() {
-        return this.login() && this._can_manage;
+        return this.hasLogin() && this._can_input;
     }
 
     _onApiErrorDefault(err) {
@@ -59,7 +59,7 @@ class ModApi extends Listenable {
         this._hasLogin = true;
         this._token = uinfo.token;
         this._can_admin = uinfo.can_admin;
-        this._can_manage = uinfo.can_manage;
+        this._can_input = uinfo.can_input;
         this._profile = {
             email: uinfo.email,
             name: uinfo.profile.name,
@@ -72,7 +72,7 @@ class ModApi extends Listenable {
         this._hasLogin = false;
         this._token = null;
         this._can_admin = false;
-        this._can_manage = false;
+        this._can_input = false;
         this._profile = AUTH_DEFAULT;
 
         return err;

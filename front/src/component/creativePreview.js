@@ -51,10 +51,14 @@ class CreativePreview extends React.Component {
             }, {});
     }
 
+    _pvCompUrl(cls) {
+        return '/img/preview/'+cls+'_'+this.state[cls]+'.png';
+    }
+
     _renderStyleBackground() {
         return {
             border: '1px solid var(--bg-dark)',
-            backgroundImage: 'url(/preview/background_'+this.state.background+'.png'+')',
+            backgroundImage: 'url('+this._pvCompUrl('background')+')',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
         }
@@ -94,7 +98,7 @@ class CreativePreview extends React.Component {
                     e: <p className={['creative-preview-text', cls].join(' ')}>{this.state[cls]}</p>,
                 };
             });
-        let renderObjet = <img className="creative-preview-objet" src={'/preview/objet_'+this.state.objet+'.png'} />;
+        let renderObjet = <img className="creative-preview-objet" src={this._pvCompUrl('objet')} />;
         let renderButton = <button className={['btn', 'creative-preview-button'].join(' ')}>{this.state.button}</button>;
 
 

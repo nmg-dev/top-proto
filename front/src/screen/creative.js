@@ -4,7 +4,6 @@ import {ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Toolt
 import AppScreen from './appScreen';
 
 import CreativeDialog from '../component/creativeDialog';
-import ApplicationContext from '../AppContext';
 import CreativePreview from '../component/creativePreview';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];

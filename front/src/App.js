@@ -64,30 +64,30 @@ class App extends React.Component {
 	_onViewUpdate(vk) { this.setState({view: vk}); }
 
 	_onLoginServerResponseSuccess(resp) {
-		// App.api.getTags(App.data.setTags.bind(App.data));
-		// App.api.getCampaigns({
-		// 	from: App.period.from.format(), 
-		// 	till: App.period.till.format()
-		// 	},
-		// 	App.data.setCampaigns.bind(App.data));
+		App.api.getTags(App.data.setTags.bind(App.data));
+		App.api.getCampaigns({
+			from: App.period.from.format(), 
+			till: App.period.till.format()
+			},
+			App.data.setCampaigns.bind(App.data));
 	}
 	_onLoginServerResponseFailure(err) {
 		// this.setState({view: Sidebar.indexViewAccessor()});
-		// window.alert('Login failed!');
+		window.alert('Login failed!');
 	}
 
 	onLoginCallback(gauth) {
-		this.setState({view: Sidebar.indexViewAccessor()});
-		// let resp = gauth.getAuthResponse();
-		// let profile = gauth.getBasicProfile();
-		// let gdata = {
-		// 	gid: profile.getId(),
-		// 	email: profile.getEmail(),
-		// 	token: resp.id_token,
-		// };
-		// App.api.getAuth(gdata, 
-		// 	this._onLoginServerResponseSuccess.bind(this),
-		// 	this._onLoginServerResponseFailure.bind(this));
+		// this.setState({view: Sidebar.indexViewAccessor()});
+		let resp = gauth.getAuthResponse();
+		let profile = gauth.getBasicProfile();
+		let gdata = {
+			gid: profile.getId(),
+			email: profile.getEmail(),
+			token: resp.id_token,
+		};
+		App.api.getAuth(gdata, 
+			this._onLoginServerResponseSuccess.bind(this),
+			this._onLoginServerResponseFailure.bind(this));
 	}
 
 	onLoginFailover(ev) {

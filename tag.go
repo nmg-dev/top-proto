@@ -39,7 +39,7 @@ func QueryTagsFor(db *sql.DB, tids []uint) map[uint]Tag {
 	return rets
 }
 
-func (a *Tag) insertStmt(db *sql.DB) *sql.Stmt {
+func (a *Tag) insertStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, attrInsertStmt)
 }
 
@@ -47,7 +47,7 @@ func (a *Tag) insertExec(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(a.Class, a.Name, a.Priority)
 }
 
-func (a Tag) updateStmt(db *sql.DB) *sql.Stmt {
+func (a Tag) updateStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, attrUpdateStmt)
 }
 
@@ -55,7 +55,7 @@ func (a Tag) updateExec(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(a.Name, a.Priority, a.ID)
 }
 
-func (a Tag) deleteStmt(db *sql.DB) *sql.Stmt {
+func (a Tag) deleteStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, attrDeleteStmt)
 }
 
@@ -64,7 +64,7 @@ func (a Tag) deleteExec(stmt *sql.Stmt) (sql.Result, error) {
 }
 
 // Insert - insert Tag
-func (a *Tag) Insert(db *sql.DB) error {
+func (a *Tag) Insert(db Preparable) error {
 	if a.ID <= 0 {
 		lastID, err := ExecuteQueriableInsert(a, db, a.insertStmt, a.insertExec)
 		a.ID = uint(lastID)
@@ -75,7 +75,7 @@ func (a *Tag) Insert(db *sql.DB) error {
 }
 
 // Update -
-func (a Tag) Update(db *sql.DB) error {
+func (a Tag) Update(db Preparable) error {
 	if 0 < a.ID {
 		return ExecuteQueriableUpdate(a, db, a.updateStmt, a.updateExec)
 	} else {
@@ -84,7 +84,7 @@ func (a Tag) Update(db *sql.DB) error {
 }
 
 // Delete -
-func (a Tag) Delete(db *sql.DB) error {
+func (a Tag) Delete(db Preparable) error {
 	if 0 < a.ID {
 		return ExecuteQueriableUpdate(a, db, a.deleteStmt, a.deleteExec)
 	} else {

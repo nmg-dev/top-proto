@@ -18,8 +18,13 @@ type Scannable interface {
 
 // Queriable table queriable
 type Queriable interface {
-	Update(db *sql.DB) error
-	Delete(db *sql.DB) error
+	Update(db Preparable) error
+	Delete(db Preparable) error
+}
+
+// Preparable can prepare statment
+type Preparable interface {
+	Prepare(query string) (*sql.Stmt, error)
 }
 
 // UintIDEntity
@@ -28,17 +33,50 @@ type UintIDEntity struct {
 }
 
 // QueriableExec
-type QueriableStmt func(db *sql.DB) *sql.Stmt
+type QueriableStmt func(db Preparable) *sql.Stmt
 type QueriableExec func(stmt *sql.Stmt) (sql.Result, error)
 
+type ServletProc func(ctx *gin.Context, db Preparable) (interface{}, error)
+
+func DatabaseContextServlet(ctx *gin.Context, proc ServletProc) {
+	db := getDatabase(ctx)
+	defer db.Close()
+
+	resp, respErr := proc(ctx, db)
+	if respErr != nil {
+		ctx.JSON(http.StatusInternalServerError, respErr)
+	} else {
+		ctx.JSON(http.StatusOK, resp)
+	}
+}
+
+func TransactContextServlet(ctx *gin.Context, proc ServletProc) {
+	db := getDatabase(ctx)
+	defer db.Close()
+
+	tx, txErr := db.Begin()
+	if txErr != nil {
+		ctx.JSON(http.StatusInternalServerError, txErr)
+	} else {
+		resp, respErr := proc(ctx, tx)
+		if respErr != nil {
+			tx.Rollback()
+			ctx.JSON(http.StatusInternalServerError, respErr)
+		} else {
+			tx.Commit()
+			ctx.JSON(http.StatusOK, resp)
+		}
+	}
+}
+
 //
-func QueriableState(db *sql.DB, query string) *sql.Stmt {
+func QueriableState(db Preparable, query string) *sql.Stmt {
 	stmt, _ := db.Prepare(query)
 	return stmt
 }
 
 // ExecuteQueriableInsert
-func ExecuteQueriableInsert(q Queriable, db *sql.DB, qs QueriableStmt, exec QueriableExec) (int64, error) {
+func ExecuteQueriableInsert(q Queriable, db Preparable, qs QueriableStmt, exec QueriableExec) (int64, error) {
 	stmt := qs(db)
 	rs, err := exec(stmt)
 	defer stmt.Close()
@@ -48,7 +86,7 @@ func ExecuteQueriableInsert(q Queriable, db *sql.DB, qs QueriableStmt, exec Quer
 }
 
 //ExecuteQueriableUpdate
-func ExecuteQueriableUpdate(q Queriable, db *sql.DB, qs QueriableStmt, exec QueriableExec) error {
+func ExecuteQueriableUpdate(q Queriable, db Preparable, qs QueriableStmt, exec QueriableExec) error {
 	stmt := qs(db)
 	_, err := exec(stmt)
 	defer stmt.Close()

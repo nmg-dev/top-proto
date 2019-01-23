@@ -11,6 +11,11 @@ const DASHBOARD_SCREEN = 'dashboard';
 const CREATIVE_SCREEN = 'creative';
 const SIMULATION_SCREEN = 'simulation';
 
+const MANAGE_DATA = 'manage-data';
+const MANAGE_TAGS = 'manage-tag';
+const MANAGE_CMPS = 'manage-campaign';
+const MANAGE_USER = 'admin-user';
+
 class Sidebar extends React.Component {
     static ViewKeys = [
         DASHBOARD_SCREEN,
@@ -22,7 +27,22 @@ class Sidebar extends React.Component {
         ko: {
             [DASHBOARD_SCREEN]: '업종별 분석',
             [CREATIVE_SCREEN]: '크리에이티브 분석',
-            [SIMULATION_SCREEN]: '예상효율 확인'
+            [SIMULATION_SCREEN]: '예상효율 확인',
+
+            [MANAGE_DATA]: '데이터 입력',
+            [MANAGE_TAGS]: '태그 관리',
+            [MANAGE_CMPS]: '캠페인 관리',
+            [MANAGE_USER]: '사용자 관리',
+        },
+        en: {
+            [DASHBOARD_SCREEN]: 'by Industries',
+            [CREATIVE_SCREEN]: 'by Creatives',
+            [SIMULATION_SCREEN]: 'Simulation',
+
+            [MANAGE_DATA]: 'Push Data',
+            [MANAGE_TAGS]: 'Manage Tags',
+            [MANAGE_CMPS]: 'Manage Campaigns',
+            [MANAGE_USER]: 'Manage Users',
         }
     };
 

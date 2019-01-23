@@ -29,7 +29,7 @@ const campaignUpdateStmt = `UPDATE campaigns SET title=?, memo=?, asset=?, perio
 const campaignDeleteStmt = `UPDATE campaigns SET deleted_at=NOW(), deleted_by=? WHERE id=?`
 const campaignFindStmt = `SELECT * FROM campaigns WHERE id=?`
 
-func (c *Campaign) insertStatement(db *sql.DB) *sql.Stmt {
+func (c *Campaign) insertStatement(db Preparable) *sql.Stmt {
 	return QueriableState(db, campaignInsertStmt)
 }
 
@@ -37,7 +37,7 @@ func (c *Campaign) insertExecution(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(c.Title, c.Memo, c.Asset, c.PeriodFrom, c.PeriodTill, c.CreatedBy, c.CreatedBy)
 }
 
-func (c Campaign) updateStatement(db *sql.DB) *sql.Stmt {
+func (c Campaign) updateStatement(db Preparable) *sql.Stmt {
 	return QueriableState(db, campaignUpdateStmt)
 }
 
@@ -53,7 +53,7 @@ func (c Campaign) updateExecution(stmt *sql.Stmt) (sql.Result, error) {
 	)
 }
 
-func (c Campaign) deleteStatement(db *sql.DB) *sql.Stmt {
+func (c Campaign) deleteStatement(db Preparable) *sql.Stmt {
 	return QueriableState(db, campaignDeleteStmt)
 }
 
@@ -62,7 +62,7 @@ func (c Campaign) deleteExecution(stmt *sql.Stmt) (sql.Result, error) {
 }
 
 // Insert -
-func (c *Campaign) Insert(db *sql.DB) error {
+func (c *Campaign) Insert(db Preparable) error {
 	if c.ID <= 0 {
 		lastID, err := ExecuteQueriableInsert(c, db, c.insertStatement, c.insertExecution)
 		c.ID = uint(lastID)
@@ -73,7 +73,7 @@ func (c *Campaign) Insert(db *sql.DB) error {
 }
 
 // Update -
-func (c Campaign) Update(db *sql.DB) error {
+func (c Campaign) Update(db Preparable) error {
 	if 0 < c.ID {
 		return ExecuteQueriableUpdate(c, db, c.updateStatement, c.updateExecution)
 	} else {
@@ -83,7 +83,7 @@ func (c Campaign) Update(db *sql.DB) error {
 }
 
 // Delete -
-func (c Campaign) Delete(db *sql.DB) error {
+func (c Campaign) Delete(db Preparable) error {
 	if 0 < c.ID {
 		return ExecuteQueriableUpdate(c, db, c.deleteStatement, c.deleteExecution)
 	}

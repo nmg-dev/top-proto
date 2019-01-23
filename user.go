@@ -44,7 +44,7 @@ const userBlockStmt = `UPDATE users SET blocked_at=NOW() WHERE id=?`
 const userSearchByEmail = `SELECT * FROM users WHERE profile->"$.email"=? ORDER BY ID DESC LIMIT 1`
 const userConditionAvailable = `deleted_at is NULL AND blocked_at is NULL`
 
-func (u *User) insertStatement(db *sql.DB) *sql.Stmt {
+func (u *User) insertStatement(db Preparable) *sql.Stmt {
 	return QueriableState(db, userInsertStmt)
 }
 
@@ -60,7 +60,7 @@ func (u *User) insertExecution(stmt *sql.Stmt) (sql.Result, error) {
 	)
 }
 
-func (u User) updateStatement(db *sql.DB) *sql.Stmt {
+func (u User) updateStatement(db Preparable) *sql.Stmt {
 	return QueriableState(db, userUpdateStmt)
 }
 
@@ -70,7 +70,7 @@ func (u User) updateExecution(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(access, profile, u.CanAdmin, u.CanManage, u.ID)
 }
 
-func (u User) deleteStatement(db *sql.DB) *sql.Stmt {
+func (u User) deleteStatement(db Preparable) *sql.Stmt {
 	return QueriableState(db, userDeleteStmt)
 }
 
@@ -79,7 +79,7 @@ func (u User) deleteExecution(stmt *sql.Stmt) (sql.Result, error) {
 }
 
 // Insert - Queriable impl.
-func (u *User) Insert(db *sql.DB) error {
+func (u *User) Insert(db Preparable) error {
 	if u.ID <= 0 {
 		lastID, err := ExecuteQueriableInsert(u, db, u.insertStatement, u.insertExecution)
 		u.ID = uint(lastID)
@@ -89,7 +89,7 @@ func (u *User) Insert(db *sql.DB) error {
 }
 
 // Update - Queriable impl.
-func (u User) Update(db *sql.DB) error {
+func (u User) Update(db Preparable) error {
 	if 0 < u.ID {
 		return ExecuteQueriableUpdate(u, db, u.updateStatement, u.updateExecution)
 	} else {
@@ -98,7 +98,7 @@ func (u User) Update(db *sql.DB) error {
 }
 
 // Delete - Queriable impl.
-func (u User) Delete(db *sql.DB) error {
+func (u User) Delete(db Preparable) error {
 	if 0 < u.ID {
 		return ExecuteQueriableUpdate(u, db, u.deleteStatement, u.deleteExecution)
 	}
@@ -229,6 +229,54 @@ func PostOpenAuth(ctx *gin.Context) {
 	// response back
 	ctx.SetCookie(authTokenCookieKey, theUser.Access["token"].(string), 8*3600, ``, ``, false, false)
 	ctx.JSON(http.StatusOK, theUser)
+}
+
+//
+type UserProcFn func(u *User, tx Preparable) error
+
+func postUserProc(ctx *gin.Context, tx Preparable, fn UserProcFn) (interface{}, error) {
+	us := make([]User, 0)
+	rs := make([]User, 0)
+
+	ctx.BindJSON(&us)
+	for _, u := range us {
+		err := fn(&u, tx)
+		if err != nil {
+			return u, err
+		}
+		rs = append(rs, u)
+	}
+	return rs, nil
+}
+
+// PostUserCreate - PostUserCreate
+func PostUserCreate(ctx *gin.Context) {
+	TransactContextServlet(ctx, postUserCreateProc)
+}
+func postUserCreateProc(ctx *gin.Context, tx Preparable) (interface{}, error) {
+	return postUserProc(ctx, tx, func(u *User, tx Preparable) error {
+		return u.Insert(tx)
+	})
+}
+
+// PostUserUpdate - PostUserUpdate
+func PostUserUpdate(ctx *gin.Context) {
+	TransactContextServlet(ctx, postUserUpdateProc)
+}
+func postUserUpdateProc(ctx *gin.Context, tx Preparable) (interface{}, error) {
+	return postUserProc(ctx, tx, func(u *User, tx Preparable) error {
+		return u.Update(tx)
+	})
+}
+
+// PostUserDelete - PostUserDelete
+func PostUserDelete(ctx *gin.Context) {
+	TransactContextServlet(ctx, postUserDeleteProc)
+}
+func postUserDeleteProc(ctx *gin.Context, tx Preparable) (interface{}, error) {
+	return postUserProc(ctx, tx, func(u *User, tx Preparable) error {
+		return u.Delete(tx)
+	})
 }
 
 // GetUserCacheKey

@@ -21,7 +21,7 @@ const grantDeleteStmt = `DELETE campaign_grants WHERE id=?`
 const grantPageSize = 50
 const grantSelectByUserStmt = `SELECT * FROM campaign_grants WHERE user_id=? AND id<? ORDER BY ID DESC`
 
-func (g *Grant) insertStatement(db *sql.DB) *sql.Stmt {
+func (g *Grant) insertStatement(db Preparable) *sql.Stmt {
 	return QueriableState(db, grantInsertStmt)
 }
 
@@ -30,7 +30,7 @@ func (g *Grant) insertExecution(stmt *sql.Stmt) (sql.Result, error) {
 }
 
 // Insert - Queriable impl.
-func (g *Grant) Insert(db *sql.DB) error {
+func (g *Grant) Insert(db Preparable) error {
 	if g.ID <= 0 {
 		lastId, err := ExecuteQueriableInsert(*g, db, g.insertStatement, g.insertExecution)
 		g.ID = uint(lastId)
@@ -41,7 +41,7 @@ func (g *Grant) Insert(db *sql.DB) error {
 }
 
 // Update - Queriable impl.
-func (g Grant) Update(db *sql.DB) error {
+func (g Grant) Update(db Preparable) error {
 	stmt, _ := db.Prepare(grantUpdateStmt)
 	_, err := stmt.Exec(g.Scope, g.ID)
 	defer stmt.Close()
@@ -49,7 +49,7 @@ func (g Grant) Update(db *sql.DB) error {
 }
 
 // Delete - Queriable impl.
-func (g Grant) Delete(db *sql.DB) error {
+func (g Grant) Delete(db Preparable) error {
 	stmt, _ := db.Prepare(grantDeleteStmt)
 	_, err := stmt.Exec(g.ID)
 	defer stmt.Close()

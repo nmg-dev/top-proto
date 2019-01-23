@@ -15,7 +15,7 @@ const campaignMetaInsertStmt = `INSERT tag_affiliations (campaign_id, tag_id) VA
 const campaignMetaUpdateStmt = `UPDATE tag_affiliations SET campaign_id=?, tag_id=? WHERE id=?`
 const campaignMetaDeleteStmt = `DELETE tag_affiliations WHERE id=?`
 
-func (m *TagAffiliation) insertStmt(db *sql.DB) *sql.Stmt {
+func (m *TagAffiliation) insertStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, campaignMetaInsertStmt)
 }
 
@@ -26,7 +26,7 @@ func (m *TagAffiliation) insertExec(stmt *sql.Stmt) (sql.Result, error) {
 	)
 }
 
-func (m TagAffiliation) updateStmt(db *sql.DB) *sql.Stmt {
+func (m TagAffiliation) updateStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, campaignMetaUpdateStmt)
 }
 
@@ -38,7 +38,7 @@ func (m TagAffiliation) updateExec(stmt *sql.Stmt) (sql.Result, error) {
 	)
 }
 
-func (m TagAffiliation) deleteStmt(db *sql.DB) *sql.Stmt {
+func (m TagAffiliation) deleteStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, campaignMetaDeleteStmt)
 }
 
@@ -47,7 +47,7 @@ func (m TagAffiliation) deleteExec(stmt *sql.Stmt) (sql.Result, error) {
 }
 
 // Insert
-func (m *TagAffiliation) Insert(db *sql.DB) error {
+func (m *TagAffiliation) Insert(db Preparable) error {
 	if m.ID <= 0 {
 		lastId, err := ExecuteQueriableInsert(m, db, m.insertStmt, m.insertExec)
 		if err != nil {
@@ -61,7 +61,7 @@ func (m *TagAffiliation) Insert(db *sql.DB) error {
 }
 
 // Update
-func (m TagAffiliation) Update(db *sql.DB) error {
+func (m TagAffiliation) Update(db Preparable) error {
 	if 0 < m.ID {
 		return ExecuteQueriableUpdate(m, db, m.updateStmt, m.updateExec)
 	} else {
@@ -70,7 +70,7 @@ func (m TagAffiliation) Update(db *sql.DB) error {
 }
 
 // Delete
-func (m TagAffiliation) Delete(db *sql.DB) error {
+func (m TagAffiliation) Delete(db Preparable) error {
 	if 0 < m.ID {
 		return ExecuteQueriableUpdate(m, db, m.deleteStmt, m.deleteExec)
 	} else {

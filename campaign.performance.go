@@ -28,7 +28,7 @@ const performanceUpdateStmt = `UPDATE campaign_performances impression=?, click=
 const performanceDeleteStmt = `DELETE campaign_performances WHERE id=?`
 const performancePeriods = `SELECT * FROM campaign_performances WHERE ? <= day_id AND day_id < ?`
 
-func (p *CampaignPerformance) insertStmt(db *sql.DB) *sql.Stmt {
+func (p *CampaignPerformance) insertStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, performanceInsertStmt)
 }
 
@@ -36,7 +36,7 @@ func (p *CampaignPerformance) insertExec(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(p.DayID, p.CampaignID, p.Impression, p.Click, p.Conversion, p.Cost, p.CreatedBy, p.CreatedBy)
 }
 
-func (p CampaignPerformance) updateStmt(db *sql.DB) *sql.Stmt {
+func (p CampaignPerformance) updateStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, performanceUpdateStmt)
 }
 
@@ -44,7 +44,7 @@ func (p CampaignPerformance) updateExec(stmt *sql.Stmt) (sql.Result, error) {
 	return stmt.Exec(p.Impression, p.Click, p.Conversion, p.Cost, p.UpdatedBy, p.ID)
 }
 
-func (p CampaignPerformance) deleteStmt(db *sql.DB) *sql.Stmt {
+func (p CampaignPerformance) deleteStmt(db Preparable) *sql.Stmt {
 	return QueriableState(db, performanceDeleteStmt)
 }
 
@@ -53,7 +53,7 @@ func (p CampaignPerformance) deleteExec(stmt *sql.Stmt) (sql.Result, error) {
 }
 
 // Insert
-func (p *CampaignPerformance) Insert(db *sql.DB) error {
+func (p *CampaignPerformance) Insert(db Preparable) error {
 	if p.ID <= 0 {
 		lastID, err := ExecuteQueriableInsert(p, db, p.insertStmt, p.insertExec)
 		if err != nil {
@@ -65,7 +65,7 @@ func (p *CampaignPerformance) Insert(db *sql.DB) error {
 }
 
 // Update
-func (p CampaignPerformance) Update(db *sql.DB) error {
+func (p CampaignPerformance) Update(db Preparable) error {
 	if 0 < p.ID {
 		return ExecuteQueriableUpdate(p, db, p.updateStmt, p.updateExec)
 	} else {
@@ -74,7 +74,7 @@ func (p CampaignPerformance) Update(db *sql.DB) error {
 }
 
 // Delete
-func (p CampaignPerformance) Delete(db *sql.DB) error {
+func (p CampaignPerformance) Delete(db Preparable) error {
 	if 0 < p.ID {
 		return ExecuteQueriableUpdate(p, db, p.deleteStmt, p.deleteExec)
 	}

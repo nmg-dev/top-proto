@@ -59,7 +59,7 @@ func initCampaigns(db *sql.DB) {
 }
 
 func initAffiliations(db *sql.DB) {
-	tags := ListAllTags(db)
+	tags, _ := ListAllTags(db)
 	campaigns := ListAllCampaigns(db)
 	seedingAffiliations(db, tags, campaigns)
 

@@ -45,11 +45,16 @@ class Navigation extends React.Component {
                         data-onerror="_onGoogleLoginFailure"
                     ></div>}
                 </a>
-                <div className="dropdown-divider" />
-                {pf && App.api.canManage() ?
-                    <a className="dropdown-item">Manage</a> : ''}
-                {pf && App.api.canAdmin() ?
-                    <a className="dropdown-item">Admin</a> : ''}
+                {pf && App.api.canManage() ? [
+                    <div className="dropdown-divider" />,
+                    <a className="dropdown-item">Push Data</a>,
+                    <a className="dropdown-item">Manage Tags</a>,
+                    <a className="dropdown-item">Manage Campaigns</a>,
+                ] : []}
+                {pf && App.api.canAdmin() ? [
+                    <div className="dropdown-divider" />,
+                    <a className="dropdown-item">Admin Users</a>,
+                ] : []}
             </div>
         </li>);
     }

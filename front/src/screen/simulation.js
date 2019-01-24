@@ -88,9 +88,7 @@ class SimulationScreen extends AppScreen {
                     return (<tr>
                         <th>{opt.label}</th>
                         <td>
-                            <CategoryBtn 
-                                key={'result-opt-'+opt.name} 
-                                name={opt.name} 
+                            <CategoryBtn key={'result-opt-'+opt.name} name={opt.name}
                                 ref={this._refs[opt.name]} 
                                 placeholder="ALL" 
                                 options={App.data.listTagOptions(opt.name)} />
@@ -134,7 +132,7 @@ class SimulationScreen extends AppScreen {
             </div>
             <div class="row section-content">
                 <div class="col-sm-12 col-lg-4">
-                    {this.renderOptionTable(table_options.design, '디자인 속성', {backgroundColor: 'var(--bg-light);'})}
+                    {this.renderOptionTable(table_options.design, '디자인 속성', {backgroundColor: 'var(--bg-light)'})}
                 </div>
                 <div class="col-sm-12 col-lg-4">
                     {this.renderOptionTable(table_options.adcopy, '콘텐츠 속성')}

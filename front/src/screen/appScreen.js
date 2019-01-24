@@ -10,12 +10,6 @@ import DropBtn from '../component/dropbtn';
 import CardPanel from '../component/cardpanel';
 import App from '../App';
 
-const queryDrops = [
-    {title: '업종', cls: 'category'},
-    {title: '채널', cls: 'channel'},
-    {title: '미디어', cls: 'media'},
-    {title: '광고목적', cls: 'goal'},
-]
 
 const QueryDropLabels = {
     category: '업종',
@@ -30,10 +24,30 @@ class AppScreen extends React.Component {
 
     constructor(ps) {
         super(ps);
+
+        this.state = {
+            metric: this.props.metric,
+            from: this.props.period.from,
+            till: this.props.period.till,
+            tags: [],
+        }
+        //
+        this.state = this.updateRefreshingContentState(this.state);
+    }
+
+    updateRefreshingContentState(nextState) { return nextState; }
+    refreshContent(nextState) {
+        this.setState(
+            this.updateRefreshingContentState(Object.assign(this.state, nextState)), 
+            ()=>console.log(this.state));
     }
 
     renderQueryTopControls() {
-        return [<MetricBtn kpi={App.kpi} />, <PeriodBtn from={App.period.from} till={App.period.till} />];
+        return [
+            <MetricBtn kpi={this.state.metric} 
+                onChange={(m)=>this.refreshContent({metric: m})} />, 
+            <PeriodBtn from={this.state.from} till={this.state.till}
+                onChange={(p)=>this.refreshContent(p)} />];
     }
 
     renderQueryMidControls() {
@@ -42,7 +56,9 @@ class AppScreen extends React.Component {
             <DropBtn title={QueryDropLabels[cls]}
                 placeholder={QueryDropLabels[cls] + ' 선택'}
                 icon={<img className="query-dropdown" src={'/img/icon-'+cls+'.png'} />}
-                options={App.data.listTagOptions(cls)} />
+                options={App.data.listTagOptions(cls)} 
+                onChange={this._onTagListUpdated.bind(this)}
+                />
         ));
     }
 
@@ -53,6 +69,18 @@ class AppScreen extends React.Component {
         </div>)
     }
 
+    _onTagListUpdated(ts) {
+        let siblings = ts.reduce((acc,tid)=>{
+            acc = acc.concat(App.data.listSiblingTags(tid));
+            return acc;
+        }, []);
+        let tags = this.state.tags.filter((tid)=>siblings.indexOf(tid)<0);
+        // one at a category
+        tags = tags.concat(ts);
+        console.log(tags, siblings, this.state.tags);
+        this.refreshContent({tags: tags});
+    }
+
     _queryBottomControlWrap(title, attrMeta) {
         let tc = 'class-' + title.toLowerCase();
         return (<div className="categorybar-wrapper">
@@ -61,7 +89,9 @@ class AppScreen extends React.Component {
                 {attrMeta.classes().map((cls)=>(<div className="categorybar-control-wrapper">
                     <h5 className={'control-title m-1 p-1 '+tc}>{cls}</h5>
                     <div className="button-group category-control m-0 p-0">
-                        <CategoryBtn placeholder="ALL" options={App.data.listTagOptions(cls)} />
+                        <CategoryBtn placeholder="ALL" options={App.data.listTagOptions(cls)}
+                            onChange={this._onTagListUpdated.bind(this)}
+                        />
                     </div>
                 </div>))}
             </div>

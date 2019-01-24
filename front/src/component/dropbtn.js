@@ -1,14 +1,5 @@
 import React from 'react';
 
-const styles = {
-    btn: {
-        backgroundColor: '#fff',
-        display: 'flex',
-        minWidth: '5vw',
-        alignItems: 'flex-start'
-    }
-}
-
 class DropBtn extends React.Component {
     constructor(ps) {
         super(ps);
@@ -19,16 +10,28 @@ class DropBtn extends React.Component {
         };
     }
 
+    onItemChanged() {
+        if(this.props.onChange) 
+            this.props.onChange(this.state.values);
+    }
+
     onClickItem(ev) {
         let key = ev.target.getAttribute('value');
-        let vals = this.values;
+        let vals;
         if(key) {
-            if(0<=vals.indexOf(key))
-                vals = vals.splice(vals.indexOf(key), 1);
-            else
-                vals.push(key);
-
-            this.setState({values: vals});
+            if(this.props.multi) {
+                vals = this.state.values.concat(this.props.options
+                    .filter((opt)=>opt.value==key)
+                    .map((opt)=>opt.value));
+            } else {
+                let selected;
+                vals = this.props.options
+                    .filter((opt)=>{selected = !selected && opt.value==key; return selected })
+                    .map((opt)=>opt.value);
+            }
+            this.setState({values: vals}, this.onItemChanged.bind(this));
+        } else if(key==="") { // reset
+            this.setState({values: []}, this.onItemChanged.bind(this));
         }
     }
 
@@ -36,9 +39,9 @@ class DropBtn extends React.Component {
         if(this.props.placeholder && this.state.values.length<=0) {
             return this.props.placeholder;
         } else {
-            let vals = this.state.values;
+            // console.log(this.props.options, this.state.values);
             return this.props.options
-                .filter((opt)=>0<=vals.indexOf(opt.value))
+                .filter((opt)=>0<=this.state.values.indexOf(opt.value))
                 .map((opt)=>opt.label)
                 .join(',');
         }
@@ -48,7 +51,7 @@ class DropBtn extends React.Component {
         let clsName = 'dropdown-item';
         if(0<=this.state.values.indexOf(opt.key))
             clsName += ' active';
-        return (<a key={opt.value} className={clsName} href="#"
+        return (<a key={opt.value} value={opt.value} className={clsName} href="#"
             onClick={this.onClickItem.bind(this)}>
                 {opt.label}
             </a>);
@@ -57,7 +60,8 @@ class DropBtn extends React.Component {
     render() {
         return (<div className="button-group query-control">
             <button type="input-group-btn" className="btn query-btn shadow" 
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                title={this.displayText()}>
                 <div className="label-icon">{this.props.icon}</div>
                 <div className="label-text">
                     <b>{this.props.title}</b>
@@ -68,7 +72,7 @@ class DropBtn extends React.Component {
                 <i className="fas fa-chevron-down" />
             </button>
             <div className="dropdown-menu">
-                <a className="dropdown-item" href="#" onClick={()=>this.setState({values: []})}>ALL</a>
+                {this.renderItem({value: "", label: "ALL"})}
                 <div class="dropdown-divider"></div>
                 {this.props.options.map(this.renderItem.bind(this))}
             </div>

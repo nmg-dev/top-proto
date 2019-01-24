@@ -60,18 +60,18 @@ class Sidebar extends React.Component {
     static renderStagedAppScreen(vk) {
         // let vk = this.state.view;
         if(!App.api.hasLogin())
-            return (<LoginScreen />);
+            return (<LoginScreen metric={App.kpi} period={App.period} />);
         if(!Sidebar.ViewRenders[vk]) {
             switch(vk) {
             case CREATIVE_SCREEN:
-                Sidebar.ViewRenders[vk] = (<CreativeScreen />);
+                Sidebar.ViewRenders[vk] = (<CreativeScreen metric={App.kpi} period={App.period} />);
                 break; 
             case SIMULATION_SCREEN:
-                Sidebar.ViewRenders[vk] = (<SimulationScreen />);
+                Sidebar.ViewRenders[vk] = (<SimulationScreen metric={App.kpi} period={App.period} />);
                 break;
             default:
             case DashboardScreen.name :
-                Sidebar.ViewRenders[vk] = (<DashboardScreen />);
+                Sidebar.ViewRenders[vk] = (<DashboardScreen metric={App.kpi} period={App.period} />);
                 break;
             }
         }

@@ -1,15 +1,9 @@
 import moment from 'moment';
 import Listenable from './listenable';
+import Metric from './metric';
+import App from '../App';
 
-const PREDEFINED_CATEGORIES = ['category', 'goal', 'channel', 'media'];
-const TOPMOST_CATEGORIES = ['layout', 'background', 'objet', 'lead'];
-const PREDEFINED_METRICS = [
-    {key: 'cpc', calc: (v) => (v.clk/Math.max(1,v.cost)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
-    {key: 'cpa', calc: (v) => (v.cnv/Math.max(1,v.cost)), fmt: (v)=> v.toLocaleString()+ 'KRW' },
-    {key: 'ctr', calc: (v) => (v.clk/Math.max(1,v.imp)), fmt: (v) => (100*v).toFixed(4)+' %' },
-    {key: 'cvr', calc: (v) => (v.cnv/Math.max(1,v.imp)), fmt: (v) => (100*v).toFixed(4)+' %' },
-    {key: 'cnt', calc: (v) => 1, hide: true, fmt: (v)=> v.toLocaleString()+ '.' },
-];
+const CLS_KEY_DELIMITER = '|';
 
 class ModData extends Listenable {
     constructor() {
@@ -18,14 +12,6 @@ class ModData extends Listenable {
         this._campaigns = null;
         this._affs = null;
         this._records = null;
-
-        this._tagList = null;
-        this._tagmap = {};
-        this._campaignList = null;
-
-        this.tags = [];
-        this.campaigns = [];
-        this.scoremap = {};
     }
 
     // intersect two obj
@@ -42,9 +28,6 @@ class ModData extends Listenable {
     _uq(arr) {
         return arr.filter((e,i,ar) => ar.indexOf(e)==i);
     }
-
-    defaultPeriodFrom() { return moment().add(-1, 'year'); }
-    defaultPeriodTill() { return moment(); }
 
 
     _qd(sc, q, qdiv) {
@@ -72,176 +55,11 @@ class ModData extends Listenable {
         return ret;
     }
 
-    tagScore(metric, tag, cids) {
-        let fn = metric.calc;
-        let scs = tag._c
-            .filter((cid)=>!cids || cids.length<=0 || 0<=cids.indexOf(cid))
-            .map((cid)=>this._campaigns[cid])
-            .reduce((acc, c)=>acc.concat(c._r.map((r)=>fn(r))), []);
-        
-        let scores = this._scores(scs);
-        
-
-        return Object.assign(scores, {m: metric.key});
-    }
-
-    categoryScore(metric, cls, cids) {
-        let fn = metric.calc;
-        let rs = [];
-        this.listTags(cls).forEach((t) => {
-            rs = rs.concat(
-                t._c.filter((cid)=>!cids || cids.length<=0 || 0<cids.indexOf(cid))
-                    .map((cid)=>this._campaigns[cid])
-                    .reduce((r, c) => r.concat(c._r.map((r)=>fn(r))), [])
-            );
-        });
-        return Object.assign(this._scores(rs), {m: metric.key});
-    }
-
-    plotClassbars(metric, cls, cids, tids) {
-        let cScore = this.categoryScore(metric, cls, cids);
-        let tags = this.listTags(cls).map((t)=>t.id)
-            .filter((tid)=>!tids || tids.length<=0 || 0<=tids.indexOf(tid));
-        let tScores = {};
-        let ts = tags;
-        let tnames = {};
-        tags.forEach((tid) => { 
-            tnames[tid] = this._tags[tid].name;
-            tScores[tid] = this.tagScore(metric, this._tags[tid]);
-        });
-        ts = ts.sort((l,r)=>tScores[l].avg-tScores[r].avg);
-        
-        return {
-            d: [
-                // tag scores
-                {
-                    name: cls,
-                    x: ts,
-                    y: ts.map((tn)=>tScores[tn].avg),
-                    // error_y: {type: 'data', array: ts.map((tn)=>tScores[tn].stdev), visible: true},
-                    type: 'bar'
-                },
-                // category average
-                {
-                    name: 'AVG.',
-                    x: ts,
-                    y: ts.map(()=>cScore.avg),
-                    // error_y: {type:'data', array: ts.map(()=>cScore.stdev), visible: true},
-                    type: 'scatter+line'
-                },
-                // category median
-                {
-                    name: 'MEDIAN',
-                    x: ts,
-                    y: ts.map(()=>cScore.med),
-                    type: 'scatter+line'
-                }
-            ],
-            l: {
-                autosize: true, 
-                showlegend: false,
-                xaxis: { showticklabels: true, tickvals: ts, ticktext: ts.map((tn)=>tnames[tn]) },
-                yaxis: { zeroline: false, ticks: '', showticklabels: false },
-                bargap: 0.1,
-            }
-        }
-    }
-
-    plotTimeSeries(metric) {
-        let fn = metric.calc;
-        let values = {};
-
-        this.campaigns.forEach((c) => {
-            c._r.forEach((r)=> {
-                let dk = r.d.format('YYYY-MM-DD');
-                let dv = fn(r);
-                if(!values[dk]) values[dk] = [dv];
-                else values[dk].push(dv);
-            })
-        });
-
-        let days = Object.keys(values).sort();
-        let scores = days.map((d)=>
-            values[d].reduce((sum, v)=>sum+=v, 0)/Math.max(1, values[d].length)
-        );
-        let total = days.reduce((acc, d) => acc += values[d].reduce((sum, v)=>sum+=v, 0), 0);
-        let cnts = days.reduce((acc, d)=> acc += values[d].length, 0);
-
-        return [{
-            name: metric.key,
-            x: days,
-            y: scores,
-            type: 'bar',
-        }, {
-            name: 'average',
-            x: days,
-            y: days.map(()=>total/Math.max(1, cnts)),
-            type: 'scatter+line',
-        }]
-    }
-
-    bestRecommandWith(tag, metric) {
-        let cids = this.campaigns
-            .filter((c)=> 0<=tag._c.indexOf(c.id))
-            .map((c)=>c.id);
-
-        let scores = {_title: tag.name};
-        this.listTopTagClasses().forEach((cls) => {
-            let m = null;
-            this.listTags(cls).forEach((t) => {
-                let s = this.tagScore(metric, t, cids);
-                if(m==null || m.avg < s.avg) {
-                    let cs = t._c
-                        .filter((cid)=>0<=cids.indexOf(cid))
-                        .sort((l,r)=>r.id-l.id)
-                        .map((cid)=>this._campaigns[cid]).pop();
-
-                    m = Object.assign(s, {tid: t.id, name: t.name, sample: cs ? cs.asset : ''});
-                }
-            });
-            m.value = metric.fmt(m.avg);
-            scores[cls] = m;
-        });
-        return scores;
-
-    }
-
-    dailyScores(metric, campaigns) {
-        if(!campaigns)
-            campaigns = this.campaigns;
-            
-        let fn = metric.calc;
-        let daylogs = {};
-
-        campaigns.forEach((c) => {
-            c._r.forEach((r) => {
-                let ds = r.d.toDate();
-                if(!daylogs[ds]) daylogs[ds] = [fn(r)];
-                else daylogs[ds].push(fn(r));
-            });
-        });
-
-        Object.keys(daylogs).forEach((ds) => {
-            daylogs[ds] = Object.assign(this._scores(daylogs[ds]), {m: metric.key});
-        });
-        return daylogs;
-    }
-
-    getTag(tid) { return this._tags[tid]; }
-    getCampaign(cid) { return this._campaigns[cid]; }
-
-    hasTagId(tid) { return this.tags.reduce((acc,t)=>acc || t.id==tid, false); }
-    hasCampaignId(cid) { return this.campaigns.reduce((acc,c)=>acc || c.id==cid, false); }
-
     initTags() {
-        this._tagmap = {};
         this.tags = [];
         Object.keys(this._tags).forEach((t) => {
             let tag = this._tags[t];
             this.tags.push(this._tags[t]);
-            if(!this._tagmap[tag.class])
-                this._tagmap[tag.class] = [];
-            this._tagmap[tag.class].push(tag);
         });
     }
 
@@ -257,22 +75,20 @@ class ModData extends Listenable {
     initCampaigns() {
         this.campaigns = Object.keys(this._campaigns)
             .map((cid)=>this._campaigns[cid]);
-        // .reduce((acc, cid) => {
-        //     this._campaigns[cid]._r = this._campaigns[cid]._r.sort((l,r)=>l.d.isAfter(r.d));
-        //     // this.campaigns.push(this._campaigns[c]);
-        //     acc.push(this._campaigns[])
-        // }, []);
-        // 
     }
+
     setCampaigns(cdata) {
         this._campaigns = cdata.campaigns;
         this._records = cdata.records;
         // this._affs = cdata.affiliations;
 
+        Object.keys(this._campaigns).forEach((cid)=>{
+            this._campaigns[cid]._r = [];
+        });
+
         this._records.forEach((r) => {
             if(!this._campaigns[r.c]) return;
             r.d = moment(r.d);
-            if(!this._campaigns[r.c]._r) this._campaigns[r.c]._r = [];
             this._campaigns[r.c]._r.push(r);
         });
 
@@ -280,12 +96,6 @@ class ModData extends Listenable {
         this.trigger('campaign');
 
         this.setAffiliation(cdata.affiliations);
-    }
-
-    filterByCampaignIds(cids) {
-        this.campaigns = 
-            this.campaigns.filter((c)=> 0<= cids.indexOf(c.id));
-        this.tags = this.filteredTags(cids);
     }
 
     setAffiliation(affs) {       
@@ -307,84 +117,174 @@ class ModData extends Listenable {
 
             this.initTags();
 
-            this.dailyScores(PREDEFINED_METRICS[3], this.campaigns);
+            // this.dailyScores(Metric.ByKey(App.kpi), this.campaigns);
             
             this.trigger('affiliation');
         }
     }
 
-    filteredTags(cids) {
-        if(!this._affs) return;
-        let tids = this._uq(this._affs
-            .filter((a)=> 0<=cids.indexOf(a.c))
-            .map((a)=>a.t));
-        this.initTags();
-        return this.tags.filter((t) => 0<=tids.indexOf(t.id));
-    }  
+    setMetric(metric_key) {
+        let metric = Metric.ByKey(metric_key);
+        this._records
+            .filter((rec)=>rec[metric_key]==null)
+            .forEach((rec,ridx)=>{
+                let val = metric.value(rec);
+                this._records[ridx][metric_key] = val;
+            });
 
-    filterExclude(cls, name) {
-        if(!this._tagmap[cls] || this._tagmap[cls].length<=0) return;
-        let exs = this._tagmap[cls].filter((tag)=>tag.name==name).map((tag)=>tag.id);
-        this.initCampaigns();
-        return this.campaigns.filter(
-            (c) => c._t.filter((tid) => 0<=exs.indexOf(tid)).length <= 0
-        ).map((c)=>c.id);
+        this.trigger('metric');
     }
 
-    filterInclude(cls, name) {
-        if(!this._tagmap[cls] || this._tagmap[cls].length<=0) return;
-        let exs = this._tagmap[cls].filter((tag)=>tag.name==name).map((tag)=>tag.id);
-        this.initCampaigns();
-        return this.campaigns.filter(
-            (c) => exs.reduce((acc,tid)=>acc = acc || 0<=c._t.indexOf(tid), false)
-        ).map((c)=>c.id);
+    retrieveScores(metric_key, campaign_ids, period_from, period_till) {
+        // this.setMetric(metric_key);
+        // let scores = [];
+        let metric = Metric.ByKey(metric_key);
+        if(!campaign_ids)
+            campaign_ids = Object.keys(this._campaigns);
+        
+        let values = campaign_ids
+            .map((cid)=>this._campaigns[cid])
+            .reduce((scores, campaign) => {
+                campaign._r
+                    .filter((rec)=>!(period_from && rec.d.isBefore(period_from)))
+                    .filter((rec)=>!(period_till && rec.d.isAfter(period_till)))
+                    .forEach((rec)=>{
+                        if(!rec[metric_key])
+                            rec[metric_key] = metric.value(rec);
+                        scores.push(rec[metric_key]);
+                    });
+                return scores;
+            }, []);
+
+        return this._scores(values);
     }
 
-    applyFilter(cids) {
-        if(cids) {
-            this.campaigns = cids.map((cid)=>this._campaigns[cid]);
-        } else {
-            this.initCampaigns();
-            // this.campaigns = Object.keys(this._campaigns).map((cid) => this._campaigns[cid]);
-        }
-        this.tags = this.filteredTags(cids);
+    retrieveBestElement(cls, metric_key, campaign_ids, period_from, period_till) {
+        return this.listTags(cls)
+            .reduce((best, tag) =>{
+                let score = this.retrieveScores(
+                    metric_key, 
+                    tag._c.filter((cid)=>!campaign_ids || 0<=campaign_ids.indexOf(cid)),
+                    period_from,
+                    period_till);
 
-        this.trigger('affiliation');
+                if(!best || best.scores.avg < score.avg) {
+                    best = Object.assign(tag, {scores: score});
+                }
+                return best;
+            });
+        // this._tagmap[cls].forEach()
     }
 
-    listTagClasses(includeTopmosts, includePredefineds, excludeTags) {
-        let names = [];
-        if(!excludeTags) {
-            if(this.tags) {
-                names = this._uq(this.tags
-                    .filter((t)=>TOPMOST_CATEGORIES.indexOf(t.class)<0 && PREDEFINED_CATEGORIES.indexOf(t.class)<0)
-                    .map((t)=>t.class)
-                );
-            }
-            else if(this._tagmap) {
-                names = Object.keys(this._tagmap)
-                    .filter((c)=>TOPMOST_CATEGORIES.indexOf(c)<0);
-            }
-        }
+    retrieveClassScores(cls, metric_key, campaign_ids, period_from, period_till) {
+        let scores = this.listTags(cls)
+            .reduce((rs, tag) =>{
+                let score = this.retrieveScores(
+                    metric_key, 
+                    tag._c.filter((cid)=>!campaign_ids || 0<=campaign_ids.indexOf(cid)),
+                    period_from,
+                    period_till);
+                rs.push(Object.assign(tag, {scores: score}));
+            }, []);
 
-        if(includeTopmosts)
-            names = TOPMOST_CATEGORIES.concat(names);
-
-        if(includePredefineds)
-            names = PREDEFINED_CATEGORIES.concat(names);
-
-        return names;
+        scores.sort((l,r)=>l.scores.avg-r.scores.avg);
+        return scores;
     }
 
-    listTopTagClasses(){
-        return TOPMOST_CATEGORIES;
+    _getCampaignCombinationKey(campaign, clss) {
+        let cks = [];
+        campaign._t.forEach((tid)=>{
+            let ckidx = clss.indexOf(this._tags[tid].class);
+            if(0<=ckidx)
+                cks[ckidx] = tid;
+        });
+
+        // fill gaps
+        cks.forEach((ck,ci)=>{if(!ck) cks[ci]='';});
+        return cks.join(CLS_KEY_DELIMITER);
     }
-    listPredTagClasses() {
-        return PREDEFINED_CATEGORIES;
+    retrieveTopCombinations(clss, metric_key, campaign_ids, period_from, period_till, limits) {
+        if(!campaign_ids) campaign_ids = Object.keys(this._campaigns).map((cid)=>parseInt(cid));
+
+        //
+        let combiScores = campaign_ids.map((cid)=>this._campaigns[cid])
+            .reduce((rs, campaign)=>{
+                let ck = this._getCampaignCombinationKey(campaign, clss);
+                if(!rs[ck])
+                    rs[ck] = [];
+                rs[ck].push(campaign.id);
+                return rs;
+        }, {});
+
+        let rs = [];
+        Object.keys(combiScores).forEach((ci) => {
+            let combi = ci.split(CLS_KEY_DELIMITER).reduce((acc,cii)=>{
+                let tid = parseInt(cii);
+                let tag = this._tags[tid];
+                if(!tag) return acc;
+
+                acc[tag.class] = tag;
+                return acc;
+            }, {});
+            let score = this.retrieveScores(metric_key, combiScores[ci], period_from, period_till);
+            rs.push({
+                c: combi,
+                s: score
+            });
+        });
+
+        rs = rs.sort((l,r)=>r.s.avg-l.s.avg);
+        return (!limits || limits<=1) ? rs[0] : rs.splice(0, limits);
+    }
+
+    retrieveTimelines(period_fmt, metric_key, campaign_ids, period_from, period_till) {
+        let metric = Metric.ByKey(metric_key);
+        let rss = this._records
+            .filter((rec)=>!campaign_ids || 0<=campaign_ids.indexOf(rec.c))
+            .filter((rec)=>!period_from || period_from.isBefore(rec.d))
+            .filter((rec)=>!period_till || period_till.isAfter(rec.d))
+            .reduce((rs, rec)=>{
+                let dk = period_fmt(rec.d);
+                if(!rs[dk]) {
+                    rs[dk] = [];
+                }
+                rs[dk].push(metric.value(rec));
+                return rs;
+            }, {});
+
+        return Object.keys(rss).sort().map((dk)=>{
+            return Object.assign({d: dk}, this._scores(rss[dk]));
+        });
     }
 
     listTags(withinCls) {
-        return this.tags.filter((t)=>t.class == withinCls);
+        return Object.keys(this._tags).map((tid)=>this._tags[parseInt(tid)])
+            .filter((tag)=>tag.class===withinCls);
+    }
+
+    listSiblingTags(tagId) {
+        let cls = this._tags[tagId].class;
+        return Object.keys(this._tags)
+            .map((tid)=>parseInt(tid))
+            .filter((tid)=>this._tags[tid].class==cls && tid!=tagId);
+    }
+
+    listCampaignIds(withTagIds) {
+        if(withTagIds && 0<withTagIds.length) {
+            // this._tags
+            let cids = withTagIds.map((tid)=>this._tags[tid])
+                .reduce((cs, tag)=>{
+                    // cs = cs.concat(tag._c.filter((cid)=>cs.indexOf(cid)<0));
+                    if(cs.length<=0) 
+                        cs = tag._c;
+                    else 
+                        cs = cs.filter((cid)=>0<=tag._c.indexOf(cid));
+                    return cs;
+                }, [])
+            return cids;
+        } else {
+            return Object.keys(this._campaigns);
+        }
     }
 
     listTagOptions(withinCls, lang='ko') {

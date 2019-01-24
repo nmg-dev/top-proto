@@ -1,8 +1,9 @@
 import React from 'react';
 import Metric from '../module/metric';
+import DropBtn from './dropbtn';
 
 
-class MetricBtn extends React.Component {
+class MetricBtn extends DropBtn {
     constructor(ps) {
         super(ps);
 
@@ -13,30 +14,22 @@ class MetricBtn extends React.Component {
 
     onClickItem(ev) {
         let key = ev.target.getAttribute('value');
-        let vals = this.values;
+        // let vals = this.values;
         if(key) {
-            if(0<=vals.indexOf(key))
-                vals = vals.splice(vals.indexOf(key), 1);
-            else
-                vals.push(key);
-
-            this.setState({values: vals});
+            this.setState({kpi: key}, this.onItemChanged.bind(this));
         }
+    }
+
+    onItemChanged() {
+        console.log(this.props.onChange, this.state.kpi);
+        if(this.props.onChange) 
+            this.props.onChange(this.state.kpi);
     }
 
     displayText() {
         return this.state.kpi.toUpperCase();
     }
 
-    renderItem(opt) {
-        let clsName = 'dropdown-item';
-        if(0<=this.state.values.indexOf(opt.key))
-            clsName += ' active';
-        return (<a key={opt.value} className={clsName} href="#"
-            onClick={this.onClickItem.bind(this)}>
-                {opt.label}
-            </a>);
-    }
 
     render() {
         return (<div className="button-group query-control top-control">
@@ -55,7 +48,7 @@ class MetricBtn extends React.Component {
                     let clsName = 'dropdown-item';
                     if(m.key()===this.state.kpi)
                         clsName += ' active';
-                    return (<a key={m.key()} href="#" className={clsName}
+                    return (<a key={'metric-'+m.key()} value={m.key()} href="#" className={clsName}
                         onClick={this.onClickItem.bind(this)}>
                         {m.label()}
                     </a>);

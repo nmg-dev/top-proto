@@ -63,7 +63,7 @@ class App extends React.Component {
 		
 	_onViewUpdate(vk) { this.setState({view: vk}); }
 
-	_onLoginServerResponseSuccess(resp) {
+	_onLoginServerResponseSuccess() {
 		App.api.getTags(App.data.setTags.bind(App.data));
 		App.api.getCampaigns({
 			from: App.period.from.format(), 
@@ -73,7 +73,8 @@ class App extends React.Component {
 	}
 	_onLoginServerResponseFailure(err) {
 		// this.setState({view: Sidebar.indexViewAccessor()});
-		window.alert('Login failed!');
+		window.alert('Login error: '+err);
+		console.log(arguments);
 	}
 
 	onLoginCallback(gauth) {

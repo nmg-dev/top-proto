@@ -19,6 +19,17 @@ class Metric {
         return this._fmt(value);
     }
 
+    value(x) {
+        if(x[this._k])
+           return x[this._k];
+        else 
+            return this.calc(x);
+    }
+
+    valueString(x) {
+        return this._fmt(this.calc(x));
+    }
+
     /* const */
     static CPC = new Metric('cpc', 'CPC', 
         (v) => (v.clk/Math.max(1,v.cost)),
@@ -52,7 +63,7 @@ class Metric {
             .map((m)=>m._k);
     }
     static ByKey(mk) {
-        return Metric.reduce((found,m)=>found=(!found && m._k===mk ? m: found));
+        return Metric.ALL.reduce((found,m)=>found=(!found && m._k===mk ? m: found));
     }
     static DefaultKey() {
         return Metric.CPC._k;

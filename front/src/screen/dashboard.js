@@ -2,6 +2,9 @@ import React from 'react';
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts';
 import AppScreen from './appScreen';
 import CreativePreview from '../component/creativePreview';
+import AttributeMeta from '../module/attrMeta';
+import App from '../App';
+import moment  from 'moment';
 
 const samples_design = [
     {c: 'Background', t: '무색'},
@@ -61,6 +64,9 @@ const table_values = {
 const table_titles = {
     fnb: '식음료', houseware: '가정용품',
 }
+
+const INDUSTRY_KEY = 'category';
+const WEEK_FORMAT = 'YYYYMM';
  
 class DashboardScreen extends AppScreen {
     static _ACCESSOR = 'dashboard';
@@ -70,8 +76,51 @@ class DashboardScreen extends AppScreen {
         super(ps, DashboardScreen.ACCESSOR);
         if(!DashboardScreen.INSTANCE)
             DashboardScreen.INSTANCE = this;
+
+        // this.state = this.update
+        console.log(this.state);
+
+        // this.state.charts = App.data.
     }
-    
+
+    timelineWeekFormat(d) {
+        // week of the year
+        // let of = Object.assign(d, {});
+
+        let wk = d.isoWeeks();
+        let wo = moment(d.format('YYYY-MM-01T00:00:00')).isoWeeks();
+        if(wo<=wk)
+            wk -= wo;
+        return d.format('YYYY-MM '+(wk+1)+'주차');
+    }
+
+    updateRefreshingContentState(nextState) {
+        if(nextState.metric) {
+            // re-calculate metric
+            App.data.setMetric(nextState.metric);
+        }
+        if(nextState.from || nextState.till) {
+            // TODO: load next data
+        }
+
+        let cids = nextState.tags ? 
+            App.data.listCampaignIds(nextState.tags) :
+            App.data.listCampaignIds(this.state.tags);
+        cids = cids.map((cid)=>parseInt(cid));
+
+        console.log(nextState.tags, cids);
+        
+
+        nextState.tops = App.data.retrieveTopCombinations(AttributeMeta.PredefinedClasses(),
+            this.state.metric, cids, this.state.from, this.state.till);
+        
+        nextState.timeline = App.data.retrieveTimelines(
+            this.timelineWeekFormat.bind(this), 
+            this.state.metric, cids,
+            this.state.from, this.state.till);
+
+        return nextState;
+    }
 
     renderElementCard(ctype, cls, title) {
         return (<div className="section col-3" key={cls+':'+title}>
@@ -98,7 +147,8 @@ class DashboardScreen extends AppScreen {
             <thead>
                 <tr>
                     <th>속성</th>
-                    {table_columns.map((c)=><th>{c}</th>)}
+                    {AttributeMeta.Design.classes().map((cls)=><th className={cls}>{cls}</th>)}
+                    {AttributeMeta.Message.classes().map((cls)=><th className={cls}>{cls}</th>)}
                 </tr>
             </thead>
             <tbody>

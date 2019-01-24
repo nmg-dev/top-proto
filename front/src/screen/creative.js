@@ -30,7 +30,7 @@ var sample_data = [
 class CreativeScreen extends AppScreen {
     constructor(ps) {
         super(ps, CreativeScreen.ACCESSOR);
-        this.state = {};   
+        // this.state = {};   
         this._dialog = React.createRef();
     }
 

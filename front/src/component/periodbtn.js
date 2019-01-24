@@ -5,17 +5,6 @@ import $ from 'jquery';
 // import Popperjs from 'popper.js';
 
 // const DATE_FORMAT = 'YYYY-MM-DD';
-
-const daterangeStyle = {
-    position: 'absolute', 
-    marginTop: 2, 
-    right: 0, 
-    border: '1px solid var(--bg-dark)', 
-    width: 564, 
-    zIndex: 99,
-    backgroundColor: '#fff',
-};
-
 class PeriodBtn extends React.Component {
     static DATE_FORMAT = 'YYYY-MM-DD';
     constructor(ps) {
@@ -31,8 +20,16 @@ class PeriodBtn extends React.Component {
         }
     }
 
+    onItemChanged() {
+        if(this.props.onChange) 
+            this.props.onChange({
+                from: this.state.from,
+                till: this.state.till,
+            });
+    }
+
     showPopover(ev) {
-        this.setState({showRange: !this.state.showRange});
+        this.setState({showRange: !this.state.showRange}, this.onItemChanged.bind(this));
     }
     disposePopover() {
         this.setState({showRange: false});
@@ -48,10 +45,10 @@ class PeriodBtn extends React.Component {
 
     render() {
         return (
-            <div className="button-group query-control top-control" style={{marginRight: 0}}>
+            <div className="button-group query-control top-control">
             <button ref={this._ref}
                 type="input-group-btn" className="btn shadow-sm period-control"
-                onClick={this.showPopover.bind(this)}>
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div className="label-icon">
                     <img src="/img/icon-calendar.png" alt="calendar icon" />
                 </div>
@@ -62,7 +59,7 @@ class PeriodBtn extends React.Component {
                 </div>
                 <i className="fas fa-chevron-down" />
             </button>
-            {this.state.showRange ? <div style={daterangeStyle} onBlur={this.disposePopover.bind(this)}>
+            <form className="dropdown-menu" >
             <DateRange 
                 ref={this._range}
                 startDate={this.state.from} 
@@ -75,7 +72,7 @@ class PeriodBtn extends React.Component {
                     <button type="button" className="btn btn-default-outline m-1 p-1"
                         onClick={this.onCalendarChanged.bind(this)}> OK </button>
                 </div>
-            </div>: ''}
+            </form>
         </div>);
     }
 }

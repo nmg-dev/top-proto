@@ -1,10 +1,12 @@
 import React from 'react';
-import Querybar from '../component/querybar';
-import {ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Cell} from 'recharts';
+import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, LabelList} from 'recharts';
 import AppScreen from './appScreen';
 
 import CreativeDialog from '../component/creativeDialog';
 import CreativePreview from '../component/creativePreview';
+import AttributeMeta from '../module/attrMeta';
+import App from '../App';
+import Metric from '../module/metric';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
 
@@ -31,11 +33,43 @@ const ScreenAccessor = 'creative';
 
 class CreativeScreen extends AppScreen {
     static ACCESSOR = ScreenAccessor;
-    
+
     constructor(ps) {
         super(ps, ScreenAccessor);
         // this.state = {};   
         this._dialog = React.createRef();
+        this.state.tops = [];
+        this.state.scores = [];
+    }
+
+    updateRefreshingContentState(nextState) {
+        let _data = this._app.data;
+        // console.log(nextState);
+        let config_filters = AttributeMeta.Config.classes()
+            .filter((cls)=>nextState[cls])
+            .map((cls)=>nextState[cls]);
+        let campaign_ids = _data.listCampaignIds(config_filters).map((cid)=>parseInt(cid));
+        let metric = nextState.metric ? nextState.metric : this.state.metric;
+
+        let tops = _data.retrieveTopCombinations(
+            AttributeMeta.PredefinedClasses(),
+            metric, campaign_ids, this.state.from, this.state.till, 3
+        );
+        let option_tag_clss = _data.listTagClasses(campaign_ids);
+        let tag_clss = AttributeMeta.PredefinedClasses().concat(Object.keys(option_tag_clss));
+        let scores = tag_clss.reduce((rss, cls)=> {
+            rss[cls] =_data.retrieveClassScores(cls, metric, campaign_ids, this.state.period.from, this.state.period.till); 
+            return rss;
+        }, {});
+
+        console.log({
+            tops: tops,
+            scores: scores,
+        });
+        return Object.assign(nextState,  {
+            tops: tops,
+            scores: scores,
+        });
     }
 
     showDetailDialog(ev) {
@@ -55,21 +89,39 @@ class CreativeScreen extends AppScreen {
         }
     }
 
-    renderContentChart(dt) {
-        return (<div class="creative-chart-wrapper">
-            <h5>{dt.title}</h5>
-            <ResponsiveContainer width="95%" height={180}>
-                <BarChart data={dt.labels.map((lb,idx)=>({l:lb, d:dt.data[idx]}))}
-                    layout="vertical" barCategoryGap={0} >
-                    <XAxis type="number" tick={false} />
-                    <YAxis type="category" dataKey="l" tick={{stroke: 'transparent'}} />
-                    <Tooltip />
-                    <Bar dataKey="d" isAnimationActive={false} label={{position: 'end', fill: '#fff'}}>
-                        {dt.labels.map((lb,idx)=><Cell key={'cell-'+idx+'-'+lb} fill={bar_colors[idx]} />)}
-                    </Bar>
-                </BarChart>
-            </ResponsiveContainer>
-        </div>);
+    renderContentChart(cls) {
+        const _lang = this._app.lang;
+        let metric = Metric.ByKey(this.state.metric);
+        if(this.state.scores[cls]) {
+            let chartData = this.state.scores[cls].map((dt)=>{
+                return {
+                    label: _lang.label(dt),
+                    value: dt.scores.avg,
+                };
+            });
+            return (<div class="creative-chart-wrapper">
+                <h5>{_lang.label(cls)}</h5>
+                <ResponsiveContainer width="95%" height={180}>
+                    <BarChart data={chartData} layout="vertical" barCategoryGap={0} >
+                        <XAxis type="number" tick={false} />
+                        <YAxis type="category" dataKey="label" tick={{stroke: 'transparent'}} />
+                        <Tooltip formatter={metric.valueString.bind(metric)} />
+                        <Bar dataKey="value" isAnimationActive={false} 
+                            label={false}>
+                            <LabelList dataKey="value" position="insideRight" 
+                                fill="#fff"
+                                formatter={metric.valueString.bind(metric)} />
+                            {this.state.scores[cls].map((dt,idx)=>
+                                <Cell key={'cell-'+idx+'-'+dt.name} fill={bar_colors[idx]} />
+                            )}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>);
+        } else {
+            return '';
+        }
+        
     }
 
     renderContent() {
@@ -81,21 +133,21 @@ class CreativeScreen extends AppScreen {
                 </div>
             </div>
             <div class="row creative-previews">
-                {[0,0,0].map((pv, rank)=>(
+                {this.state.tops.map((top, rank)=>(
                     <div class="col-sm-12 col-md-4">
                         <h5>{rank+1} 순위 조합</h5>
-                        <CreativePreview />
+                        <CreativePreview top={top} />
                     </div>
                 ))}
             </div>
 
             <div class="row panel-charts">
-                {sample_data.map((dt) => <div class="col-sm-12 col-md-6 col-lg-3 m-0 p-1 ">
+                {AttributeMeta.PredefinedClasses().map((cls) => <div class="col-sm-12 col-md-6 col-lg-3 m-0 p-1 ">
                     <div class="creative-chart-link">
-                        <a dataKey={dt.title}
+                        <a dataKey={cls}
                             onClick={this.showDetailDialog.bind(this)}>자세히 보기&gt;</a>
                     </div>
-                    {this.renderContentChart(dt)}
+                    {this.renderContentChart(cls)}
                 </div>)}
             </div>
             <CreativeDialog ref={this._dialog} />

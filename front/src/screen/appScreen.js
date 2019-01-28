@@ -26,6 +26,7 @@ class AppScreen extends React.Component {
     constructor(ps, accessor) {
         super(ps);
 
+        this._app = App;
         this._accessor = accessor;
 
         this.state = {

@@ -2,6 +2,7 @@ import moment from 'moment';
 import Listenable from './listenable';
 import Metric from './metric';
 import App from '../App';
+import AttributeMeta from './attrMeta';
 
 const CLS_KEY_DELIMITER = '|';
 
@@ -170,6 +171,7 @@ class ModData extends Listenable {
                     period_from,
                     period_till);
                 rs.push(Object.assign(tag, {scores: score}));
+                return rs;
             }, []);
 
         scores.sort((l,r)=>l.scores.avg-r.scores.avg);
@@ -314,8 +316,10 @@ class ModData extends Listenable {
                     return cs;
                 }, [])
             return cids;
-        } else {
+        } else if(this._campaigns) {
             return Object.keys(this._campaigns);
+        } else {
+            return [];
         }
     }
 
@@ -327,6 +331,28 @@ class ModData extends Listenable {
                     label: tag.property && tag.property[lang] ? tag.property[lang] : tag.name
                 };
             });
+    }
+
+    listTagClasses(campaignIds) {
+        let predefineds = AttributeMeta.AllClasses();
+        let tagIds = campaignIds
+            .map((cid)=>this._campaigns[cid])
+            .reduce((rss, campaign)=>{
+                let appendings = campaign._t
+                    .filter((tid)=>predefineds.indexOf(tid)<0)
+                    .filter((tid)=>rss.indexOf(tid)<0);
+                if(appendings && 0<appendings.length) {
+                    rss.concat(appendings);
+                }
+                return rss;
+            }, []);
+        return tagIds.reduce((rs, tid)=>{
+            let tag = this._tags[tid];
+            if(!rs[tag.class])
+                rs[tag.class] = [];
+            rs[tag.class] = tag;
+            return rs;
+        }, {});
     }
 
 }

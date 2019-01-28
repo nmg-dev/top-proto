@@ -7,33 +7,6 @@ import App from '../App';
 import moment  from 'moment';
 import Metric from '../module/metric';
 
-const table_values = {
-    fnb: [
-        {l: '중앙배치형', v: 200},
-        {l: '무색', v: 451},
-        {l: '일러스트', v: 115},
-        {l: '타임형', v: 447},
-        {l: '모바일 프로모션', v: 200},
-        {l: '할인율 표기', v: 451},
-        {l: '마감 임박', v: 115},
-        {l: '주목형', v: 447},
-    ],
-    houseware: [
-        {l: '우측배치형', v: 200},
-        {l: '면분할', v: 451},
-        {l: '모델', v: 115},
-        {l: '혜택형', v: 447},
-        {l: '세일강조', v: 200},
-        {l: '할인율 표기', v: 451},
-        {l: '경품 증정 강조', v: 115},
-        {l: '주목형', v: 447},
-    ],
-};
-
-const table_titles = {
-    fnb: '식음료', houseware: '가정용품',
-}
-
 const INDUSTRY_KEY = 'category';
 const WEEK_FORMAT = 'YYYYMM';
 
@@ -66,12 +39,12 @@ class DashboardScreen extends AppScreen {
     }
 
     updateRefreshingContentState(nextState) {
-        // console.log(nextState);
+        const _data = this._app.data;
 
         let metric = this.state.metric;
         if(nextState.metric) {
             // re-calculate metric
-            App.data.setMetric(nextState.metric);
+            _data.setMetric(nextState.metric);
             metric = nextState.metric;
         }
         if(nextState.from || nextState.till) {
@@ -84,31 +57,27 @@ class DashboardScreen extends AppScreen {
             return acc;
         }, []);
 
-        let cids = App.data.listCampaignIds(tags)
+        let cids = _data.listCampaignIds(tags)
             .map((cid)=>parseInt(cid));
 
-        let topCombi = App.data.retrieveTopCombinations(
+        let topCombi = _data.retrieveTopCombinations(
             AttributeMeta.PredefinedClasses(),
             metric, cids, this.state.from, this.state.till);
-        // console.log(topCombi);
 
-        // nextState.tops = {};
         nextState.tops = AttributeMeta.PredefinedClasses().reduce((rs, cls)=>{
             rs[cls] = topCombi && topCombi.c ? topCombi.c[cls] : '-';
             return rs;
         }, {});
         
-        nextState.timeline = App.data.retrieveTimelines(
+        nextState.timeline = _data.retrieveTimelines(
             this.timelineWeekFormat.bind(this), 
             metric, cids,
             this.state.from, this.state.till);
 
-        nextState.tables = App.data.retrieveCategoryScores(
+        nextState.tables = _data.retrieveCategoryScores(
             'category', AttributeMeta.PredefinedClasses(),
             metric, cids, this.state.from, this.state.till
         );
-
-        // console.log(nextState.tables);
 
         return nextState;
     }
@@ -143,6 +112,7 @@ class DashboardScreen extends AppScreen {
     }
 
     renderClassTable(tb) {
+        const _lang = App.lang;
         // console.log(tb);
         // return '';
         return (<table className="table">
@@ -157,10 +127,10 @@ class DashboardScreen extends AppScreen {
                 <tr>
                     <th>옵션</th>
                     {AttributeMeta.Design.classes().map((cls)=>
-                        <td className="class-design">{App.lang.label(tb.data.c[cls])}</td>
+                        <td className="class-design">{_lang.label(tb.data.c[cls])}</td>
                     )}
                     {AttributeMeta.Message.classes().map((cls)=>
-                        <td className="class-message">{App.lang.label(tb.data.c[cls])}</td>
+                        <td className="class-message">{_lang.label(tb.data.c[cls])}</td>
                     )}
                 </tr>
                 <tr>
@@ -185,7 +155,8 @@ class DashboardScreen extends AppScreen {
     }
 
     renderContent() {
-        console.log(this.state.tops);
+        const _lang = App.lang;
+
         return (<div className="m-0 p-1">
             <div className="row panel-header">
                 <div className="col">
@@ -194,11 +165,11 @@ class DashboardScreen extends AppScreen {
             </div>
             <div className="row dashboard-card-design">
                 {AttributeMeta.Design.classes().map((cls)=>
-                    this.renderElementCard('design', cls, App.lang.label(this.state.tops[cls])))}
+                    this.renderElementCard('design', cls, _lang.label(this.state.tops[cls])))}
             </div>
             <div className="row dashboard-card-message">
                 {AttributeMeta.Message.classes().map((cls)=>
-                    this.renderElementCard('message', cls, App.lang.label(this.state.tops[cls])))}
+                    this.renderElementCard('message', cls, _lang.label(this.state.tops[cls])))}
             </div>
             <div className="row dashboard-card-chart">
                 <div className="col">
@@ -210,7 +181,7 @@ class DashboardScreen extends AppScreen {
                     <h3 className="section-title p-0">Industry Analysis</h3>
                     {this.state.tables.map((tb)=>{
                         return (<div className="panel-category-detail">
-                            <h5>{App.lang.label(tb.tag)}</h5>
+                            <h5>{_lang.label(tb.tag)}</h5>
                             {this.renderClassTable(tb)}
                         </div>);
                     })}

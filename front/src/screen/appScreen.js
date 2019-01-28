@@ -9,6 +9,7 @@ import CategoryBtn from '../component/categorybtn';
 import DropBtn from '../component/dropbtn';
 import CardPanel from '../component/cardpanel';
 import App from '../App';
+import GTM from '../module/gtm';
 
 
 const QueryDropLabels = {
@@ -22,44 +23,77 @@ const QueryDropLabels = {
 class AppScreen extends React.Component {
     static views = {};
 
-    constructor(ps) {
+    constructor(ps, accessor) {
         super(ps);
+
+        this._accessor = accessor;
 
         this.state = {
             metric: this.props.metric,
-            from: this.props.period.from,
-            till: this.props.period.till,
-            tags: [],
-        }
-        //
-        this.state = this.updateRefreshingContentState(this.state);
+            period: this.props.period,
+        };
+        this._refs = {};
+    }
+
+    componentDidMount() {
+        this.refreshContent();
+        GTM.ScreenView(this._accessor);
     }
 
     updateRefreshingContentState(nextState) { return nextState; }
-    refreshContent(nextState) {
-        this.setState(
-            this.updateRefreshingContentState(Object.assign(this.state, nextState)), 
-            ()=>console.log(this.state));
+    _metricRecalculateRequired(nextState) {
+        return (nextState.metric && this.state.metric != nextState.metric);
+    }
+    _periodReloadRequired(nextState) {
+        return (nextState.period && 
+            ( (nextState.period.from && nextState.period.from.isBefore(this.state.from))
+            ||(nextState.period.till && nextState.period.till.isBefore(this.state.till)) )
+        );
+    }
+    refreshContent() {
+        // retrieve values
+        let nextState = Object.keys(this._refs).reduce((rs, key)=> {
+            let ctrl = this._refs[key].current;
+            let val = ctrl.getSelected();
+            rs = Object.assign(rs, {[key]: val});
+            return rs;
+        }, {});
+        // console.log(nextState);
+
+        // on metric change
+        if(this._metricRecalculateRequired(nextState))
+            App.data.setMetric(nextState.metric);
+        
+        // on period change
+        if(this._periodReloadRequired(nextState)) {
+            // TODO: api reload
+        }
+
+        GTM.RefreshScreen(this._accessor, nextState);
+        this.setState(this.updateRefreshingContentState(nextState));
     }
 
     renderQueryTopControls() {
+        this._refs = Object.assign(this._refs, { 
+            metric: React.createRef(),
+            period: React.createRef() });
         return [
-            <MetricBtn kpi={this.state.metric} 
-                onChange={(m)=>this.refreshContent({metric: m})} />, 
-            <PeriodBtn from={this.state.from} till={this.state.till}
-                onChange={(p)=>this.refreshContent(p)} />];
+            <MetricBtn kpi={this.state.metric} ref={this._refs.metric}
+                onChange={this.refreshContent.bind(this)} />, 
+            <PeriodBtn from={this.state.period.from} till={this.state.period.till} ref={this._refs.period}
+                onChange={this.refreshContent.bind(this)} />];
     }
 
     renderQueryMidControls() {
-        // console.log(AttributeMeta.Config.classes());
-        return AttributeMeta.Config.classes().map((cls) => (
-            <DropBtn title={QueryDropLabels[cls]}
+        return AttributeMeta.Config.classes().map((cls) => {
+            this._refs[cls] = React.createRef();
+            return (<DropBtn title={QueryDropLabels[cls]} ref={this._refs[cls]}
                 placeholder={QueryDropLabels[cls] + ' 선택'}
                 icon={<img className="query-dropdown" src={'/img/icon-'+cls+'.png'} />}
                 options={App.data.listTagOptions(cls)} 
-                onChange={this._onTagListUpdated.bind(this)}
-                />
-        ));
+                onChange={this.refreshContent.bind(this)} />);
+        });
+        
     }
 
     renderQueryBottomControls() {
@@ -69,31 +103,23 @@ class AppScreen extends React.Component {
         </div>)
     }
 
-    _onTagListUpdated(ts) {
-        let siblings = ts.reduce((acc,tid)=>{
-            acc = acc.concat(App.data.listSiblingTags(tid));
-            return acc;
-        }, []);
-        let tags = this.state.tags.filter((tid)=>siblings.indexOf(tid)<0);
-        // one at a category
-        tags = tags.concat(ts);
-        console.log(tags, siblings, this.state.tags);
-        this.refreshContent({tags: tags});
-    }
-
     _queryBottomControlWrap(title, attrMeta) {
         let tc = 'class-' + title.toLowerCase();
         return (<div className="categorybar-wrapper">
             <h3 className={'wrapper-title m-1 p-1 ' + tc} >{title}</h3>
             <div className="categorybar-subwrapper">
-                {attrMeta.classes().map((cls)=>(<div className="categorybar-control-wrapper">
-                    <h5 className={'control-title m-1 p-1 '+tc}>{cls}</h5>
-                    <div className="button-group category-control m-0 p-0">
-                        <CategoryBtn placeholder="ALL" options={App.data.listTagOptions(cls)}
-                            onChange={this._onTagListUpdated.bind(this)}
-                        />
-                    </div>
-                </div>))}
+                {attrMeta.classes().map((cls)=>{
+                    this._refs[cls] = React.createRef();
+                    return (<div className="categorybar-control-wrapper">
+                        <h5 className={'control-title m-1 p-1 '+tc}>{cls}</h5>
+                        <div className="button-group category-control m-0 p-0">
+                            <CategoryBtn ref={this._refs[cls]}
+                                placeholder="ALL" options={App.data.listTagOptions(cls)}
+                                onChange={this.refreshContent.bind(this)}
+                            />
+                        </div>
+                    </div>);
+                })}
             </div>
         </div>);
     }

@@ -10,6 +10,14 @@ class DropBtn extends React.Component {
         };
     }
 
+    getSelected() {
+        if(!this.props.multi) {
+            return (this.state.values && 0<this.state.values.length) ? this.state.values[0] : null;
+        } else {
+            return this.state.values;
+        }
+    }
+
     onItemChanged() {
         if(this.props.onChange) 
             this.props.onChange(this.state.values);
@@ -73,7 +81,7 @@ class DropBtn extends React.Component {
             </button>
             <div className="dropdown-menu">
                 {this.renderItem({value: "", label: "ALL"})}
-                <div class="dropdown-divider"></div>
+                <div className="dropdown-divider"></div>
                 {this.props.options.map(this.renderItem.bind(this))}
             </div>
         </div>);

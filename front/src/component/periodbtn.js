@@ -20,6 +20,13 @@ class PeriodBtn extends React.Component {
         }
     }
 
+    getSelected() {
+        return {
+            from: this.state.from,
+            till: this.state.till
+        };
+    }
+
     onItemChanged() {
         if(this.props.onChange) 
             this.props.onChange({

@@ -12,6 +12,10 @@ class MetricBtn extends DropBtn {
         };
     }
 
+    getSelected() {
+        return this.state.kpi;
+    }
+
     onClickItem(ev) {
         let key = ev.target.getAttribute('value');
         // let vals = this.values;
@@ -21,7 +25,6 @@ class MetricBtn extends DropBtn {
     }
 
     onItemChanged() {
-        console.log(this.props.onChange, this.state.kpi);
         if(this.props.onChange) 
             this.props.onChange(this.state.kpi);
     }

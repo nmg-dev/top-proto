@@ -5,39 +5,8 @@ import CreativePreview from '../component/creativePreview';
 import AttributeMeta from '../module/attrMeta';
 import App from '../App';
 import moment  from 'moment';
+import Metric from '../module/metric';
 
-const samples_design = [
-    {c: 'Background', t: '무색'},
-    {c: 'Objet', t: '모델'},
-    {c: 'Layout', t: '중앙배치형'},
-    {c: 'Button type', t: '타임형'},
-];
-
-const samples_topic = [
-    {c: 'Key topic', t: '프리미엄'},
-    {c: 'Keyword', t: '할인율 표기'},
-    {c: 'Trigger', t: '리워드 강조'},
-    {c: 'Ad Copy', t: '주목형'},
-];
-
-const sample_data = [
-    { t: '2018년 10월 1주차',	y: 500},
-    { t: '2018년 10월 2주차',	y: 426},
-    { t: '2018년 10월 3주차',	y: 602},
-    { t: '2018년 10월 4주차',	y: 737},
-    { t: '2018년 11월 1주차',	y: 725},
-    { t: '2018년 11월 2주차',	y: 616},
-    { t: '2018년 11월 3주차',	y: 598},
-    { t: '2018년 11월 4주차',	y: 767},
-    { t: '2018년 12월 1주차',	y: 869},
-    { t: '2018년 12월 2주차', y: 664},
-    { t: '2018년 12월 3주차', y: 693},
-    { t: '2018년 12월 4주차', y: 745},
-];
-
-const table_columns = [
-    'Layout', 'Background', 'Objet', 'Button', 'Keytopic', 'Keyword', 'Trigger', 'Ad Copy', 
-];
 const table_values = {
     fnb: [
         {l: '중앙배치형', v: 200},
@@ -67,20 +36,22 @@ const table_titles = {
 
 const INDUSTRY_KEY = 'category';
 const WEEK_FORMAT = 'YYYYMM';
+
+const ScreenAccessor = 'dashboard';
  
 class DashboardScreen extends AppScreen {
-    static _ACCESSOR = 'dashboard';
+    static ACCESSOR = ScreenAccessor;
+    // static _ACCESSOR = 'dashboard';
     static _TITLE = {ko: '업종별 분석', en: 'By industry'};
 
     constructor(ps) {
-        super(ps, DashboardScreen.ACCESSOR);
+        super(ps, ScreenAccessor);
         if(!DashboardScreen.INSTANCE)
             DashboardScreen.INSTANCE = this;
-
-        // this.state = this.update
-        console.log(this.state);
-
-        // this.state.charts = App.data.
+        
+        this.state.tops = {};
+        this.state.timeline = [];
+        this.state.tables = [];
     }
 
     timelineWeekFormat(d) {
@@ -95,29 +66,49 @@ class DashboardScreen extends AppScreen {
     }
 
     updateRefreshingContentState(nextState) {
+        // console.log(nextState);
+
+        let metric = this.state.metric;
         if(nextState.metric) {
             // re-calculate metric
             App.data.setMetric(nextState.metric);
+            metric = nextState.metric;
         }
         if(nextState.from || nextState.till) {
             // TODO: load next data
         }
 
-        let cids = nextState.tags ? 
-            App.data.listCampaignIds(nextState.tags) :
-            App.data.listCampaignIds(this.state.tags);
-        cids = cids.map((cid)=>parseInt(cid));
+        let tags = AttributeMeta.AllClasses().reduce((acc, cls)=>{  
+            if(nextState[cls])
+                acc.push(nextState[cls]);
+            return acc;
+        }, []);
 
-        console.log(nextState.tags, cids);
-        
+        let cids = App.data.listCampaignIds(tags)
+            .map((cid)=>parseInt(cid));
 
-        nextState.tops = App.data.retrieveTopCombinations(AttributeMeta.PredefinedClasses(),
-            this.state.metric, cids, this.state.from, this.state.till);
+        let topCombi = App.data.retrieveTopCombinations(
+            AttributeMeta.PredefinedClasses(),
+            metric, cids, this.state.from, this.state.till);
+        // console.log(topCombi);
+
+        // nextState.tops = {};
+        nextState.tops = AttributeMeta.PredefinedClasses().reduce((rs, cls)=>{
+            rs[cls] = topCombi && topCombi.c ? topCombi.c[cls] : '-';
+            return rs;
+        }, {});
         
         nextState.timeline = App.data.retrieveTimelines(
             this.timelineWeekFormat.bind(this), 
-            this.state.metric, cids,
+            metric, cids,
             this.state.from, this.state.till);
+
+        nextState.tables = App.data.retrieveCategoryScores(
+            'category', AttributeMeta.PredefinedClasses(),
+            metric, cids, this.state.from, this.state.till
+        );
+
+        // console.log(nextState.tables);
 
         return nextState;
     }
@@ -130,19 +121,30 @@ class DashboardScreen extends AppScreen {
     }
 
     renderContentChart() {
-        return (<ResponsiveContainer width="95%" height={0.45*window.innerHeight}>
-            <LineChart data={sample_data}>
-                <XAxis dataKey="t" />
+        if(!this.state.timeline)
+            return  '';
+
+        let chartData = this.state.timeline.map((td)=>{
+            return {xaxis: td.d, [this.state.metric]: td.avg};
+        });
+        let metric = Metric.ByKey(this.state.metric);
+
+
+        return (<ResponsiveContainer width="100%" height={0.45*window.innerHeight}>
+            <LineChart data={chartData}>
+                <XAxis dataKey="xaxis" />
                 <YAxis tick={false} stroke="transparent" />
-                <Line dataKey="y" 
+                <Line dataKey={this.state.metric} 
                     stroke="#002060" strokeWidth="3" 
                     dot={{r: 5}} />
-                <Tooltip />
+                <Tooltip formatter={metric.valueString.bind(metric)} />
             </LineChart>
         </ResponsiveContainer>);
     }
 
-    renderClassTable(cls) {
+    renderClassTable(tb) {
+        // console.log(tb);
+        // return '';
         return (<table className="table">
             <thead>
                 <tr>
@@ -154,15 +156,23 @@ class DashboardScreen extends AppScreen {
             <tbody>
                 <tr>
                     <th>옵션</th>
-                    {table_values[cls].map((v)=><td className="class-design">{v.l}</td>)}
+                    {AttributeMeta.Design.classes().map((cls)=>
+                        <td className="class-design">{App.lang.label(tb.data.c[cls])}</td>
+                    )}
+                    {AttributeMeta.Message.classes().map((cls)=>
+                        <td className="class-message">{App.lang.label(tb.data.c[cls])}</td>
+                    )}
                 </tr>
                 <tr>
-                    <th>CPC</th>
-                    {table_values[cls].map((v)=><td className="class-design cell-value">{v.v}</td>)}
+                    <th>{this.state.metric.toUpperCase()}</th>
+                    <td className="class-design cell-value" align="center" 
+                        colspan={AttributeMeta.PredefinedClasses().length}>
+                        {Metric.ByKey(this.state.metric).valueString(tb.data.s.avg)}
+                    </td>
                 </tr>
                 <tr>
                     <th>예시</th>
-                    <td colSpan={table_values[cls].length} align="center">
+                    <td colspan={AttributeMeta.PredefinedClasses().length} align="center">
                         <CreativePreview />
                     </td>
                 </tr>
@@ -175,6 +185,7 @@ class DashboardScreen extends AppScreen {
     }
 
     renderContent() {
+        console.log(this.state.tops);
         return (<div className="m-0 p-1">
             <div className="row panel-header">
                 <div className="col">
@@ -182,10 +193,12 @@ class DashboardScreen extends AppScreen {
                 </div>
             </div>
             <div className="row dashboard-card-design">
-                {samples_design.map((d)=>this.renderElementCard('design', d.c, d.t))}
+                {AttributeMeta.Design.classes().map((cls)=>
+                    this.renderElementCard('design', cls, App.lang.label(this.state.tops[cls])))}
             </div>
             <div className="row dashboard-card-message">
-                {samples_topic.map((d)=>this.renderElementCard('message', d.c, d.t))}
+                {AttributeMeta.Message.classes().map((cls)=>
+                    this.renderElementCard('message', cls, App.lang.label(this.state.tops[cls])))}
             </div>
             <div className="row dashboard-card-chart">
                 <div className="col">
@@ -194,11 +207,11 @@ class DashboardScreen extends AppScreen {
             </div>
             <div className="row panel-details">
                 <div className="col">
-                    <h3 class="section-title p-0">Industry Analysis</h3>
-                    {['fnb','houseware'].map((cls)=>{
+                    <h3 className="section-title p-0">Industry Analysis</h3>
+                    {this.state.tables.map((tb)=>{
                         return (<div className="panel-category-detail">
-                            <h5>{table_titles[cls]}</h5>
-                            {this.renderClassTable(cls)}
+                            <h5>{App.lang.label(tb.tag)}</h5>
+                            {this.renderClassTable(tb)}
                         </div>);
                     })}
                 </div>

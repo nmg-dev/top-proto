@@ -55,17 +55,8 @@ class ModData extends Listenable {
         return ret;
     }
 
-    initTags() {
-        this.tags = [];
-        Object.keys(this._tags).forEach((t) => {
-            let tag = this._tags[t];
-            this.tags.push(this._tags[t]);
-        });
-    }
-
     setTags(tags) {
         this._tags = tags;
-        this.initTags();
 
         this.trigger('tag');
 
@@ -114,10 +105,6 @@ class ModData extends Listenable {
                     this._tags[a.t]._c.push(a.c);
                 }
             });
-
-            this.initTags();
-
-            // this.dailyScores(Metric.ByKey(App.kpi), this.campaigns);
             
             this.trigger('affiliation');
         }
@@ -136,8 +123,6 @@ class ModData extends Listenable {
     }
 
     retrieveScores(metric_key, campaign_ids, period_from, period_till) {
-        // this.setMetric(metric_key);
-        // let scores = [];
         let metric = Metric.ByKey(metric_key);
         if(!campaign_ids)
             campaign_ids = Object.keys(this._campaigns);
@@ -203,6 +188,7 @@ class ModData extends Listenable {
         cks.forEach((ck,ci)=>{if(!ck) cks[ci]='';});
         return cks.join(CLS_KEY_DELIMITER);
     }
+
     retrieveTopCombinations(clss, metric_key, campaign_ids, period_from, period_till, limits) {
         if(!campaign_ids) campaign_ids = Object.keys(this._campaigns).map((cid)=>parseInt(cid));
 
@@ -219,42 +205,88 @@ class ModData extends Listenable {
         let rs = [];
         Object.keys(combiScores).forEach((ci) => {
             let combi = ci.split(CLS_KEY_DELIMITER).reduce((acc,cii)=>{
-                let tid = parseInt(cii);
-                let tag = this._tags[tid];
+                let tag = this._tags[parseInt(cii)];
                 if(!tag) return acc;
 
                 acc[tag.class] = tag;
                 return acc;
             }, {});
+
             let score = this.retrieveScores(metric_key, combiScores[ci], period_from, period_till);
             rs.push({
                 c: combi,
                 s: score
             });
         });
-
-        rs = rs.sort((l,r)=>r.s.avg-l.s.avg);
+        
+        rs = rs.filter((r)=>0<Object.keys(r.c).length)
+            .sort((l,r)=>-r.s.avg-l.s.avg);
         return (!limits || limits<=1) ? rs[0] : rs.splice(0, limits);
     }
 
     retrieveTimelines(period_fmt, metric_key, campaign_ids, period_from, period_till) {
+        // console.log(arguments);
         let metric = Metric.ByKey(metric_key);
+        let period_min, period_max;
+        
         let rss = this._records
             .filter((rec)=>!campaign_ids || 0<=campaign_ids.indexOf(rec.c))
             .filter((rec)=>!period_from || period_from.isBefore(rec.d))
             .filter((rec)=>!period_till || period_till.isAfter(rec.d))
             .reduce((rs, rec)=>{
                 let dk = period_fmt(rec.d);
+                if(!period_min || period_min.isAfter(rec.d))
+                    period_min = rec.d;
+                if(!period_max || period_max.isBefore(rec.d))
+                    period_max = rec.d;
+
                 if(!rs[dk]) {
                     rs[dk] = [];
                 }
                 rs[dk].push(metric.value(rec));
                 return rs;
             }, {});
+        
+        // timeline key
+        if(period_min && period_max) {
+            let dcursor = Object.assign(period_min, {});
+            while(dcursor && dcursor.isBefore(period_max)) {
+                let dk = period_fmt(dcursor);
+                if(!rss[dk]) rss[dk] = [];
+                dcursor.add(1, 'day');
+            }
+        }
+
 
         return Object.keys(rss).sort().map((dk)=>{
             return Object.assign({d: dk}, this._scores(rss[dk]));
         });
+    }
+
+    retrieveCategoryScores(cls, optionClss, metric_key, campaign_ids, period_from, period_till) {
+        let tag_ids = Object.values(this._tags)
+            .filter((tag)=>tag.class===cls)
+            .map((tag)=>tag.id);
+
+        let campaign_categories = this._affs
+            .filter((aff)=>0<=campaign_ids.indexOf(aff.c))
+            .filter((aff)=>0<=tag_ids.indexOf(aff.t))
+            .reduce((rs, aff)=>{
+                if(!rs[aff.t])
+                    rs[aff.t] = [];
+                rs[aff.t].push(aff.c);
+                return rs;
+            }, {});
+
+        return Object.keys(campaign_categories)
+            .map((tid)=>{
+                let cids = campaign_categories[tid];
+                let tag = this._tags[parseInt(tid)];
+                return {tag: tag,
+                    data: this.retrieveTopCombinations(
+                        optionClss, metric_key, cids, period_from, period_till)
+                };
+            });
     }
 
     listTags(withinCls) {

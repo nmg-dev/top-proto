@@ -10,11 +10,14 @@ import ModData from './module/data';
 import Config from './config';
 import moment from 'moment';
 import Metric from './module/metric';
+import GTM from './module/gtm';
+import ModLang from './module/lang';
 
 class App extends React.Component {
 	static api = new ModApi(Config.API_HOST);
 	static data = new ModData();
-	static lang='ko';
+	static lang = new ModLang('ko');
+	// static lang='ko';
 	static period = {
 		from: moment().add(-1, 'years'),
 		till: moment()
@@ -68,13 +71,15 @@ class App extends React.Component {
 		App.api.getCampaigns({
 			from: App.period.from.format(), 
 			till: App.period.till.format()
-			},
-			App.data.setCampaigns.bind(App.data));
+		},
+		App.data.setCampaigns.bind(App.data));
 	}
 	_onLoginServerResponseFailure(err) {
 		// this.setState({view: Sidebar.indexViewAccessor()});
+		GTM.UserLoginError(err);
 		window.alert('Login error: '+err);
-		console.log(arguments);
+
+		// console.log(arguments);
 	}
 
 	onLoginCallback(gauth) {
@@ -89,6 +94,7 @@ class App extends React.Component {
 		App.api.getAuth(gdata, 
 			this._onLoginServerResponseSuccess.bind(this),
 			this._onLoginServerResponseFailure.bind(this));
+		GTM.UserLogin(profile.getId());
 	}
 
 	onLoginFailover(ev) {

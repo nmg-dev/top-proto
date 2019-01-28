@@ -1,10 +1,15 @@
 import React from 'react';
 import AppScreen from './appScreen';
+import GTM from '../module/gtm';
 
 class LoginScreen extends AppScreen {
     constructor(ps) {
         super(ps);
         this.state = {};
+    }
+
+    componentDidMount() {
+        GTM.ScreenView('login');
     }
 
     renderQueryTopControls() { return [] }

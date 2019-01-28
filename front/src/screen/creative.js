@@ -27,9 +27,13 @@ var sample_data = [
     {title: 'Attribution4', labels: ['혜택형','유도형','타임형'], data: [204,231,242]},
 ];
 
+const ScreenAccessor = 'creative';
+
 class CreativeScreen extends AppScreen {
+    static ACCESSOR = ScreenAccessor;
+    
     constructor(ps) {
-        super(ps, CreativeScreen.ACCESSOR);
+        super(ps, ScreenAccessor);
         // this.state = {};   
         this._dialog = React.createRef();
     }

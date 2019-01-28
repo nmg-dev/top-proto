@@ -225,6 +225,25 @@ class ModLang {
         });
     }
 
+    label(val) {
+        if(val==null)
+            return '-';
+        if(val.property && val.property[this.now])
+            return val.property[this.now];
+        else if(val.label && LANG_DICT[this.now][val.label])
+            return LANG_DICT[this.now][val.label];
+        else if(val.name && LANG_DICT[this.now][val.name])
+            return LANG_DICT[this.now][val.name];
+        else if(typeof val==='string' && LANG_DICT[this.now][val])
+            return LANG_DICT[this.now][val];
+        else if(val.label)
+            return val.label;
+        else if(val.name)
+            return val.name;
+        else
+            return val.toString();
+    }
+
     set(lcode) {
         if(LANG_DICT[lcode]) {
             this.now = lcode;

@@ -60,7 +60,7 @@ class Sidebar extends React.Component {
     static renderStagedAppScreen(vk) {
         // let vk = this.state.view;
         if(!App.api.hasLogin())
-            return (<LoginScreen metric={App.kpi} period={App.period} />);
+            return (<LoginScreen />);
         if(!Sidebar.ViewRenders[vk]) {
             switch(vk) {
             case CREATIVE_SCREEN:

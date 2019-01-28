@@ -27,16 +27,18 @@ const table_options = {
     ],
 }
 
+const ScreenAccessor = 'simulation';
+
 class SimulationScreen extends AppScreen {
     static contextType = ApplicationContext;
+    static ACCESSOR = ScreenAccessor;
 
     constructor(ps) {
-        super(ps, SimulationScreen.ACCESSOR);
+        super(ps, ScreenAccessor);
         this.state = {
             history: [],
             options: {},
         };
-        this._refs = {};
     }
     appendHistory() {
         // retrive options
@@ -44,6 +46,7 @@ class SimulationScreen extends AppScreen {
             opts: {},
             vals: {},
         };
+        // 
         Object.values(this._refs)
             .map((rf)=>rf.current)
             .forEach((el)=> {
@@ -57,7 +60,7 @@ class SimulationScreen extends AppScreen {
         Metric.Keys().forEach((mk)=>{
             rs.vals[mk] = Math.random();
         });
-        // console.log(rs);
+
         let hist = this.state.history;
         hist.push(rs);
         this.setState({

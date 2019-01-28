@@ -27,7 +27,7 @@ class Metric {
     }
 
     valueString(x) {
-        return this._fmt(this.calc(x));
+        return this._fmt(x);
     }
 
     /* const */
@@ -63,7 +63,9 @@ class Metric {
             .map((m)=>m._k);
     }
     static ByKey(mk) {
-        return Metric.ALL.reduce((found,m)=>found=(!found && m._k===mk ? m: found));
+        // return Metric.ALL.reduce((found,m)=>found=(!found && m._k===mk ? m: found));
+        let filtered = Metric.ALL.filter((m)=>m._k===mk);
+        return (filtered && 0<filtered.length ? filtered[0] : null); 
     }
     static DefaultKey() {
         return Metric.CPC._k;

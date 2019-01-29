@@ -29,7 +29,7 @@ class DropBtn extends React.Component {
         if(key) {
             if(this.props.multi) {
                 vals = this.state.values.concat(this.props.options
-                    .filter((opt)=>opt.value==key)
+                    .filter((opt)=>opt.value===key)
                     .map((opt)=>opt.value));
             } else {
                 let selected;
@@ -59,7 +59,7 @@ class DropBtn extends React.Component {
         let clsName = 'dropdown-item';
         if(0<=this.state.values.indexOf(opt.key))
             clsName += ' active';
-        return (<a key={opt.value} value={opt.value} className={clsName} href="#"
+        return (<a key={opt.value} value={opt.value} className={clsName} 
             onClick={this.onClickItem.bind(this)}>
                 {opt.label}
             </a>);

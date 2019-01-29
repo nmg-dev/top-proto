@@ -7,8 +7,8 @@
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
 
   width: 100%;
-  padding-top: 5vh;
-  padding-bottom: 5vh;
+  padding-top: 4vh;
+  padding-bottom: 6vh;
   padding-left: 10vw;
   padding-right: 10vw;
 
@@ -19,13 +19,12 @@
 }
 .card.panel .row.panel-header {
   text-align: center;
-  border-bottom: 2px solid var(--font-normal);
+  border-bottom: 1px solid #262626;
   margin: 0px;
 }
 .card.panel .panel-title {
-  font-family: 'Noto Serif JP', Arial;
   font-size: var(--font-size-5);
-  font-style: italic;
+  font-weight: 500;
 }
 
 .card.panel .panel-subtitle{
@@ -36,11 +35,13 @@
   font-weight: 700;
   font-size: var(--font-size-7);
   padding: var(--padding-1);
+  margin-top: var(--padding-1);
 }
 .card.panel .section-text {
   font-weight: 300;
   font-size: var(--font-size-1);
-  color: var(--font-light);
+  color: var(--bg-dark);
+  text-transform: capitalize;
 }
 .card.panel .panel-details {
   text-align: left;

@@ -1,5 +1,3 @@
-
-
 /* component preview */
 .creative-preview {
     display: flex;
@@ -18,10 +16,3 @@
 .creative-preview.background-solid_dark {background-image: url(/preview/background_solid_dark.png)}
 .creative-preview.background-split {background-image: url(/preview/background_split.png)}
 .creative-preview.background-image {background-image: url(/preview/background_image.png)}
-
-.class-design {
-    color: var(--font-normal);
-}
-.class-message {
-    color: var(--font-dark);
-}

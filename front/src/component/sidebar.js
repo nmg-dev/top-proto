@@ -19,7 +19,7 @@ class Sidebar extends React.Component {
 
     onViewListClicked(ev) {
         let vk = ev.target.getAttribute('view');
-        if(vk && vk!=this.state.view) {
+        if(vk && vk!==this.state.view) {
             this.setState({view: vk}, ()=>this.props.onClickItem(vk));
         }
     }
@@ -32,7 +32,7 @@ class Sidebar extends React.Component {
                     <img alt="logo" className="logo" src="/img/logo_md.png" />
                 </li>
                 {AppScreen.ViewKeys.map((vk)=>(<li key={vk} view={vk}
-                    className={'sidebar-item '+(this.state.view==vk?' active':'')}
+                    className={'sidebar-item '+(this.state.view===vk?' active':'')}
                     onClick={this.onViewListClicked.bind(this)}>
                 {AppScreen.ViewTitleOf(vk)}</li>))}
             </ul></div>) : ''}

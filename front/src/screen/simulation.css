@@ -1,0 +1,62 @@
+/* simulation screen specific */
+.card.panel .panel-details .section-content {
+    margin-top: var(--padding-3);
+    margin-bottom: var(--padding-1);
+}
+
+.card.panel .panel-details .section-controls {
+    margin-bottom: var(--padding-3);
+    padding-bottom: var(--padding-1);
+    border-bottom: 2px solid var(--data-grey);
+}
+
+.card.panel .panel-details .section-controls button.btn {
+    min-width: 10vw;
+    font-size: var(--font-size-1);
+    font-weight: 700;
+    border: 2px solid #979797;
+    border-radius: 8px;
+}
+
+.card.panel table.simulate-table .query-control i.fa-chevron-down {
+    padding-top: 6px;
+}
+.card.panel table.table.simulate-table thead {
+    border-top: none;
+    background: transparent;
+}
+
+.card.panel table.table.simulate-table thead th {
+    text-align: left;
+    background-color: transparent;
+    border: none;
+}
+.card.panel table.table.simulate-table tbody th,
+.card.panel table.table.simulate-table tbody td {
+    vertical-align: middle;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 1vw;
+    padding-right: 1vw;
+    margin: 0px;
+}
+.card.panel table.table.simulate-table tbody th {
+    text-align: left;
+}
+.card.panel table.table.simulate-table tbody td {
+    text-align: center;
+}
+
+.card.panel table.table.simulate-table .button-group {
+    margin: 0px;
+}
+.card.panel table.table.simulate-table .query-btn {
+    width: 80%;
+    background-color: transparent;
+    padding: 0px;
+    padding-top: 4px;
+    padding-bottom: 7px;
+}
+.card.panel table.table.simulate-table .query-btn .label-text {
+    width: 100%;
+}

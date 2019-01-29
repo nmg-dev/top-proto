@@ -7,6 +7,8 @@ import App from '../App';
 import moment  from 'moment';
 import Metric from '../module/metric';
 
+import './dashboard.css';
+
 const INDUSTRY_KEY = 'category';
 const WEEK_FORMAT = 'YYYYMM';
 
@@ -102,7 +104,7 @@ class DashboardScreen extends AppScreen {
         return (<ResponsiveContainer width="100%" height={0.45*window.innerHeight}>
             <LineChart data={chartData}>
                 <XAxis dataKey="xaxis" />
-                <YAxis tick={false} stroke="transparent" />
+                
                 <Line dataKey={this.state.metric} 
                     stroke="#002060" strokeWidth="3" 
                     dot={{r: 5}} />
@@ -136,13 +138,13 @@ class DashboardScreen extends AppScreen {
                 <tr>
                     <th>{this.state.metric.toUpperCase()}</th>
                     <td className="class-design cell-value" align="center" 
-                        colspan={AttributeMeta.PredefinedClasses().length}>
+                        colSpan={AttributeMeta.PredefinedClasses().length}>
                         {Metric.ByKey(this.state.metric).valueString(tb.data.s.avg)}
                     </td>
                 </tr>
                 <tr>
                     <th>예시</th>
-                    <td colspan={AttributeMeta.PredefinedClasses().length} align="center">
+                    <td colSpan={AttributeMeta.PredefinedClasses().length} align="center">
                         <CreativePreview />
                     </td>
                 </tr>

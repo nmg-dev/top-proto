@@ -110,10 +110,10 @@ class AppScreen extends React.Component {
         let nextState = Object.keys(this._refs).reduce((rs, key)=> {
             let ctrl = this._refs[key].current;
             let val = ctrl.getSelected();
-            rs = Object.assign(rs, {[key]: val});
+            // rs = Object.assign(rs, {[key]: val});
+            rs[key] = val;
             return rs;
         }, {});
-        // console.log(nextState);
 
         // on metric change
         if(this._metricRecalculateRequired(nextState))

@@ -40,7 +40,7 @@ class MetricBtn extends DropBtn {
             <button type="input-group-btn" className="btn"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div className="label-icon m-0 p-0">
-                    <img src="/img/icon-metric.png" />
+                    <img src="/img/icon-metric.png" alt="ruler" />
                 </div>
                 <div className="label-text text-muted">
                     {this.displayText()}
@@ -52,7 +52,7 @@ class MetricBtn extends DropBtn {
                     let clsName = 'dropdown-item';
                     if(m.key()===this.state.kpi)
                         clsName += ' active';
-                    return (<a key={'metric-'+m.key()} value={m.key()} href="#" className={clsName}
+                    return (<a key={'metric-'+m.key()} value={m.key()} className={clsName}
                         onClick={this.onClickItem.bind(this)}>
                         {m.label()}
                     </a>);

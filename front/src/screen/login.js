@@ -33,7 +33,7 @@ class LoginScreen extends AppScreen {
             </div>
             <div className="row">
                 <div className="col d-flex justify-content-end align-items-baseline">
-                    <h7>by <a href="https://www.nextmediagroup.co.kr" target="_blank">NextMediaGroup</a></h7>
+                    <h5>by <a href="https://www.nextmediagroup.co.kr" target="_blank" rel="noopener noreferrer">NextMediaGroup</a></h5>
                 </div>
             </div>
         </div>);

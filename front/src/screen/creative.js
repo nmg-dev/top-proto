@@ -5,29 +5,11 @@ import AppScreen from './appScreen';
 import CreativeDialog from '../component/creativeDialog';
 import CreativePreview from '../component/creativePreview';
 import AttributeMeta from '../module/attrMeta';
-import App from '../App';
 import Metric from '../module/metric';
 
+import './creative.css';
+
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
-
-
-
-var sample_data = [
-    {title: 'Layout', labels: ['중앙','좌우','우측','좌측'], data: [168,194,243,435]},
-    {title: 'Background', labels: ['밝은단색','무색','면분할','어두운단색'], data: [112,204,271,320]},
-    {title: 'Objet', labels: ['일러스트','모델','실사','없음'], data: [121,172,256,318]},
-    {title: 'Button type', labels: ['혜택형','유도형','타임형'], data: [204,231,242]},
-
-    {title: 'Key topic', labels: ['중앙','좌우','우측','좌측'], data: [168,194,243,435]},
-    {title: 'Keyword', labels: ['밝은단색','무색','면분할','어두운단색'], data: [112,204,271,320]},
-    {title: 'Trigger', labels: ['일러스트','모델','실사','없음'], data: [121,172,256,318]},
-    {title: 'Ad Copy', labels: ['혜택형','유도형','타임형'], data: [204,231,242]},
-
-    {title: 'Attribution1', labels: ['중앙','좌우','우측','좌측'], data: [168,194,243,435]},
-    {title: 'Attribution2', labels: ['밝은단색','무색','면분할','어두운단색'], data: [112,204,271,320]},
-    {title: 'Attribution3', labels: ['일러스트','모델','실사','없음'], data: [121,172,256,318]},
-    {title: 'Attribution4', labels: ['혜택형','유도형','타임형'], data: [204,231,242]},
-];
 
 const ScreenAccessor = 'creative';
 
@@ -101,7 +83,7 @@ class CreativeScreen extends AppScreen {
             });
             return (<div class="creative-chart-wrapper">
                 <h5>{_lang.label(cls)}</h5>
-                <ResponsiveContainer width="95%" height={180}>
+                <ResponsiveContainer width="95%" height={.2*window.innerHeight}>
                     <BarChart data={chartData} layout="vertical" barCategoryGap={0} >
                         <XAxis type="number" tick={false} />
                         <YAxis type="category" dataKey="label" tick={{stroke: 'transparent'}} />

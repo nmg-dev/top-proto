@@ -1,6 +1,8 @@
 import React from 'react';
 import AttributeMeta from '../module/attrMeta';
 
+import './creativePreview.css';
+
 const defaultRect = {x: 10, y: 0, w: 729, h: 147};
 const classes = ['layout','background','objet','button', 
     'keytopic', 'keyword', 'trigger', 'adcopy',
@@ -113,7 +115,7 @@ class CreativePreview extends React.Component {
             case 'between':
                 let ret = renderTexts.map((t)=>t.e);
                 ret.splice(Math.ceil(renderTexts.length/2), 0, 
-                    <div class="creative-preview-ctrl d-flex flex-column">{renderObjet}{renderButton}</div>);
+                    <div className="creative-preview-ctrl d-flex flex-column">{renderObjet}{renderButton}</div>);
                 return ret;
             case 'left': // text elements first, image and button
             default:

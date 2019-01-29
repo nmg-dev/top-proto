@@ -121,6 +121,14 @@ text.recharts-text {
 }
 
 
+/* color class */
+.class-design {
+  color: var(--font-normal);
+}
+.class-message {
+  color: var(--font-dark);
+}
+
 @media print {
   body { visibility: hidden; }
   .printable { 

@@ -1,0 +1,50 @@
+/* creative screen specific */
+.creative-chart-link {
+    font-size: var(--font-size--1);
+    font-weight: 700;
+    text-align: right;
+    color: var(--data-primary);
+}
+
+.card.panel .panel-details .section-title h5 {
+    font-size: var(--font-size-1);
+    font-weight: 500;
+}
+
+.card.panel .panel-details .creative-chart-wrapper h5 {
+    font-size: var(--font-size-0);
+    font-weight: 700;
+    text-align: center;
+}
+
+.card.panel .row.creative-previews {
+    margin-top: var(--padding-3);
+    margin-bottom: var(--padding-1);
+} 
+
+.card.panel .row.creative-previews h5 {
+    font-size: var(--font-size-1);
+    font-weight: 700;
+}
+
+
+.card.panel .panel-details .creative-chart-wrapper {
+    border: 1px solid var(--bg-light);
+    border-radius: 2px;
+    margin: 4px;
+    padding: var(--padding-0);
+}
+.card.panel .panel-details .creative-chart-wrapper .recharts-wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
+.card.panel .row.panel-charts {
+    margin-top: var(--padding-3);
+    margin-bottom: var(--padding-1);
+}
+
+.modal table.creative-modal .kpi-column {
+    background-color: var(--bg-select);
+    
+}

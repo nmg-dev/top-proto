@@ -1,7 +1,6 @@
 import moment from 'moment';
 import Listenable from './listenable';
 import Metric from './metric';
-import App from '../App';
 import AttributeMeta from './attrMeta';
 
 const CLS_KEY_DELIMITER = '|';
@@ -27,7 +26,7 @@ class ModData extends Listenable {
     }
     
     _uq(arr) {
-        return arr.filter((e,i,ar) => ar.indexOf(e)==i);
+        return arr.filter((e,i,ar) => ar.indexOf(e)===i);
     }
 
 
@@ -300,7 +299,7 @@ class ModData extends Listenable {
         let cls = this._tags[tagId].class;
         return Object.keys(this._tags)
             .map((tid)=>parseInt(tid))
-            .filter((tid)=>this._tags[tid].class==cls && tid!=tagId);
+            .filter((tid)=>this._tags[tid].class===cls && tid!==tagId);
     }
 
     listCampaignIds(withTagIds) {

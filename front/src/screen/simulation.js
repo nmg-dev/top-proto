@@ -5,6 +5,8 @@ import Metric from '../module/metric';
 import AttributeMeta from '../module/attrMeta';
 import App from '../App';
 
+import './simulation.css';
+
 const table_options = {
     design: [
         {name: 'layout', label: 'Layout', values: [{t: 'left', d: '좌측'}, {t: 'right', d: '우측'}, {t: 'center', d: '중앙'}, {t: 'between', d: '좌우'}]},
@@ -75,14 +77,14 @@ class SimulationScreen extends AppScreen {
     }
 
     renderOptionTable(options, clsLabel, styles) {
-        return (<table className="table simulate-table" style={styles}>
+        return (<table className="table simulate-table">
             <thead>
                 <tr>
                     <th>{clsLabel}</th>
                     <th>옵션</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody style={styles}>
                 {options.map((opt)=> {
                     if(!this._refs[opt.name])
                         this._refs[opt.name] = React.createRef();
@@ -128,24 +130,24 @@ class SimulationScreen extends AppScreen {
             <div class="row section-title m-0 p-0">
                 <div class="col m-0 p-0">
                     <h3 className="title">Creative Simulation</h3>
-                    <h5 className="subtitle">소재요소별 효율 시뮬레이션</h5>
+                    <h5 className="subtitle">소재요소별 예상효율 확인</h5>
                 </div>
             </div>
             <div class="row section-content">
-                <div class="col-sm-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4 p-2">
                     {this.renderOptionTable(table_options.design, '디자인 속성', {backgroundColor: 'var(--bg-light)'})}
                 </div>
-                <div class="col-sm-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4 p-2">
                     {this.renderOptionTable(table_options.adcopy, '콘텐츠 속성')}
                 </div>
-                <div class="col-sm-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4 p-2">
                     {this.renderOptionTable(table_options.optional, '캠페인 조건')}
                 </div>
             </div>
             <div class="row section-controls">
                 <div class="col" align="right">
-                    <button class="btn btn-default m-1 p-2">리셋</button>
-                    <button class="btn m-1 p-2" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
+                    <button class="btn btn-default m-3 p-3">리셋</button>
+                    <button class="btn m-0 p-3" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
                     {/* <button class="btn shadow" onClick={()=>window.print()}>출력하기</button> */}
                 </div>
             </div>

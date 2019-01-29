@@ -48,9 +48,9 @@ class Navigation extends React.Component {
                 </a>
                 {pf && App.api.canManage() ? [
                     <div className="dropdown-divider" />,
-                    <a className="dropdown-item">Push Data</a>,
-                    <a className="dropdown-item">Manage Tags</a>,
-                    <a className="dropdown-item">Manage Campaigns</a>,
+                    <a key="manage-push-data" className="dropdown-item">Push Data</a>,
+                    <a key="manage-tag-data" className="dropdown-item">Manage Tags</a>,
+                    <a key="manage-campaign-data" className="dropdown-item">Manage Campaigns</a>,
                 ] : []}
                 {pf && App.api.canAdmin() ? [
                     <div className="dropdown-divider" />,

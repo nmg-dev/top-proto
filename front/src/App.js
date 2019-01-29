@@ -75,6 +75,8 @@ class App extends React.Component {
 		switch(ev) {
 			case 'affiliation':
 				this.setState({view: AppScreen.indexViewAccessor()});
+			default:
+				return;
 		}
 	}
 	

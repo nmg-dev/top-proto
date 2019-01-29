@@ -3,6 +3,8 @@ import React from 'react';
 import App from '../App';
 import ModLang from '../module/lang';
 
+import './navigation.css';
+
 class Navigation extends React.Component {
     constructor(ps) {
         super(ps);

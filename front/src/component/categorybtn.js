@@ -12,7 +12,7 @@ class CategoryBtn extends DropBtn {
     }
 
     render() {
-        return (<div className={'button-group query-control m-1 p-0 ' +this.props.className}>
+        return (<div className={'button-group query-control ' +this.props.className}>
             <button type="input-group-btn" className="query-btn btn"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div className={'label-text text-muted ' + this.props.labelClass}>

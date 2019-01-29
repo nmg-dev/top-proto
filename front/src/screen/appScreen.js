@@ -1,15 +1,28 @@
 import React from 'react';
 
 import AttributeMeta from '../module/attrMeta';
+import GTM from '../module/gtm';
 
-import Querybar from '../component/querybar';
+import App from '../App';
+
 import MetricBtn from '../component/metricbtn';
 import PeriodBtn from '../component/periodbtn';
 import CategoryBtn from '../component/categorybtn';
 import DropBtn from '../component/dropbtn';
 import CardPanel from '../component/cardpanel';
-import App from '../App';
-import GTM from '../module/gtm';
+
+import './appScreen.css';
+
+
+const LOGIN_SCREEN = 'login';
+const DASHBOARD_SCREEN = 'dashboard';
+const CREATIVE_SCREEN = 'creative';
+const SIMULATION_SCREEN = 'simulation';
+
+const MANAGE_DATA = 'manage-data';
+const MANAGE_TAGS = 'manage-tag';
+const MANAGE_CMPS = 'manage-campaign';
+const MANAGE_USER = 'admin-user';
 
 
 const QueryDropLabels = {
@@ -22,6 +35,46 @@ const QueryDropLabels = {
 
 class AppScreen extends React.Component {
     static views = {};
+    static ViewKeys = [
+        DASHBOARD_SCREEN,
+        CREATIVE_SCREEN,
+        SIMULATION_SCREEN,
+    ];
+
+    static ViewTitles = {
+        ko: {
+            [DASHBOARD_SCREEN]: '업종별 분석',
+            [CREATIVE_SCREEN]: '크리에이티브 분석',
+            [SIMULATION_SCREEN]: '예상효율 확인',
+
+            [MANAGE_DATA]: '데이터 입력',
+            [MANAGE_TAGS]: '태그 관리',
+            [MANAGE_CMPS]: '캠페인 관리',
+            [MANAGE_USER]: '사용자 관리',
+        },
+        en: {
+            [DASHBOARD_SCREEN]: 'by Industries',
+            [CREATIVE_SCREEN]: 'by Creatives',
+            [SIMULATION_SCREEN]: 'Simulation',
+
+            [MANAGE_DATA]: 'Push Data',
+            [MANAGE_TAGS]: 'Manage Tags',
+            [MANAGE_CMPS]: 'Manage Campaigns',
+            [MANAGE_USER]: 'Manage Users',
+        }
+    };
+
+    static ViewRenders = {};
+    static indexViewAccessor() {
+        return DASHBOARD_SCREEN;
+    }
+
+    static ViewTitleOf(vk) {
+        let locale='ko';
+        return AppScreen.ViewTitles[locale][vk];
+    }
+
+    
 
     constructor(ps, accessor) {
         super(ps);
@@ -35,6 +88,7 @@ class AppScreen extends React.Component {
         };
         this._refs = {};
     }
+
 
     componentDidMount() {
         this.refreshContent();
@@ -98,7 +152,7 @@ class AppScreen extends React.Component {
     }
 
     renderQueryBottomControls() {
-        return (<div className="categorybar">
+        return (<div className="d-flex">
             {this._queryBottomControlWrap('Design Type', AttributeMeta.Design)}
             {this._queryBottomControlWrap('Message Type', AttributeMeta.Message)}
         </div>)
@@ -107,14 +161,15 @@ class AppScreen extends React.Component {
     _queryBottomControlWrap(title, attrMeta) {
         let tc = 'class-' + title.toLowerCase();
         return (<div className="categorybar-wrapper">
-            <h3 className={'wrapper-title m-1 p-1 ' + tc} >{title}</h3>
+            <h3 className={'wrapper-title ' + tc} >{title}</h3>
             <div className="categorybar-subwrapper">
                 {attrMeta.classes().map((cls)=>{
                     this._refs[cls] = React.createRef();
                     return (<div className="categorybar-control-wrapper">
-                        <h5 className={'control-title m-1 p-1 '+tc}>{cls}</h5>
-                        <div className="button-group category-control m-0 p-0">
+                        <h5 className={'control-title '+tc}>{cls}</h5>
+                        <div className="button-group category-control">
                             <CategoryBtn ref={this._refs[cls]}
+                                className="query-control m-0"
                                 placeholder="ALL" options={App.data.listTagOptions(cls)}
                                 onChange={this.refreshContent.bind(this)}
                             />
@@ -123,6 +178,32 @@ class AppScreen extends React.Component {
                 })}
             </div>
         </div>);
+    }
+
+    renderQuerybar() {
+        return (
+            <div className="querybar">
+                <div className="querybar-top">
+                    <div className="querybar-title d-flex justify-content-start align-items-center">
+                        <h1>Tag Operation</h1>
+                        <sup>Beta</sup>
+                    </div>
+                    <div className="querybar-controls">
+                        {this.renderQueryTopControls()}
+                    </div>
+                </div>
+                <div className="querybar-mid">
+                    <div className="querybar-controls">
+                        {this.renderQueryMidControls()}
+                    </div>
+                </div>
+                <div className="querybar-bottom">
+                    <div className="querybar-controls">
+                        {this.renderQueryBottomControls()}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
 
@@ -134,14 +215,11 @@ class AppScreen extends React.Component {
             <div className="container-fluid panel-wrapper m-0 p-4">
                 <div className="row m-0 p-0">
                     <div className="col m-0 p-0">
-                        <Querybar 
-                            tops={this.renderQueryTopControls()} 
-                            mids={this.renderQueryMidControls()} 
-                            bottoms={this.renderQueryBottomControls()} />
+                        {this.renderQuerybar()}
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col">
+                    <div className="col col-12">
                         <CardPanel body={this.renderContent()} />
                     </div>
                 </div>

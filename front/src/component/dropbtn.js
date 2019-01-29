@@ -77,7 +77,7 @@ class DropBtn extends React.Component {
                         {this.displayText()}
                     </div>
                 </div>
-                <i className="fas fa-chevron-down" />
+                <i className="fas fa-chevron-down align-self-start" />
             </button>
             <div className="dropdown-menu">
                 {this.renderItem({value: "", label: "ALL"})}

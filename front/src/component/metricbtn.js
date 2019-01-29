@@ -2,6 +2,7 @@ import React from 'react';
 import Metric from '../module/metric';
 import DropBtn from './dropbtn';
 
+import './metricbtn.css';
 
 class MetricBtn extends DropBtn {
     constructor(ps) {
@@ -44,7 +45,7 @@ class MetricBtn extends DropBtn {
                 <div className="label-text text-muted">
                     {this.displayText()}
                 </div>
-                <i className="fas fa-chevron-down" />
+                <i className="fas fa-chevron-down align-self-start" />
             </button>
             <div className="dropdown-menu">
                 {Metric.List().map((m)=> {

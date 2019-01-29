@@ -1,7 +1,6 @@
 import React from 'react';
 import CategoryBtn from '../component/categorybtn';
 import AppScreen from './appScreen';
-import ApplicationContext from '../AppContext';
 import Metric from '../module/metric';
 import AttributeMeta from '../module/attrMeta';
 import App from '../App';
@@ -30,7 +29,6 @@ const table_options = {
 const ScreenAccessor = 'simulation';
 
 class SimulationScreen extends AppScreen {
-    static contextType = ApplicationContext;
     static ACCESSOR = ScreenAccessor;
 
     constructor(ps) {

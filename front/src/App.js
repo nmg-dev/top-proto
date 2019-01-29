@@ -1,17 +1,26 @@
 import React from 'react';
+
 import './App.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import ApplicationContext from './AppContext';
-import Navigation from './component/navigation';
-import Sidebar from './component/sidebar';
+import moment from 'moment';
+import Config from './config';
+
 import ModApi from './module/api';
 import ModData from './module/data';
-import Config from './config';
-import moment from 'moment';
+import ModLang from './module/lang';
 import Metric from './module/metric';
 import GTM from './module/gtm';
-import ModLang from './module/lang';
+
+import Navigation from './component/navigation';
+import Sidebar from './component/sidebar';
+
+import AppScreen from './screen/appScreen';
+import DashboardScreen from './screen/dashboard';
+import CreativeScreen from './screen/creative';
+import SimulationScreen from './screen/simulation';
+import LoginScreen from './screen/login';
+
 
 class App extends React.Component {
 	static api = new ModApi(Config.API_HOST);
@@ -36,6 +45,27 @@ class App extends React.Component {
 		App._current = this;
 		App.data.addListener(this.onDataPrepared.bind(this));
 	}
+
+	static renderStagedAppScreen(vk) {
+        // let vk = this.state.view;
+        if(!App.api.hasLogin())
+            return (<LoginScreen />);
+        if(!AppScreen.ViewRenders[vk]) {
+            switch(vk) {
+            case CreativeScreen.ACCESSOR:
+                AppScreen.ViewRenders[vk] = (<CreativeScreen metric={App.kpi} period={App.period} />);
+                break; 
+            case SimulationScreen.ACCESSOR:
+                AppScreen.ViewRenders[vk] = (<SimulationScreen metric={App.kpi} period={App.period} />);
+                break;
+            default:
+            case DashboardScreen.ACCESSOR :
+                AppScreen.ViewRenders[vk] = (<DashboardScreen metric={App.kpi} period={App.period} />);
+                break;
+            }
+        }
+        return AppScreen.ViewRenders[vk];
+    }
 	
 	componentDidMount() {
 		document.title = 'TagOperation beta by NextMediaGroup';
@@ -44,24 +74,22 @@ class App extends React.Component {
 	onDataPrepared(ev) {
 		switch(ev) {
 			case 'affiliation':
-				this.setState({view: Sidebar.indexViewAccessor()});
+				this.setState({view: AppScreen.indexViewAccessor()});
 		}
 	}
 	
 	renderStagedView() {
-		return Sidebar.renderStagedAppScreen(this.state.view);
+		return App.renderStagedAppScreen(this.state.view);
 	}
 	
 	render() {
-		return (<ApplicationContext.Provider>
-			<div>
+		return (<div>
 				<Navigation className="background-dark" />
 				<main className="background-light wrap-container">
 					<Sidebar onClickItem={this._onViewUpdate.bind(this)} />
 					{this.renderStagedView()}
 				</main>
-			</div>
-		</ApplicationContext.Provider>); 
+			</div>); 
 	}
 		
 	_onViewUpdate(vk) { this.setState({view: vk}); }
@@ -75,15 +103,11 @@ class App extends React.Component {
 		App.data.setCampaigns.bind(App.data));
 	}
 	_onLoginServerResponseFailure(err) {
-		// this.setState({view: Sidebar.indexViewAccessor()});
 		GTM.UserLoginError(err);
 		window.alert('Login error: '+err);
-
-		// console.log(arguments);
 	}
 
 	onLoginCallback(gauth) {
-		// this.setState({view: Sidebar.indexViewAccessor()});
 		let resp = gauth.getAuthResponse();
 		let profile = gauth.getBasicProfile();
 		let gdata = {

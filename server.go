@@ -36,8 +36,8 @@ func main() {
 
 	// static index endpoint
 	app.Static(`/img`, `./img`)
-	app.Static(`/js`, `./js`)
-	app.Static(`/css`, `./css`)
+	// app.Static(`/js`, `./js`)
+	// app.Static(`/css`, `./css`)
 
 	app.Use(static.Serve("/", static.LocalFile("front/build", true)))
 

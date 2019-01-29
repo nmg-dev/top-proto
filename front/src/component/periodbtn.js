@@ -1,8 +1,5 @@
 import React from 'react';
 import { DateRange } from 'react-date-range';
-// yg.song;  nooooooo...222 (20190121)
-import $ from 'jquery';
-// import Popperjs from 'popper.js';
 
 // const DATE_FORMAT = 'YYYY-MM-DD';
 class PeriodBtn extends React.Component {
@@ -54,7 +51,7 @@ class PeriodBtn extends React.Component {
         return (
             <div className="button-group query-control top-control">
             <button ref={this._ref}
-                type="input-group-btn" className="btn shadow-sm period-control"
+                type="input-group-btn" className="btn period-control"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div className="label-icon">
                     <img src="/img/icon-calendar.png" alt="calendar icon" />

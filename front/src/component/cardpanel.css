@@ -1,0 +1,59 @@
+
+/* card panel */
+.card.panel {
+  border-top: none;
+  border-left: none;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+
+  width: 100%;
+  padding-top: 5vh;
+  padding-bottom: 5vh;
+  padding-left: 10vw;
+  padding-right: 10vw;
+
+  text-align: center;
+}
+.card.panel .row {
+  margin: 0px;
+}
+.card.panel .row.panel-header {
+  text-align: center;
+  border-bottom: 2px solid var(--font-normal);
+  margin: 0px;
+}
+.card.panel .panel-title {
+  font-family: 'Noto Serif JP', Arial;
+  font-size: var(--font-size-5);
+  font-style: italic;
+}
+
+.card.panel .panel-subtitle{
+  text-align: left;
+}
+
+.card.panel .section-title  {
+  font-weight: 700;
+  font-size: var(--font-size-7);
+  padding: var(--padding-1);
+}
+.card.panel .section-text {
+  font-weight: 300;
+  font-size: var(--font-size-1);
+  color: var(--font-light);
+}
+.card.panel .panel-details {
+  text-align: left;
+}
+.card.panel .panel-details h3 {
+  font-weight: 700;
+  line-height: 1.25em;
+}
+.card.panel .panel-details h5 {
+    font-size: var(--font-size-1);
+    font-weight: 500;
+    color: var(--bg-dark);
+}
+.card.panel .panel-details .section-title {
+    border-bottom: 1px solid #f2f2f2;
+}

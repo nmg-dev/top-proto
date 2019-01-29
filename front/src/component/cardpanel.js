@@ -1,5 +1,7 @@
 import React from 'react';
 
+import './cardpanel.css';
+
 class CardPanel extends React.Component {
     constructor(ps) {
         super(ps);
@@ -17,7 +19,7 @@ class CardPanel extends React.Component {
     }
 
     render() {
-        return (<div className="card panel shadow m-0 p-4" style={this.props.style}>
+        return (<div className="card panel m-0" style={this.props.style}>
             {this.renderCardImage()}
             {this.renderCardTitle()}
             <div className="card-text">

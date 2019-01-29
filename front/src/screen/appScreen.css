@@ -1,0 +1,188 @@
+
+/* querybar */
+.querybar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-bottom: var(--padding-1);
+}
+
+.querybar .querybar-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.querybar .querybar-top .querybar-title {
+    display: flex;
+    font-size: var(--font-size-9);
+}
+.querybar .querybar-top .querybar-title sup { 
+    color: var(--data-primary); 
+    font-size: var(--font-size-4);
+    font-weight: 300;
+}
+
+.querybar .querybar-controls {
+    display: flex;
+}
+
+.querybar .querybar-controls .query-control:first-child {
+    margin-left: 0px;
+}
+.querybar .querybar-controls .query-control:last-child {
+    margin-right: 0px;
+}
+
+
+.querybar .querybar-mid {
+    display: flex;
+    flex-direction: row;
+}
+
+.querybar .querybar-mid .query-control .query-btn {
+    display: flex;
+    justify-content: space-between;
+    width: 13.5vw;
+
+    padding-top: calc(0.5*var(--font-size--1));
+    padding-bottom: calc(0.5*var(--font-size--1));
+}
+
+/* query-control: dropbtn and others */
+.query-control {
+    margin: 20px;
+}
+.query-control .query-btn {
+    background-color: #fff;
+    display: flex;
+    min-width: 5vw;
+    max-width: 280px;
+    align-items: center;
+    border-radius: 6px;
+}
+.query-control .label-text {
+    padding-left: 12px;
+    padding-right: 24px;
+    text-align: left;
+
+    width: 100%;
+    line-height: 1.5em;
+    line-break: unset;
+    word-break: keep-all;
+    white-space: nowrap;
+    overflow: hidden;
+
+    font-size: var(--font-size-0);
+    font-weight: 500;
+}
+.query-control .label-text b {
+    color: var(--font-light);
+    font-size: var(--font-size-1);
+    font-weight: 700;
+}
+.query-control .label-text .text-muted {
+    font-weight: 300;
+    margin-top: 6px;
+}
+
+.query-control i.fa-chevron-down {
+    color: var(--font-light);
+    padding-top: 2px;
+}
+
+.query-control.top-control {
+    margin: var(--padding-1);
+    margin-left: 0px;
+    border-radius: 0;
+    background-color: var(--bg-white);
+    color: var(--font-light);
+    min-width: 12vw;
+}
+.query-control.top-control button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    width: 100%;
+    border: 1px solid #d9d9d9;
+    border-radius: 1px;
+    box-shadow: none;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+.query-control.top-control i.fa-chevron-down {
+    padding-top: 8px;
+}
+
+
+
+/* categorybar */
+.querybar-bottom {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.querybar-bottom .categorybar-wrapper {
+    width: 49%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin-right: var(--padding-2);
+}
+.querybar-bottom .categorybar-wrapper .wrapper-title  {
+    font-size: var(--font-size-2);
+    font-weight: 700;
+    padding-bottom: calc(0.25*var(--font-size-0));
+    border-bottom: 3px solid var(--data-grey);
+}
+.querybar-bottom .categorybar-wrapper .categorybar-subwrapper  {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    
+}
+.querybar-bottom .categorybar-subwrapper .control-title {
+    font-size: var(--font-size-0);
+    font-weight: 600;
+    text-transform: capitalize;
+    margin: 0px;
+}
+
+.querybar-bottom .query-control .query-btn {
+    width: 8.5vw;
+    font-size: var(--font-size--1);
+    border-radius: 6px;
+    border: 1px solid #d9d9d9; 
+
+    margin-top: 2px;
+    margin-right: 12px;
+    margin-left: 0px;
+    margin-bottom: 1px;
+
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+.querybar-bottom .query-control .query-btn.shadow {
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+}
+
+.querybar-bottom .label-text {
+    width: 100%;
+    padding-left: 4px;
+}
+
+
+/* category dialog */
+.modal .query-control {
+    border-radius: 2px;
+    border: 1px solid var(--bg-dark);
+    box-shadow: none;
+}
+
+.modal .query-control i.fa-chevron-down {
+    padding: 0px;
+    padding-top: 8px;
+}

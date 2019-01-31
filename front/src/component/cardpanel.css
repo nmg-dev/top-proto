@@ -13,6 +13,7 @@
   padding-right: 10vw;
 
   text-align: center;
+  color: var(--font-normal);
 }
 .card.panel .row {
   margin: 0px;
@@ -23,12 +24,18 @@
   margin: 0px;
 }
 .card.panel .panel-title {
+  margin-top: .25rem;
+  margin-bottom: .25rem;
   font-size: var(--font-size-5);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .card.panel .panel-subtitle{
   text-align: left;
+}
+
+.card.panel .section-separator {
+  border-bottom: 1px solid #595959;
 }
 
 .card.panel .section-title  {

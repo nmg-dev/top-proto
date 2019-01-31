@@ -8,6 +8,7 @@ import AttributeMeta from '../module/attrMeta';
 import Metric from '../module/metric';
 
 import './creative.css';
+import App from '../App';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
 
@@ -43,11 +44,6 @@ class CreativeScreen extends AppScreen {
             rss[cls] =_data.retrieveClassScores(cls, metric, campaign_ids, this.state.period.from, this.state.period.till); 
             return rss;
         }, {});
-
-        console.log({
-            tops: tops,
-            scores: scores,
-        });
         return Object.assign(nextState,  {
             tops: tops,
             scores: scores,
@@ -57,17 +53,10 @@ class CreativeScreen extends AppScreen {
     showDetailDialog(ev) {
         let dk = ev.target.getAttribute('dataKey');
         if(this._dialog && this._dialog.current) {
-            this._dialog.current.setState({
-                cls: dk,
-                options: [],
-                // kpi: this.context.kpi,
-                _data: [],
-                data: [],
-                _from: '',
-                _till: '',
-                period_from: '',
-                period_till: '',
-            }, ()=>this._dialog.current.show());
+            this._dialog.current.setDataOpen(dk, 
+                this.state.metric, 
+                this.state.period,
+                this.state.campaign_ids);
         }
     }
 
@@ -77,22 +66,19 @@ class CreativeScreen extends AppScreen {
         if(this.state.scores[cls]) {
             let chartData = this.state.scores[cls].map((dt)=>{
                 return {
-                    label: _lang.label(dt),
-                    value: dt.scores.avg,
+                    label: _lang.label(dt).replace(/\s/g, ''),
+                    [this.state.metric]: dt.scores.avg,
                 };
             });
-            return (<div class="creative-chart-wrapper">
+            return (<div class="creative-chart-wrapper p-2">
                 <h5>{_lang.label(cls)}</h5>
                 <ResponsiveContainer width="95%" height={.2*window.innerHeight}>
                     <BarChart data={chartData} layout="vertical" barCategoryGap={0} >
-                        <XAxis type="number" tick={false} />
-                        <YAxis type="category" dataKey="label" tick={{stroke: 'transparent'}} />
+                        <XAxis type="number" tick={false} axisLine={false} />
+                        <YAxis type="category" dataKey="label" tick={{stroke: 'none'}} tickLine={false} axisLine={false} width={.04*window.innerWidth} />
                         <Tooltip formatter={metric.valueString.bind(metric)} />
-                        <Bar dataKey="value" isAnimationActive={false} 
+                        <Bar dataKey={this.state.metric} isAnimationActive={false} 
                             label={false}>
-                            <LabelList dataKey="value" position="insideRight" 
-                                fill="#fff"
-                                formatter={metric.valueString.bind(metric)} />
                             {this.state.scores[cls].map((dt,idx)=>
                                 <Cell key={'cell-'+idx+'-'+dt.name} fill={bar_colors[idx]} />
                             )}
@@ -132,8 +118,11 @@ class CreativeScreen extends AppScreen {
                     {this.renderContentChart(cls)}
                 </div>)}
             </div>
-            <CreativeDialog ref={this._dialog} />
         </div>);
+    }
+
+    renderSubsides() {
+        return [<CreativeDialog ref={this._dialog} className="modal-lg" />];
     }
 }
 

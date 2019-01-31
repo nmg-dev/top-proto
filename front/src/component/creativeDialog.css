@@ -1,0 +1,90 @@
+.modal-content {
+    padding: var(--padding-3);
+}
+.modal-header {
+    padding: 0px;
+}
+.modal-header .close {
+    padding: 0px;
+    margin: 0px;
+    font-size: var(--font-size-9);
+    font-weight: 100;
+    color: var(--font-light);
+}
+.modal-header h3.modal-title {
+    text-transform: capitalize;
+    font-size: var(--font-size-9);
+    font-weight: 700;
+    
+    padding-bottom: .5em;
+
+}
+.modal-header h5.modal-subtitle {
+    color: var(--font-normal);
+    font-size: var(--font-size-3);
+    font-weight: 300;
+}
+.creative-modal {
+    margin: 0px;
+    padding: 0px;
+}
+
+.creative-modal > div {
+    margin-top: var(--padding-0);
+}
+
+.creative-modal div.query-control {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+}
+
+.creative-modal div.query-control button.query-btn {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px; 
+    border-radius: 2px;
+    border: 1px solid #d9d9d9;
+
+    min-height: 32px;
+    min-width: 10vw;
+}
+
+.creative-modal div.query-control button.query-btn:last-child {
+    margin-right: 0px;
+}
+
+.creative-modal table {
+    font-size: var(--font-size-0);
+}
+
+.creative-modal table thead th {
+    font-weight: 700;
+    color: var(--font-normal);
+    text-align: center;
+    text-transform: capitalize;
+    background-color: var(--bg-light);
+    border: none;
+}
+.creative-modal table thead .kpi-column {
+    background-color: var(--data-primary);
+    color: var(--font-white);
+}
+.creative-modal table tbody .kpi-column {
+    background-color: var(--bg-select);
+}
+
+.creative-modal table tr td {
+    font-weight: 300;
+    color: var(--font-light);
+    text-align: right;
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+    border-bottom: 1px solid #e9ecef;
+}
+.creative-modal table tr td:first-child {
+    text-align: center;
+}

@@ -210,6 +210,8 @@ class AppScreen extends React.Component {
     // abstract
     renderContent() { return ''; }
 
+    renderSubsides() { return ''; }
+
     render() {
         return (
             <div className="container-fluid panel-wrapper m-0 p-4">
@@ -223,7 +225,12 @@ class AppScreen extends React.Component {
                         <CardPanel body={this.renderContent()} />
                     </div>
                 </div>
+                <div className="row footer m-0 p-0">
+                        <a href="https://www.nextmediagroup.co.kr" target="_blank">Next Media Group</a> &nbsp;is part of the&nbsp; <a href="https://fsn.co.kr" target="_blank">FSN group</a>
+                </div>
+                {this.renderSubsides()}
             </div>
+
         );
     }
 }

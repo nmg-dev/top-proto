@@ -7,7 +7,7 @@
     justify-content: flex-start;
     align-items: flex-start;
     color: var(--font-white);
-    font-size: 18px;
+    font-size: var(--font-size-3);
     font-weight: 500;
   }
   .sidebar .sidebar-inner {

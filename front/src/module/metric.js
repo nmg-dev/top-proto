@@ -16,7 +16,10 @@ class Metric {
     }
 
     format(value) {
-        return this._fmt(value);
+        if(value!=null)
+            return this._fmt(value);
+        else
+            return '';
     }
 
     value(x) {

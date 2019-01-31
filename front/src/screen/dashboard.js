@@ -1,5 +1,5 @@
 import React from 'react';
-import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip} from 'recharts';
+import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid} from 'recharts';
 import AppScreen from './appScreen';
 import CreativePreview from '../component/creativePreview';
 import AttributeMeta from '../module/attrMeta';
@@ -8,6 +8,7 @@ import moment  from 'moment';
 import Metric from '../module/metric';
 
 import './dashboard.css';
+import ModFormat from '../module/format';
 
 const INDUSTRY_KEY = 'category';
 const WEEK_FORMAT = 'YYYYMM';
@@ -33,11 +34,7 @@ class DashboardScreen extends AppScreen {
         // week of the year
         // let of = Object.assign(d, {});
 
-        let wk = d.isoWeeks();
-        let wo = moment(d.format('YYYY-MM-01T00:00:00')).isoWeeks();
-        if(wo<=wk)
-            wk -= wo;
-        return d.format('YYYY-MM '+(wk+1)+'주차');
+        
     }
 
     updateRefreshingContentState(nextState) {
@@ -72,7 +69,7 @@ class DashboardScreen extends AppScreen {
         }, {});
         
         nextState.timeline = _data.retrieveTimelines(
-            this.timelineWeekFormat.bind(this), 
+            ModFormat.autoPeriodFormat(this.state.period, 15), 
             metric, cids,
             this.state.from, this.state.till);
 
@@ -103,8 +100,9 @@ class DashboardScreen extends AppScreen {
 
         return (<ResponsiveContainer width="100%" height={0.45*window.innerHeight}>
             <LineChart data={chartData}>
-                <XAxis dataKey="xaxis" />
-                
+                <XAxis dataKey="xaxis" tickLine={false} tickCount={12} interval="preserveStartEnd" />
+                <YAxis axisLine={false} tick={false} tickCount={4} width={0} />
+                <CartesianGrid horizontal={true} vertical={false} strokeDasharray="1 1" />
                 <Line dataKey={this.state.metric} 
                     stroke="#002060" strokeWidth="3" 
                     dot={{r: 5}} />
@@ -178,9 +176,9 @@ class DashboardScreen extends AppScreen {
                     {this.renderContentChart()}
                 </div>
             </div>
-            <div className="row panel-details">
+            <div className="row dashboard-card-table panel-details">
                 <div className="col">
-                    <h3 className="section-title p-0">Industry Analysis</h3>
+                    <h3 className="section-title">Element Analysis</h3>
                     {this.state.tables.map((tb)=>{
                         return (<div className="panel-category-detail">
                             <h5>{_lang.label(tb.tag)}</h5>

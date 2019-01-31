@@ -61,8 +61,7 @@ class SimulationScreen extends AppScreen {
             rs.vals[mk] = Math.random();
         });
 
-        let hist = this.state.history;
-        hist.push(rs);
+        let hist = [rs].concat(this.state.history);
         this.setState({
             history: hist
         });
@@ -102,20 +101,25 @@ class SimulationScreen extends AppScreen {
         </table>);
     }
 
+    renderResultSectionAttributes(rs) {
+        let values = AttributeMeta.AllClasses()
+            .filter((opt)=>rs.opts[opt] && rs.opts[opt]!=='ALL')
+            .map((opt)=>rs.opts[opt]);
+        if(values && 0<values.length)
+            return values.join(' • ');
+        else
+            return 'ALL';
+    }
+
     renderResultSection(rs) {
-        return(<div class="row section-result">
-            <div class="col">
-                <div>
-                    <span class="simulate-option">
-                    {AttributeMeta.AllClasses()
-                        // .filter((opt)=>rs.opts[opt]!=='ALL')
-                        .map((opt)=>rs.opts[opt])
-                        .join('•')}
-                    </span>
+        return(<div className="row section-result">
+            <div className="col-lg-8 col-md-12 p-0">
+                <div className="simulate-option">
+                    {this.renderResultSectionAttributes(rs)}
                 </div>
-                <table class="table simulate-result-table">
+                <table className="table simulate-result-table">
                     <thead>
-                        <tr>{Metric.List().map((m)=><th>{m.label()}</th>)}</tr>
+                        <tr>{Metric.List().map((m)=><th>e.{m.label()}</th>)}</tr>
                     </thead>
                     <tbody>
                         <tr>{Metric.List().map((m)=><td>{m.format(rs.vals[m.key()])}</td>)}</tr>
@@ -126,35 +130,34 @@ class SimulationScreen extends AppScreen {
     }
 
     renderContent() {
-        return (<div class="section panel-details m-0 p-0">
-            <div class="row section-title m-0 p-0">
-                <div class="col m-0 p-0">
+        return (<div className="section panel-details m-0 p-0">
+            <div className="row section-title m-0 p-0">
+                <div className="col m-0 p-0">
                     <h3 className="title">Creative Simulation</h3>
                     <h5 className="subtitle">소재요소별 예상효율 확인</h5>
                 </div>
             </div>
-            <div class="row section-content">
-                <div class="col-sm-12 col-lg-4 p-2">
+            <div className="row section-content">
+                <div className="col-sm-12 col-lg-4 p-2">
                     {this.renderOptionTable(table_options.design, '디자인 속성', {backgroundColor: 'var(--bg-light)'})}
                 </div>
-                <div class="col-sm-12 col-lg-4 p-2">
+                <div className="col-sm-12 col-lg-4 p-2">
                     {this.renderOptionTable(table_options.adcopy, '콘텐츠 속성')}
                 </div>
-                <div class="col-sm-12 col-lg-4 p-2">
+                <div className="col-sm-12 col-lg-4 p-2">
                     {this.renderOptionTable(table_options.optional, '캠페인 조건')}
                 </div>
             </div>
-            <div class="row section-controls">
-                <div class="col" align="right">
-                    <button class="btn btn-default m-3 p-3">리셋</button>
-                    <button class="btn m-0 p-3" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
-                    {/* <button class="btn shadow" onClick={()=>window.print()}>출력하기</button> */}
+            <div className="row section-controls">
+                <div className="col" align="right">
+                    <button className="btn btn-default m-3 p-3">리셋</button>
+                    <button className="btn m-0 p-3" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
                 </div>
             </div>
 
-            <div class="printable">
+            <div className="printable">
             <h3>Results</h3>
-                {this.state.history.reverse().map((rs)=>this.renderResultSection(rs))}
+                {this.state.history.map((rs)=>this.renderResultSection(rs))}
             </div>
         </div>);
     }

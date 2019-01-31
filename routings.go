@@ -44,19 +44,4 @@ func GroupDatabaseConnection(app *gin.Engine) {
 	postQueryRoutes(sessionGroup, `u`, PostUserCreate, PostUserUpdate, PostUserDelete)
 	postQueryRoutes(sessionGroup, `p`, PostPerformanceCreate, PostPerformanceUpdate, PostPerformanceDelete)
 	postQueryRoutes(sessionGroup, `a`, PostAffiliationCreate, PostAffiliationUpdate, PostAffiliationDelete)
-
-	// update tags
-	sessionGroup.POST("/t/edit", PostTagUpdate)
-	sessionGroup.POST("/t/del", PostTagDelete)
-
-	// update users
-	sessionGroup.POST("/u/edit")
-
-	// campaignGroup
-	// campaignGroup := app.Group("/c")
-
-	// tagGroup
-	// tagGroup := app.Group("/t")
-
-	// managerGroup := app.Group("")
 }

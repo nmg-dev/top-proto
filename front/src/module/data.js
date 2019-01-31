@@ -14,6 +14,15 @@ class ModData extends Listenable {
         this._records = null;
     }
 
+    //
+    getTag(tid) {
+        return this._tags[parseInt(tid)];
+    }
+
+    getCampaign(cid) {
+        return this._campaigns[parseInt(cid)];
+    }
+
     // intersect two obj
 	_jx(o1, o2) {
 		let orr = {};
@@ -290,6 +299,11 @@ class ModData extends Listenable {
             });
     }
 
+    retrieveClassScoreTimelines(period_fmt, cls, campaign_ids, period_from, period_till) {
+        let tags = this.listTags(cls);
+        let metrics = Metric.List();
+    }
+
     listTags(withinCls) {
         return Object.keys(this._tags).map((tid)=>this._tags[parseInt(tid)])
             .filter((tag)=>tag.class===withinCls);
@@ -316,7 +330,7 @@ class ModData extends Listenable {
                 }, [])
             return cids;
         } else if(this._campaigns) {
-            return Object.keys(this._campaigns);
+            return Object.keys(this._campaigns).map((cid)=>parseInt(cid));
         } else {
             return [];
         }
@@ -330,6 +344,20 @@ class ModData extends Listenable {
                     label: tag.property && tag.property[lang] ? tag.property[lang] : tag.name
                 };
             });
+    }
+
+    listTagClassCampaignIds(withinCls) {
+        let tagCids = this.listTags(withinCls).map((tag)=>tag._c);
+        console.log(withinCls, tagCids);
+        if(0<tagCids.length) {
+            return tagCids.reduce((rs, cids) => {
+                rs = rs.concat(cids.filter((cid)=>rs.indexOf(cid)<0));
+                return rs;
+            }, []);
+        } else {
+            return [];
+        }
+
     }
 
     listTagClasses(campaignIds) {

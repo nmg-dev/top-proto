@@ -7,7 +7,7 @@
 .card.panel .panel-details .section-controls {
     margin-bottom: var(--padding-3);
     padding-bottom: var(--padding-1);
-    border-bottom: 2px solid var(--data-grey);
+    border-bottom: 1px solid #f2f2f2;
 }
 
 .card.panel .panel-details .section-controls button.btn {
@@ -31,6 +31,8 @@
     background-color: transparent;
     border: none;
 }
+
+
 .card.panel table.table.simulate-table tbody th,
 .card.panel table.table.simulate-table tbody td {
     vertical-align: middle;
@@ -42,6 +44,8 @@
 }
 .card.panel table.table.simulate-table tbody th {
     text-align: left;
+    font-weight: 300;
+    font-size: var(--font-size-0);
 }
 .card.panel table.table.simulate-table tbody td {
     text-align: center;
@@ -59,4 +63,38 @@
 }
 .card.panel table.table.simulate-table .query-btn .label-text {
     width: 100%;
+}
+
+.card.panel .section-result .simulate-option {
+    display: block;
+    margin-top: 1.5em;
+    margin-bottom: 1.0em;
+    font-weight: 300;
+}
+
+.card.panel .section-result table.simulate-result-table thead th {
+    text-align: left;
+    text-transform: none;
+    text-indent: 1.0em;
+
+    background-color: #d8d8d8;
+    border-top: 2px solid #979797;
+    border-bottom: 2px solid #979797;
+}
+.card.panel .section-result table.simulate-result-table tbody {
+    border-bottom: 2px solid #979797;
+}
+
+.card.panel .section-result table.simulate-result-table th,
+.card.panel .section-result table.simulate-result-table td {
+    border-left: 1px solid #979797;
+    border-right: 1px solid #979797;
+}
+.card.panel .section-result table.simulate-result-table th:first-child,
+.card.panel .section-result table.simulate-result-table td:first-child {
+    border-left: none;
+}
+.card.panel .section-result table.simulate-result-table th:last-child,
+.card.panel .section-result table.simulate-result-table td:last-child {
+    border-right: none;
 }

@@ -4,14 +4,13 @@ import AppScreen from './appScreen';
 import CreativePreview from '../component/creativePreview';
 import AttributeMeta from '../module/attrMeta';
 import App from '../App';
-import moment  from 'moment';
 import Metric from '../module/metric';
 
 import './dashboard.css';
 import ModFormat from '../module/format';
 
-const INDUSTRY_KEY = 'category';
-const WEEK_FORMAT = 'YYYYMM';
+// const INDUSTRY_KEY = 'category';
+// const WEEK_FORMAT = 'YYYYMM';
 
 const ScreenAccessor = 'dashboard';
  

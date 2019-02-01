@@ -12,6 +12,7 @@
 
 # production
 /build
+/top-proto
 
 # misc
 .DS_Store

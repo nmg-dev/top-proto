@@ -1,5 +1,5 @@
 import React from 'react';
-import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, LabelList} from 'recharts';
+import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell} from 'recharts';
 import AppScreen from './appScreen';
 
 import CreativeDialog from '../component/creativeDialog';
@@ -8,7 +8,6 @@ import AttributeMeta from '../module/attrMeta';
 import Metric from '../module/metric';
 
 import './creative.css';
-import App from '../App';
 
 const bar_colors = ['#D9D9D9','#9DC3E6','#1F4E79','#20ADE3','#002060'];
 

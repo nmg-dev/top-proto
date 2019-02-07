@@ -1,13 +1,22 @@
 /* simulation screen specific */
+.card.panel .panel-details .section-title .title {
+}
+.card.panel .panel-details .section-title .subtitle {
+    font-size: var(--font-size-2);
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
 .card.panel .panel-details .section-content {
-    margin-top: var(--padding-3);
-    margin-bottom: var(--padding-1);
+    margin-top: var(--padding-5);
+    margin-bottom: var(--padding-2);
 }
 
 .card.panel .panel-details .section-controls {
-    margin-bottom: var(--padding-3);
-    padding-bottom: var(--padding-1);
-    border-bottom: 1px solid #f2f2f2;
+    border-top: 1px solid #f2f2f2;
+}
+.card.panel .panel-details .section-controls .col {
+    padding: 0px;
 }
 
 .card.panel .panel-details .section-controls button.btn {
@@ -16,6 +25,10 @@
     font-weight: 700;
     border: 2px solid #979797;
     border-radius: 8px;
+
+    margin-top: var(--padding-2);
+    margin-left: var(--padding-1);
+    height: var(--padding-3);
 }
 
 .card.panel table.simulate-table .query-control i.fa-chevron-down {
@@ -27,6 +40,8 @@
 }
 
 .card.panel table.table.simulate-table thead th {
+    padding-left: 1vw;
+    padding-right: 1vw;
     text-align: left;
     background-color: transparent;
     border: none;
@@ -63,6 +78,11 @@
 }
 .card.panel table.table.simulate-table .query-btn .label-text {
     width: 100%;
+    font-weight: 300;
+}
+
+.card.panel .section-result .section-result-title {
+    margin-top: -2.5rem;
 }
 
 .card.panel .section-result .simulate-option {
@@ -78,15 +98,16 @@
     text-indent: 1.0em;
 
     background-color: #d8d8d8;
-    border-top: 2px solid #979797;
-    border-bottom: 2px solid #979797;
+    border-top: 1px solid #979797;
+    border-bottom: 1px solid #979797;
 }
 .card.panel .section-result table.simulate-result-table tbody {
-    border-bottom: 2px solid #979797;
+    border-bottom: 1px solid #979797;
 }
 
 .card.panel .section-result table.simulate-result-table th,
 .card.panel .section-result table.simulate-result-table td {
+    min-width: 9vw;
     border-left: 1px solid #979797;
     border-right: 1px solid #979797;
 }

@@ -13,6 +13,8 @@
 # production
 /build
 /top-proto
+/top-proto.exe
+front/package-lock.json
 
 # misc
 .DS_Store

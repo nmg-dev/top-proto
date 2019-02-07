@@ -138,25 +138,25 @@ class SimulationScreen extends AppScreen {
                 </div>
             </div>
             <div className="row section-content">
-                <div className="col-sm-12 col-lg-4 p-2">
+                <div className="col-sm-12 col-lg-4 p-4">
                     {this.renderOptionTable(table_options.design, '디자인 속성', {backgroundColor: 'var(--bg-light)'})}
                 </div>
-                <div className="col-sm-12 col-lg-4 p-2">
+                <div className="col-sm-12 col-lg-4 p-4">
                     {this.renderOptionTable(table_options.adcopy, '콘텐츠 속성')}
                 </div>
-                <div className="col-sm-12 col-lg-4 p-2">
+                <div className="col-sm-12 col-lg-4 p-4">
                     {this.renderOptionTable(table_options.optional, '캠페인 조건')}
                 </div>
             </div>
             <div className="row section-controls">
                 <div className="col" align="right">
-                    <button className="btn btn-default m-3 p-3">리셋</button>
-                    <button className="btn m-0 p-3" onClick={this.appendHistory.bind(this)}>예상효율 확인하기</button>
+                    <button className={'btn btn-default p-1 ' + (0<this.state.history.length ? 'd-none' : '')}>리셋</button>
+                    <button className="btn p-1" onClick={this.appendHistory.bind(this)}>{0<this.state.history.length ? '다시 조회하기' :'예상효율 확인하기' }</button>
                 </div>
             </div>
 
-            <div className="printable">
-            <h3>Results</h3>
+            <div className="printable section-result">
+            <h3 className="section-result-title">Result</h3>
                 {this.state.history.map((rs)=>this.renderResultSection(rs))}
             </div>
         </div>);

@@ -11,10 +11,15 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    min-height: 90px;
 }
 .querybar .querybar-top .querybar-title {
     display: flex;
     font-size: var(--font-size-9);
+    align-items: center;
+}
+.querybar .querybar-top .querybar-title h1 {
+    font-weight: 300;
 }
 .querybar .querybar-top .querybar-title sup { 
     color: var(--data-primary); 
@@ -94,7 +99,6 @@
     margin: var(--padding-1);
     margin-left: 0px;
     border-radius: 0;
-    background-color: var(--bg-white);
     color: var(--font-light);
     min-width: 12vw;
 }
@@ -102,13 +106,15 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-
+    
     width: 100%;
     border: 1px solid #d9d9d9;
     border-radius: 1px;
     box-shadow: none;
     padding-top: 2px;
     padding-bottom: 2px;
+
+    background-color: var(--bg-white);
 }
 .query-control.top-control i.fa-chevron-down {
     padding-top: 8px;

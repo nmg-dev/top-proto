@@ -36,16 +36,16 @@ class Metric {
     /* const */
     static CPC = new Metric('cpc', 'CPC', 
         (v) => (v.clk/Math.max(1,v.cost)),
-        (v)=> v.toLocaleString()+ 'KRW' );
+        (v)=> v.toLocaleString()+ ' 원' );
     static CPA = new Metric('cpa', 'CPA',
         (v) => (v.cnv/Math.max(1,v.cost)),
-        (v)=> v.toLocaleString()+ 'KRW');
+        (v)=> v.toLocaleString()+ ' 원');
     static CTR = new Metric('ctr', 'CTR',
         (v) => (v.clk/Math.max(1,v.imp)),
-        (v) => (100*v).toFixed(4)+' %');
+        (v) => (100*v).toFixed(2)+' %');
     static CVR = new Metric('cvr', 'CVR',
         (v) => (v.cnv/Math.max(1,v.imp)),
-        (v) => (100*v).toFixed(4)+' %' );
+        (v) => (100*v).toFixed(2)+' %' );
     static COUNT = new Metric('cnt', 'COUNT',
         () => 1, (v)=>v.toLocaleString(), true);
 

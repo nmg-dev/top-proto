@@ -5,6 +5,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+window.__AppCls = App;
 var __app = ReactDOM.render(<App />, document.getElementById('root'));
 window._onGoogleLoginSuccess = __app.onLoginCallback.bind(__app);
 window._onGoogleLoginFailure = __app.onLoginFailover.bind(__app);

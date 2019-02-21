@@ -101,7 +101,7 @@
 
 
 .dropdown-menu {
-  max-height: 33vh;
+  max-height: 50vh;
   overflow: auto;
 }
 .dropdown-menu::-webkit-scrollbar {

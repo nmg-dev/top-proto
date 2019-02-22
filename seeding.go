@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
@@ -20,6 +23,7 @@ func Migrate(clear bool, withSeeding bool) {
 	runMigrations(db, migrations)
 
 	if withSeeding {
+
 		initTags(db)
 
 		initCampaigns(db)
@@ -28,10 +32,80 @@ func Migrate(clear bool, withSeeding bool) {
 
 		initAdmin(db)
 	}
+}
+
+func readFileContent(folder string, file os.FileInfo) ([]string, error) {
+	fin, fileErr := os.Open(fmt.Sprintf("%s/%s", folder, file.Name()))
+	defer fin.Close()
+
+	lines := make([]string, 0)
+
+	if fileErr != nil {
+		return nil, fileErr
+	}
+
+	scanner := bufio.NewScanner(fin)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	return lines, nil
+}
+
+func parseFileContentTags([]string) []Tag {
+	classes := []string{
+		"category",
+		"category",
+		"account",
+		"brand",
+		"goal",
+		"device",
+		"channel",
+		"adtype",
+		"admedia",
+		"period",
+		"date",
+		"impression",
+		"click",
+		"conversion",
+		"creative",
+		"layout",
+		"background",
+		"objet",
+		"button",
+		"shape",
+		"benefit",
+		"keytopic",
+		"keyword",
+		"trigger",
+		"adcopy",
+	}
+	tags := make(map[string]map[string]Tag)
 
 }
 
-func initTags(db *sql.DB) {
+func parseFileContentCampaigns([]string) []Campaign {
+
+} 
+
+func parseFileContent
+
+func aggSampleFiles(folder string) {
+	files, _ := ioutil.ReadDir(folder)
+	// assume the file contains header; with tab separated
+	for _, file := range files {
+		lines, ferr := readFileContent(folder, file)
+
+		if ferr != nil {
+			continue
+		}
+
+		parseFileContent(lines)
+
+	}
+}
+
+func initTags(db *sql.DB, tags []Tag) {
 	// initialize tags
 	tx, _ := db.Begin()
 	tstmt, _ := tx.Prepare(`INSERT INTO tags (class, name, property) VALUES (?, ?, ?)`)
@@ -43,7 +117,7 @@ func initTags(db *sql.DB) {
 	tx.Commit()
 }
 
-func initCampaigns(db *sql.DB) {
+func initCampaigns(db *sql.DB, campaigns []Campaign, performances[]CampaignPerformance) {
 	campaigns := seedingCampaigns()
 	tx, _ := db.Begin()
 	stmt, _ := tx.Prepare(`INSERT INTO campaigns (title, memo, asset, period_from, period_till, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`)
@@ -58,7 +132,7 @@ func initCampaigns(db *sql.DB) {
 	}
 }
 
-func initAffiliations(db *sql.DB) {
+func initAffiliations(db *sql.DB, affs[]TagAffiliation) {
 	tags, _ := ListAllTags(db)
 	campaigns := ListAllCampaigns(db)
 	seedingAffiliations(db, tags, campaigns)

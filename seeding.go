@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -24,18 +23,20 @@ func Migrate(clear bool, withSeeding bool) {
 
 	if withSeeding {
 
-		initTags(db)
+		// initTags(db)
 
-		initCampaigns(db)
+		// initCampaigns(db)
 
-		initAffiliations(db)
+		// initAffiliations(db)
 
-		initAdmin(db)
+		// initAdmin(db)
 	}
 }
 
-func readFileContent(folder string, file os.FileInfo) ([]string, error) {
-	fin, fileErr := os.Open(fmt.Sprintf("%s/%s", folder, file.Name()))
+func readFileContent(folder string, file os.FileInfo, includeHeader bool) ([]string, error) {
+	filepath := fmt.Sprintf("%s/%s", folder, file.Name())
+	fmt.Println(filepath)
+	fin, fileErr := os.Open(filepath)
 	defer fin.Close()
 
 	lines := make([]string, 0)
@@ -45,103 +46,121 @@ func readFileContent(folder string, file os.FileInfo) ([]string, error) {
 	}
 
 	scanner := bufio.NewScanner(fin)
+	isHeader := true
 	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+		if isHeader && !includeHeader {
+			scanner.Text()
+			isHeader = false
+			continue
+		} else if isHeader {
+			isHeader = false
+		}
+		line := scanner.Text()
+		fmt.Println(line)
+		lines = append(lines, line)
 	}
 
 	return lines, nil
 }
 
-func parseFileContentTags([]string) []Tag {
-	classes := []string{
-		"category",
-		"category",
-		"account",
-		"brand",
-		"goal",
-		"device",
-		"channel",
-		"adtype",
-		"admedia",
-		"period",
-		"date",
-		"impression",
-		"click",
-		"conversion",
-		"creative",
-		"layout",
-		"background",
-		"objet",
-		"button",
-		"shape",
-		"benefit",
-		"keytopic",
-		"keyword",
-		"trigger",
-		"adcopy",
-	}
-	tags := make(map[string]map[string]Tag)
+func parseFileContentTags(rows []string) map[string][]string {
+	// classes := []string{
+	// 	"category",
+	// 	"category",
+	// 	"account",
+	// 	"brand",
+	// 	"goal",
+	// 	"device",
+	// 	"channel",
+	// 	"adtype",
+	// 	"admedia",
+	// 	"period",
+	// 	"date",
+	// 	"impression",
+	// 	"click",
+	// 	"conversion",
+	// 	"creative",
+	// 	"layout",
+	// 	"background",
+	// 	"objet",
+	// 	"button",
+	// 	"shape",
+	// 	"benefit",
+	// 	"keytopic",
+	// 	"keyword",
+	// 	"trigger",
+	// 	"adcopy",
+	// }
+	// tags := make(map[string][]string)
+	// TODO: read files and build tags
+	// for _, row := range rows {
+	// rowTags := make(map[string]string)
+	// cells := strings.Split(row, "\t")
+	// }
 
+	return nil
 }
 
 func parseFileContentCampaigns([]string) []Campaign {
+	return nil
+}
 
-} 
-
-func parseFileContent
+func parseFileContentCampaignPerformance([]string, []Campaign) []CampaignPerformance {
+	return nil
+}
 
 func aggSampleFiles(folder string) {
 	files, _ := ioutil.ReadDir(folder)
 	// assume the file contains header; with tab separated
 	for _, file := range files {
-		lines, ferr := readFileContent(folder, file)
+		_, ferr := readFileContent(folder, file, false)
 
 		if ferr != nil {
 			continue
 		}
 
-		parseFileContent(lines)
+		// parseFileContent(lines)
 
 	}
 }
 
-func initTags(db *sql.DB, tags []Tag) {
-	// initialize tags
-	tx, _ := db.Begin()
-	tstmt, _ := tx.Prepare(`INSERT INTO tags (class, name, property) VALUES (?, ?, ?)`)
-	tags := seedingTags()
-	for _, t := range tags {
-		prs, _ := json.Marshal(t.Property)
-		tstmt.Exec(t.Class, t.Name, prs)
-	}
-	tx.Commit()
-}
+// func initTags(db *sql.DB, tags []Tag) {
+// 	// initialize tags
+// 	tx, _ := db.Begin()
+// 	tstmt, _ := tx.Prepare(`INSERT INTO tags (class, name, property) VALUES (?, ?, ?)`)
+// 	// tags := seedingTags()
+// 	for _, t := range tags {
+// 		prs, _ := json.Marshal(t.Property)
+// 		tstmt.Exec(t.Class, t.Name, prs)
+// 	}
+// 	tx.Commit()
+// }
 
-func initCampaigns(db *sql.DB, campaigns []Campaign, performances[]CampaignPerformance) {
-	campaigns := seedingCampaigns()
-	tx, _ := db.Begin()
-	stmt, _ := tx.Prepare(`INSERT INTO campaigns (title, memo, asset, period_from, period_till, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`)
-	for _, c := range campaigns {
-		stmt.Exec(c.Title, c.Memo, c.Asset, c.PeriodFrom, c.PeriodTill)
-	}
-	tx.Commit()
+// func initCampaigns(db *sql.DB, campaigns []Campaign, performances []CampaignPerformance) {
+// 	// campaigns := seedingCampaigns()
+// 	tx, _ := db.Begin()
+// 	stmt, _ := tx.Prepare(`INSERT INTO campaigns (title, memo, asset, period_from, period_till, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`)
+// 	for _, c := range campaigns {
+// 		stmt.Exec(c.Title, c.Memo, c.Asset, c.PeriodFrom, c.PeriodTill)
+// 	}
+// 	tx.Commit()
 
-	// seeding performance
-	for _, c := range ListAllCampaigns(db) {
-		seedingPerformances(db, c)
-	}
-}
+// 	// seeding performance
+// 	for _, c := range ListAllCampaigns(db) {
+// 		seedingPerformances(db, c)
+// 	}
+// }
 
-func initAffiliations(db *sql.DB, affs[]TagAffiliation) {
-	tags, _ := ListAllTags(db)
-	campaigns := ListAllCampaigns(db)
-	seedingAffiliations(db, tags, campaigns)
+// func initAffiliations(db *sql.DB, affs []TagAffiliation) {
+// 	tags, _ := ListAllTags(db)
+// 	campaigns := ListAllCampaigns(db)
+// 	seedingAffiliations(db, tags, campaigns)
 
-}
+// }
 
-func initAdmin(db *sql.DB) {
-	seedingAdmin(db)
-}
+// func initAdmin(db *sql.DB) {
+// 	seedingAdmin(db)
+// }
 
 var periodFrom = time.Date(2018, 1, 0, 0, 0, 0, 0, time.Local)
 var periodTill = time.Date(2019, 1, 0, 0, 0, 0, 0, time.Local)

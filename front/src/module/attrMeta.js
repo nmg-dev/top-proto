@@ -15,9 +15,9 @@ class AttributeMeta {
     }
 
 
-    static Config = new AttributeMeta('config', [CATEGORY_INDUSTRY, 'channel', 'media', 'goal']);
-    static Design = new AttributeMeta('design', ['layout', 'objet', 'background', 'button',]);
-    static Message = new AttributeMeta('message', ['keytopic', 'keyword', 'trigger', 'adcopy',]);
+    static Config = new AttributeMeta('config', [CATEGORY_INDUSTRY, 'device', 'media', 'adtype']);
+    static Design = new AttributeMeta('design', ['design.layout', 'design.objet', 'design.background', 'design.button',]);
+    static Message = new AttributeMeta('message', ['content.keytopic', 'content.keyword', 'content.trigger', 'content.adcopy',]);
     static ALL = [
         AttributeMeta.Design, 
         AttributeMeta.Message,

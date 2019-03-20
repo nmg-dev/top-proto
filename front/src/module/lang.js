@@ -17,13 +17,21 @@ const LANG_DICT = {
 
         category: '업종',
         goal: '광고목표',
+        device: '장치',
+
         channel: '채널',
         media: '매체',
+        adtype: '광고유형',
 
-        layout: '레이아웃',
-        background: '배경',
-        objet: '오브제',
-        lead: '카피',
+        'design.layout': '레이아웃',
+        'design.background': '배경',
+        'design.objet': '오브제',
+        'design.button': '버튼',
+
+        'content.keytopic': '주제',
+        'content.keyword': '키워드',
+        'content.trigger': '트리거',
+        'content.adcopy': '카피',
 
         //
         from: '기간 시작',
@@ -47,13 +55,21 @@ const LANG_DICT = {
         //
         category: 'category',
         goal: 'goal',
+        device: 'device',
+
         channel: 'channel',
         media: 'ad media',
+        adtype: 'ad type',
 
-        layout: 'layout',
-        background: 'background',
-        objet: 'objet',
-        lead: 'copy text',
+        'design.layout': 'Layout',
+        'design.background': 'Background',
+        'design.objet': 'Objet',
+        'design.button': 'Button',
+
+        'content.keytopic': 'Topic',
+        'content.keyword': 'Keyword',
+        'content.trigger': 'Trigger',
+        'content.adcopy': 'Ad Copy',
 
         //
         from: 'from',

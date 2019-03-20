@@ -27,9 +27,9 @@ const MANAGE_USER = 'admin-user';
 
 const QueryDropLabels = {
     category: '업종',
-    channel: '채널',
+    device: '장치',
     media: '미디어',
-    goal: '광고목적',
+    adtype: '광고유형',
 };
 
 

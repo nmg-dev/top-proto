@@ -28,8 +28,8 @@ class App extends React.Component {
 	static lang = new ModLang('ko');
 	// static lang='ko';
 	static period = {
-		from: moment().add(-1, 'years'),
-		till: moment()
+		from: moment('2018-01-01'),
+		till: moment('2018-02-01'),
 	};
 	static kpi = Metric.DefaultKey();
 

@@ -34,13 +34,16 @@ class PeriodBtn extends React.Component {
 
     componentDidMount() {
         window.__updateApplicationPeriod = ((daterange)=>{
-            console.log('period updated', daterange.value, this);
-            this.setState({
-                from: moment(daterange.value.from),
-                till: moment(daterange.value.till),
-            });
+            if(daterange && daterange.value) {
+                this.setState({
+                    from: moment(daterange.value.from),
+                    till: moment(daterange.value.till),
+                });
+            }
         }).bind(this);
         eval(`$('.daterange').daterange({
+            dateFrom: '${moment(this.state.from).format('YYYY-MM-DD')}',
+            dateTill: '${moment(this.state.till).format('YYYY-MM-DD')}',
             onSelected: function(ev,range) {
                 window.__updateApplicationPeriod(range);
             }
@@ -155,7 +158,7 @@ class PeriodBtn extends React.Component {
                 <i className="fas fa-chevron-down" />
             </button>
             <div className="dropdown-menu p-1">
-                <div className="daterange"></div>
+                <div className="daterange" ref={this._range}></div>
             </div>
         </div>);
     }

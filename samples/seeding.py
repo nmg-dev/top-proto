@@ -5,15 +5,9 @@ import json
 import os, os.path
 import re
 
-__mysql_config = {
-    'host': '127.0.0.1',
-    'port': 3306,
-    'database': 'tagop',
-    'user': 'nmg-to',
-    'password': 'nmg-tagOperation.v2018.proto',
-    'charset': 'utf8mb4',
-    'use_unicode': True
-}
+__mysql_config = {}
+if os.path.exists('./seeding.database.json') :
+    with open('./seeding.database.json', encoding='utf8') as dbfp : __mysql_config = json.load(dbfp)
 
 __table_names = ('tags','campaigns','users','campaign_grants','campaign_performances','tag_affiliations')
 __table_schema = {
@@ -65,8 +59,8 @@ __table_schema = {
             ON UPDATE NO ACTION) ENGINE = InnoDB;''',
     'tags': '''CREATE TABLE IF NOT EXISTS tags (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        class VARCHAR(20) NOT NULL,
-        name VARCHAR(20) NOT NULL,
+        class VARCHAR(30) NOT NULL,
+        name VARCHAR(60) NOT NULL,
         priority INT UNSIGNED NOT NULL DEFAULT 1,
         property JSON NULL,
         PRIMARY KEY (id),
@@ -114,8 +108,6 @@ __table_schema = {
 cnx = mysql.connector.connect(**__mysql_config)
 cs = cnx.cursor()
 
-
-
 tag_classes = (
     'category',
     'subcategory',
@@ -130,6 +122,7 @@ tag_classes = (
     'date',
     'impression',
     'click',
+    'cost',
     'conversion',
     'design.creative',
     'design.layout',
@@ -144,6 +137,10 @@ tag_classes = (
     'content.adcopy'
 )
 
+tag_classes_to_excludes = (
+    'date','impression','click','cost','conversion',
+)
+
 campaign_key_classes = (
     'category',
     'subcategory',
@@ -155,7 +152,28 @@ campaign_key_classes = (
     'adtype',
     'admedia',
     'period',
-    'design.creative',
+    'design.layout',
+    'design.background',
+    'design.objet',
+    'design.button',
+    'design.shape',
+    'content.benefit',
+    'content.keytopic',
+    'content.keyword',
+    'content.trigger',
+    'content.adcopy'
+)
+
+campaign_aff_classes = (
+    'category',
+    'subcategory',
+    'account',
+    'brand',
+    'goal',
+    'device',
+    'media',
+    'adtype',
+    'admedia',
     'design.layout',
     'design.background',
     'design.objet',
@@ -171,13 +189,13 @@ campaign_key_classes = (
 tags = {cls:{} for cls in tag_classes}
 tag_autoinc = 0
 campaigns = {}
-performances = []
+performances = {}
 filename_pattern = re.compile(r'.+\.tsv', re.IGNORECASE)
 text_wrapper_pattern = re.compile(r'^\s*"(.*)"\s*$')
 integer_pattern = re.compile(r'[^\d]')
 
-def drop_tables() :
-    for tb in reversed(__table_names) :
+def drop_tables(tablenames) :
+    for tb in reversed(tablenames) :
         cs.execute('DROP TABLE IF EXISTS %s'%(tb))
     cnx.commit()
 
@@ -190,18 +208,18 @@ def _from_file_line_content(c,t) :
     cls = tag_classes[c]
     tm = text_wrapper_pattern.match(t)
     t = tm.group(1) if tm is not None else t
-    return t
+    return t.strip()
 
 def _campaign_key_from_values(line_values) :
     return '|'.join(str(tags[cc][line_values[cc]]) for cc in campaign_key_classes)
 
 def _perform_value_date(date_str) :
-    return datetime.strptime(date_str,'%Y%m%d') if date_str is not None else None
+    return datetime.strptime(date_str,'%Y-%m-%d') if date_str is not None else None
 def _perform_value_int(int_str) :
     return int(integer_pattern.sub('', int_str)) if int_str is not None and 0<len(int_str) else None
 
 def seeding_from_file(filepath, sep='\t', include_header=False) :
-    global tag_autoinc
+    global tags, tag_autoinc, campaigns
     lines = None
     with open(filepath, encoding='utf8') as fin :
         lines = [line.strip() for line in fin.readlines()]
@@ -213,19 +231,89 @@ def seeding_from_file(filepath, sep='\t', include_header=False) :
             tag_classes[c]:(_from_file_line_content(c,tokens[c]) if len(tokens)>c else None) 
             for c in range(0, len(tag_classes)) }
         for k,v in line_values.items() :
+            if k in tag_classes_to_excludes : continue
             if v not in tags[k] :
                 tag_autoinc += 1
                 tags[k][v] = tag_autoinc
         ck = _campaign_key_from_values(line_values)
-        if ck not in campaigns :
-            campaigns[ck] = []
+        if ck not in campaigns : 
+            print(line_values)
+            ctitle = '[{account}] {brand} -{device},{media},{adtype},{admedia}'.format(**line_values)
+            periods = line_values['period'].split('~')
+            period_from = None
+            period_till = None
+            try :
+                if 2<=len(periods) :
+                    period_from = datetime.strptime(periods[0], '%Y/%m/%d')
+                    period_till = datetime.strptime(periods[1], '%Y/%m/%d')
+                elif 1==len(periods) :
+                    p = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(periods[0]) - 2)
+                    period_from = p
+                    period_till = p
+            except :
+                continue
+
+            tks = tuple(tags[c][line_values[c]] for c in campaign_aff_classes)
+            campaigns[ck] = (ctitle, period_from, period_till,tks)
+        if ck not in performances : 
+            performances[ck] = []
         performance = ( \
             _perform_value_date(line_values['date']), \
             _perform_value_int(line_values['impression']), \
             _perform_value_int(line_values['click']), \
+            _perform_value_int(line_values['cost']), \
             _perform_value_int(line_values['conversion']))
+        performances[ck].append(performance)
 
-        print((ck, ) + performance)
+def seeding_data_tag(tags) :
+    global cnx, cs
+
+    tids = {}
+    for cls in campaign_aff_classes :
+        # insertion
+        for tag in tags[cls].keys() :
+            if tag is None : continue
+            cs.execute('INSERT INTO tags (class,name) VALUES (%s,%s)', (cls, tag))
+            tids[tags[cls][tag]] = cs.lastrowid
+
+        cnx.commit()
+    return tids
+
+def seeding_data_campaign(campaigns) :
+    global cnx, cs
+
+    cids = {}
+    for ck,cv in campaigns.items() :
+        cs.execute('''INSERT INTO campaigns 
+            (title, period_from, period_till, created_at)
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP)''', cv[0:3])
+        cids[ck] = cs.lastrowid
+    cnx.commit()
+
+    return cids
+
+def seeding_data_campaign_tag(tags, tids, campaigns, cids) :
+    global cnx, cs
+    
+    for ck,cv in campaigns.items() :
+        cid = cids[ck]
+        for tk in cv[-1] :
+            if tk not in tids or tids[tk] is None or tids[tk]<=0 : continue
+            cs.execute('''INSERT INTO tag_affiliations
+            (campaign_id, tag_id) VALUES(%s,%s)''', (cid, tids[tk]))
+        cnx.commit()
+
+def seeding_data_campaign_performance(campaigns, performances, cids) :
+    global cnx, cs
+
+    for ck,pfs in performances.items() :
+        cid = cids[ck]
+        cps = [(cid,)+cv for cv in pfs]
+        cs.executemany('''INSERT INTO campaign_performances
+            (campaign_id, day_id, impression, click, cost, conversion, created_at)
+            VALUES(%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)''', cps)
+        cnx.commit()
+
 
 
 if __name__ == '__main__' :
@@ -235,17 +323,26 @@ if __name__ == '__main__' :
         fpath = '%s/%s'%(folder, fname)
         seeding_from_file(fpath)
 
-        # TODO: clear databases
+        to_clear = ('campaigns', 'campaign_grants', 'campaign_performances', 'tags', 'tag_affiliations')
 
-        # TODO: insert tags
+    # drop tables
+    drop_tables(to_clear)
 
-        # TODO: insert campaigns
+    # create blank
+    create_tables()
+    
+    # insert & get tags, tag ids
+    tids = seeding_data_tag(tags)
+    # insert campaigns
+    cids = seeding_data_campaign(campaigns)
+    # insert tag_affiliations
+    seeding_data_campaign_tag(tags, tids, campaigns, cids)
+    # insert campaign_performances
+    seeding_data_campaign_performance(campaigns, performances, cids)
 
-        # TODO: insert tag_affiliations
-
-        # TODO: insert campaign_performances
-
-        
+    # flush
+    cnx.commit()
+    cnx.close()
     
         
         

@@ -3,83 +3,142 @@ import AttributeMeta from '../module/attrMeta';
 
 import './creativePreview.css';
 
-const components = {
-    background: {
-        blank: 'background_blank',
-        image: 'background_image',
-        solid_dark: 'background_solid_dark',
-        solid_light: 'background_solid_light',
-        split: 'background_split',
-    },
-    objet: {
-        illust: 'objet_illust',
-        model: 'objet_model',
-        picture: 'objet_picture',
-    },
-    button: {
-        benefit: 'button_benefit',
-        suggest: 'button_suggest',
-        time: 'button_time',
-    },
-    layout: {
-        left: 'layout_left',
-        right: 'layout_right',
-        between: 'layout_between',
-        center: 'layout_center',
-    }
+const ImagePath = `/img/preview`;
+
+const BackgroundTypes = {
+    '공백': 'blank',
+    '단색_밝은색': 'solid_light',
+    '단색_어두운색': 'solid_dark',
+    '면분할': 'split',
+};
+const ObjetTypes = {
+    '모델': 'model',
+    '일러스트': 'illust',
+    '실사': 'picture',
+    '텍스트': '',
+};
+const LayoutObjets = {
+        '좌측': { x: "75%", y: "5%", h: '90%' },
+        '우측': { x: "25%", y: "5%", h: '90%' },
+        '중앙': { x: "5%", y: "5%", h: '90%' },
+        '좌우': { x: "40%", y: "5%", h: '90%' },
+    // '정방형': {
+    //     '좌측': { x: "75%", y: "15%", h: '90%' },
+    //     '우측': { x: "25%", y: "15%", h: '90%' },
+    //     '중앙': { x: "5%", y: "5%", h: '90%' },
+    //     '좌우': { x: "40%", y: "15%", h: '90%' },
+    // },
+    // '세로형': {
+    //     '좌측': { x: "5%", y: "75%", h: '30%' },
+    //     '우측': { x: "5%", y: "25%", h: '30%' },
+    //     '중앙': { x: "5%", y: "15%", h: '30%' },
+    //     '좌우': { x: "5%", y: "30%", h: '30%' },
+    // },
+    // '원형': {
+    //     '좌측': { x: "75%", y: "25%", h: '50%' },
+    //     '우측': { x: "25%", y: "25%", h: '50%' },
+    //     '중앙': { x: "30%", y: "5%", h: '50%' },
+    //     '좌우': { x: "30%", y: "25%", h: '50%' },
+    // }
 }
 
 class CreativePreview extends React.Component {
     constructor(ps) {
         super(ps);
 
-        this.state={
-            ...this.props
-        };
+        console.log(ps);
 
         this._canvas = React.createRef();
         this._context = null;
     }
 
-    componentDidMount() {
-        this.onUpdateDraw();
+    renderBackgroundImage() {
+        let bg = this.props.meta['design.background'].name;
+        return <image 
+            x="0" y="0" width="100%" height="100%" preserveAspectRatio="0"
+            href={`${ImagePath}/background_${BackgroundTypes[bg]}.png`} />
     }
 
-    componentDidUpdate() {
-        this.onUpdateDraw();
+    renderContentText() {
+        // let shape = this.props.meta['design.shape'];
+        let layout = this.props.meta['design.layout'].name;
+        let text = this.props.meta['content.adcopy'].name;
+        switch(layout) {
+            case '좌측': 
+                return <text x="5%" y="50%" fill="grey">{text}</text>;
+            case '우측':
+                return <text x="75%" y="50%" fill="grey">{text}</text>;
+            case '좌우':
+                return [
+                    <text x="75%" y="50%" fill="grey">{text}</text>,
+                    <text x="5%" y="50%" fill="grey">{text}</text>
+                ];
+            default:
+            case '중앙':
+                return <text x="50%" y="50%" fill="grey">{text}</text>;
+        }
     }
 
-    _imageLoadingCanvas(src, dx, dy, dw, dh) {
-        dx = dx || 0;
-        dy = dy || 0;
-        dw = dw || this._canvas.current.width;
-        dh = dh || this._canvas.current.height;
+    renderButtonImage() {
+        let layout = this.props.meta['design.layout'].name;
+        let text = this.props.meta['content.trigger'].name;
 
-        let img = new Image();
-        img.src = src;
-        img.onload = ((ev) => {
-            console.log(src, dx, dy, dw, dh);
-            this._context.drawImage(img, dx, dy, dw, dh);
-        });
+        let btnLayout;
+        let btnType;
+        switch(layout) {
+            case '좌측': 
+                btnLayout = {x: '90%', y: '50%', h: '40%'}; break;
+            case '우측':
+                btnLayout = {x: '10%', y: '50%', h: '40%'}; break;
+            case '좌우':
+                btnLayout = {x: '55%', y: '50%', h: '40%'}; break;
+            default:
+            case '중앙':
+                btnLayout = {x: '90%', y: '50%', h: '40%'}; break;
+        }
+        
+        switch(text) {
+            case 'User Persuasive Text':
+                btnType = 'suggest'; break;
+            case 'Emphasize Reward':
+                btnType = 'reward'; break;
+            case 'Highlight benefits':
+                btnType = 'benefit'; break;
+            case 'Include Seasonlaity':
+                btnType = 'season'; break;
+            case 'Create Ungency':
+                btnType = 'time'; break;
+            case 'Esatablish credibility':
+                btnType = 'credible'; break;
+        }
+
+        return <image href={`${ImagePath}/button_${btnType}`}
+            x={btnLayout.x} y={btnLayout.y} height={btnLayout.h} preserveAspectRatio="1" />;
+
     }
 
-    onUpdateDraw() {
-        // console.log('preview updated', this._canvas);
-        // if(this._canvas.current) {
-        //     if(!this._context) 
-        //         this._context = this._canvas.current.getContext('2d');
-        //     this._imageLoadingCanvas(`/img/preview/background_split.png` );
-        //     this._imageLoadingCanvas(`/img/preview/objet_model.png`, 10, 10);
-        //     this._imageLoadingCanvas(`/img/preview/button_benefit.png`, 20, 20);
-        // }
+    renderObjetImage() {
+        // let shape = this.props.meta['design.shape'].name;
+        let layout = this.props.meta['design.layout'].name;
+        let objet = this.props.meta['design.objet'].name;
+        let x = LayoutObjets[layout].x || '30%';
+        let y = LayoutObjets[layout].y || '5%';
+        let h = LayoutObjets[layout].h || '50%';
+
+        return <image
+            x={x} y={y} height={h} preserveAspectRatio="1"
+            href={`${ImagePath}/objet_${ObjetTypes[objet]}.png`} />
     }
-    render() {
+
+
+    render() {        
         return (<svg ref={this._canvas} style={{width: '100%', height: '120px'}} 
             xmlns="http://www.w3.org/2000/svg"
             xmlnsXlink="http://www.w3.org/1999/xlink">
-            <image href={`/img/preview/background_split.png`} x="0" y="0" width="100%" preserveAspectRatio="true" />
-            <image href={`/img/preview/objet_model.png`} x="50%" y="10%" width="20%" preserveAspectRatio="true" />
-            <image href={`/img/preview/button_benefit.png`} x="75%" y="25%" width="10%" preserveAspectRatio="true" />
+            {this.renderBackgroundImage()}
+            {this.renderObjetImage()}
+            {this.renderContentText()}
+            {this.renderButtonImage()}
         </svg>);
     }
 }

@@ -142,7 +142,7 @@ class DashboardScreen extends AppScreen {
                 <tr>
                     <th>예시</th>
                     <td colSpan={AttributeMeta.PredefinedClasses().length} align="center">
-                        <CreativePreview />
+                        <CreativePreview meta={tb.data.c}  />
                     </td>
                 </tr>
             </tbody>

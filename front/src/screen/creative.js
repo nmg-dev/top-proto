@@ -103,7 +103,7 @@ class CreativeScreen extends AppScreen {
                 {this.state.tops.map((top, rank)=>(
                     <div class="col-sm-12 col-md-4">
                         <h5>{rank+1} 순위 조합</h5>
-                        <CreativePreview top={top} />
+                        <CreativePreview meta={top.c} />
                     </div>
                 ))}
             </div>

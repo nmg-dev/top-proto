@@ -1,5 +1,9 @@
 *.log
 /*.exe
-front/package.json
+front/package-lock.json
 front/node_modules/*
+
+vue/package-lock.json
+vue/node_modules/*
+
 database.go

@@ -1,62 +1,39 @@
 <template>
-    <div class="container-fluid panel-wrapper m-0 p-4">
-        <div class="row m-0 p-0">
-            <div class="col m-0 p-0">
-                <div class="querybar">
-                    <querytop :controls="true"></querytop>
-                    <querymid></querymid>
-                </div>
+    <div className="m-0 p-1">
+        <div className="row panel-header">
+            <div className="col">
+                <h3 className="panel-title">Best Creative Element</h3>
             </div>
         </div>
-        <div class="row">
-            <div class="col col-12">
-                <b-card>
-                    <div className="m-0 p-1">
-                        <div className="row panel-header">
-                            <div className="col">
-                                <h3 className="panel-title">Best Creative Element</h3>
-                            </div>
-                        </div>
-                        <div className="row dashboard-card-design">
-                            <template v-for="design_att in design_attrs">
+        <div className="row dashboard-card-design">
+            <template v-for="design_att in design_attrs">
 
-                            </template>
-                        </div>
-                        <div className="row dashboard-card-message">
-                            
+            </template>
+        </div>
+        <div className="row dashboard-card-message">
+            
 
-                        </div>
-                        <div className="row dashboard-card-chart">
-                            <div className="col">
-                            </div>
-                        </div>
-                        <div className="row dashboard-card-table panel-details">
-                            <div className="col">
-                                <h3 className="section-title">Element Analysis</h3>
-                            </div>
-                        </div>
-                    </div>
-                </b-card>
+        </div>
+        <div className="row dashboard-card-chart">
+            <div className="col">
             </div>
-        </div>        
+        </div>
+        <div className="row dashboard-card-table panel-details">
+            <div className="col">
+                <h3 className="section-title">Element Analysis</h3>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
 import './appscreen.css';
-import querytop from './queryTop';
-import querymid from './queryMid';
-import querydown from './queryDown';
-
 export default {
     name: 'dashboard',
     props: [
         'design_attrs',
         'message_attrs',
     ],
-    components: {
-        querytop, querymid, querydown,
-    },
     data: () => {
         return {
 

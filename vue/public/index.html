@@ -8,8 +8,6 @@
 
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
 
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <meta name="google-signin-client_id" content="812043764419-lunbnv3g64rg709da2ad6asnqg05c7oi.apps.googleusercontent.com">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <title>TagOperation by NextMediaGroup</title>
 
@@ -27,7 +25,10 @@
     <noscript>
       <strong>We're sorry but vue doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
+
+    <div class="g-signin2" data-onsuccess="onLoginSuccess" data-onerror="onLoginFailure" data-theme="dark"></div>
+
+    <div id="app" disabled></div>
     <!-- built files will be auto injected -->
 
     <!-- Google Tag Manager (noscript) -->

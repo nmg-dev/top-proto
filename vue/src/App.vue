@@ -4,7 +4,28 @@
 		<main class="wrap-container">
 			<sidebar :routes="routes" />
 			<transition name="fade">
-				<router-view class="container-fluid background-light"></router-view>
+				<div class="container-fluid panel-wrapper">
+					<div class="row m-0 p-0">
+						<div class="col m-0 p-0">
+							<div class="querybar">
+								<querytop :controls="0<=['/','/creative'].indexOf($route.path)"></querytop>
+								<querymid v-if="0<=['/', '/creative'].indexOf($route.path)"></querymid>
+								<querydown v-if="0<=['/creative'].indexOf($route.path)"></querydown>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col col-12">
+							<b-card>
+								<router-view 
+									class="container-fluid background-light"
+									style="min-height: 50vh;"
+								>
+								</router-view>
+							</b-card>
+						</div>
+					</div>
+				</div>
 			</transition>
 		</main>
 	</div>
@@ -16,33 +37,44 @@ import BootstrapVue from 'bootstrap-vue';
 import VueRouter from 'vue-router';
 import 'moment';
 
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 
 import navigation from './components/navigation';
 import sidebar from './components/sidebar';
+
+import querytop from './components/queryTop';
+import querymid from './components/queryMid';
+import querydown from './components/queryDown';
+
 import dashboard from './components/Dashboard';
 import creative from './components/Creative';
 import simulation from './components/Simulation';
 import glogin from './components/Login';
 
+
+
 Vue.use(BootstrapVue);
 Vue.use(VueRouter);
 
 const routes = [
-	{ path: '/login', component: glogin },
-	{ path: '/', name: '업종별 분석', component: dashboard },
-	{ path: '/creative', name: '크리에이티브 분석', component: creative },
-	{ path: '/simulation', name: '예상효율 확인', component: simulation },
+	{ path: '/login', component: glogin, tops: false, mids: false, downs: false },
+	{ path: '/', name: '업종별 분석', component: dashboard, tops: true, mids: true, downs: false },
+	{ path: '/creative', name: '크리에이티브 분석', component: creative, tops: true, mids: true, downs: true },
+	{ path: '/simulation', name: '예상효율 확인', component: simulation, tops: false, mids: false, downs: false },
 ];
 const router = new VueRouter({ routes });
-
 
 export default {
 	name: 'app',
 	components: {
 		navigation,
 		sidebar,
+
+		querytop,
+		querymid,
+		querydown,
 	},
 	data: () => {
 		return {
@@ -50,6 +82,13 @@ export default {
 		}
 	},
 	router: router,
+	created: function() {
+		if(!window.__api)
+			this.$router.push('/login');
+	},
+
+	mounted: function() {			
+	}
 }
 </script>
 

@@ -22,16 +22,16 @@ export default {
     data: function() {
         return {
             designTypeOptions : [
-                {cls: 'layout', title: '레이아웃', onchange: (ev) => { console.log(ev, this); }},
-                {cls: 'background', title: '배경', onchange: (ev) => { console.log(ev, this); }},
-                {cls: 'objet', title: '오브제', onchange: (ev) => { console.log(ev, this); }},
-                {cls: 'button', title: '버튼', onchange: (ev) => { console.log(ev, this); }},
+                {cls: 'layout', title: '레이아웃', onchange: (ev) => {  }},
+                {cls: 'background', title: '배경', onchange: (ev) => {  }},
+                {cls: 'objet', title: '오브제', onchange: (ev) => {  }},
+                {cls: 'button', title: '버튼', onchange: (ev) => {  }},
             ],
             messageTypeOptions : [
-                {cls: 'keytopic', title: '주제', onchange: (ev) => { console.log(ev, this); }},
-                {cls: 'keyword', title: '키워드', onchange: (ev) => { console.log(ev, this); }},
-                {cls: 'trigger', title: '트리거', onchange: (ev) => { console.log(ev, this); }},
-                {cls: 'adcopy', title: '카피', onchange: (ev) => { console.log(ev, this); }},
+                {cls: 'keytopic', title: '주제', onchange: (ev) => {  }},
+                {cls: 'keyword', title: '키워드', onchange: (ev) => {  }},
+                {cls: 'trigger', title: '트리거', onchange: (ev) => {  }},
+                {cls: 'adcopy', title: '카피', onchange: (ev) => {  }},
             ],
 
 

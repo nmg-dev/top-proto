@@ -26,6 +26,9 @@ export default {
         window.__onGoogleLoginSuccess = api.onGoogleLoginSuccess;
         window.__onGoogleLoginFailure = api.__onGoogleLoginFailure;
         utils.gauth();
-    }
+    },
+    mounted() {
+        this.$root.$emit('displayControls', [false, false, false]);
+    },
 }
 </script>

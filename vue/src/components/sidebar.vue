@@ -5,16 +5,16 @@
                 <li class="sidebar-item logo m-0 p-0">
                     <img class="logo" src="../assets/logo_md.png" />
                 </li>
-                <template  v-for="rt in routes">
+                <template  v-for="rt in $router.options.routes">
                     <li v-if="rt.name" :key="rt.path" class="sidebar-item">
                         <router-link :to="rt.path">{{rt.name}}</router-link>
                     </li>
                 </template>
             </ul>
         </div>
-        <div class="sidebar-holder m-0 p-1" v-on:click="show=!show">
+        <div class="sidebar-holder m-0 p-1" @click="show=!show">
             <i class="fas fa-chevron-left" v-if="show" />
-            <i class="fas fa-chevron-right" v-if="!show" />
+            <i class="fas fa-chevron-right" v-else />
         </div>
     </div>
 </template>
@@ -22,7 +22,6 @@
 <script>
 export default {
     name: 'sidebar',
-    props: ['routes'],
     data: () => {
         return {
             show: true,

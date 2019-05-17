@@ -13,17 +13,7 @@
 </template>
 
 <script>
-import querytop from './queryTop';
-import querymid from './queryMid';
-import querydown from './queryDown';
-
 export default {
     name: 'creative',
-    components: {
-        querytop, 
-        querymid, 
-        querydown,
-    },
-
 }
 </script>

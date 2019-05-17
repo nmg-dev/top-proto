@@ -1,16 +1,16 @@
 <template>
 	<div id="app">
-		<navigation />
+		<navigation></navigation>
 		<main class="wrap-container">
-			<sidebar :routes="routes" />
+			<sidebar></sidebar>
 			<transition name="fade">
 				<div class="container-fluid panel-wrapper">
 					<div class="row m-0 p-0">
 						<div class="col m-0 p-0">
 							<div class="querybar">
-								<querytop :controls="0<=['/','/creative'].indexOf($route.path)"></querytop>
-								<querymid v-if="0<=['/', '/creative'].indexOf($route.path)"></querymid>
-								<querydown v-if="0<=['/creative'].indexOf($route.path)"></querydown>
+								<querytop :controls="showTopControls"></querytop>
+								<querymid v-if="showMidControls"></querymid>
+								<querydown v-if="showDownControls"></querydown>
 							</div>
 						</div>
 					</div>
@@ -58,16 +58,24 @@ import glogin from './components/Login';
 Vue.use(BootstrapVue);
 Vue.use(VueRouter);
 
+const rpath_dashboard = '/dashboard';
+const rpath_creative = '/creative';
+const rpath_simulation = '/simulation';
+const rpath_login = '/login';
+
 const routes = [
-	{ path: '/login', component: glogin, tops: false, mids: false, downs: false },
-	{ path: '/', name: '업종별 분석', component: dashboard, tops: true, mids: true, downs: false },
-	{ path: '/creative', name: '크리에이티브 분석', component: creative, tops: true, mids: true, downs: true },
-	{ path: '/simulation', name: '예상효율 확인', component: simulation, tops: false, mids: false, downs: false },
+	{ path: rpath_login, component: glogin },
+	{ path: rpath_dashboard, name: '업종별 분석', component: dashboard },
+	{ path: rpath_creative, name: '크리에이티브 분석', component: creative },
+	{ path: rpath_simulation, name: '예상효율 확인', component: simulation },
 ];
-const router = new VueRouter({ routes });
+const router = new VueRouter({ 
+	routes,
+});
 
 export default {
 	name: 'app',
+	router: router,
 	components: {
 		navigation,
 		sidebar,
@@ -76,12 +84,21 @@ export default {
 		querymid,
 		querydown,
 	},
-	data: () => {
+
+	data: function() {
 		return {
-			routes: routes,
+			showTopControls: false,
+			showMidControls: false,
+			showDownControls: false,
 		}
 	},
-	router: router,
+	methods: {
+	},
+	updated() {
+		this.showTopControls = 0<=[rpath_dashboard, rpath_creative].indexOf(this.$route.path);
+		this.showMidControls = 0<=[rpath_dashboard, rpath_creative].indexOf(this.$route.path);
+		this.showDownControls = 0<=[rpath_creative].indexOf(this.$route.path);
+	},
 	created: function() {
 		if(!window.__api)
 			this.$router.push('/login');
@@ -250,4 +267,6 @@ text.recharts-text {
 		width: 100%;
 	}
 }
+
+@import 'https://use.fontawesome.com/releases/v5.8.2/css/all.css'
 </style>

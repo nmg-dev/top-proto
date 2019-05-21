@@ -6,37 +6,69 @@
         </div>
         <div class="querybar-controls" v-if="controls">
             <!-- dropdown metric -->
-            <b-button-group class="query-control top-control" no-caret>
+            <b-input-group>
+                <b-input-group-text>
+                    <img src="../assets/icon-metric.png" alt="ruler" />
+                </b-input-group-text>
+                <b-input-group-text>{{ app_metric.label }}</b-input-group-text>
                 <b-dropdown>
-                    <template slot="button-content">
-                        <div class="label-icon m-0 p-0">
-                            <img src="../assets/icon-metric.png" alt="ruler" />
-                        </div>
+                    <template v-for="met in metrices">
+                        <b-dropdown-item :key="met.key" :title="met.desc" 
+                            @click="set_app_metric(met.key)"
+                            v-if="!met.defaultHide">{{ met.label }}
+                        </b-dropdown-item>
                     </template>
-
-                    <b-dropdown-item>CPC</b-dropdown-item>
                 </b-dropdown>
-            </b-button-group>
+            </b-input-group>
             
             <!-- period control -->
-            <b-button-group class="query-control top-control" no-caret>
-                <b-dropdown></b-dropdown>
-            </b-button-group>
+            <daterange 
+                :from="period.from"
+                :till="period.till">
+            </daterange>
         </div>
     </div>
 </template>
 
 <script>
+import utils from '../utils.js';
+
+import daterange from './daterange';
+
 export default {
     name: 'querytop',
     props: ['controls'],
+    components: {
+        daterange,
+    },
+    computed: {
+        metrices: function() { 
+            return utils.metrices; 
+        },
+    },
     data: () => {
         return {
-        
+            app_metric: utils.getMetric(),
+            period: utils.getPeriod(),
         };
+    },
+    methods: {
+        set_app_metric: function(metric) {
+            utils.setMetric(metric);
+            this.app_metric = utils.getMetric();
+        }
+    },
+    // beforeMount: function() {
+    //     this.appMetric = this.$root.metric;
+    // },
+    mounted: function() {
+    },
+    updated: function() {
+        window.console.log(this.app_metric);
     }
 }
 </script>
 
 <style>
+@import 'https://nmg-dev.github.io/bs-daterange/daterange.css';
 </style>

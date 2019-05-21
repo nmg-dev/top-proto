@@ -31,7 +31,7 @@
             <div className="col">
                 <h3 className="section-title">Element Analysis</h3>
                 <template v-for="pv in previews">
-                    <div class="panel-category-detail" >
+                    <div class="panel-category-detail" :key="pv.title">
                         <h5>{{ pv.title }}</h5>
                         <table class="table">
                             <thead>
@@ -43,7 +43,7 @@
                             <tbody>
                                 <tr>
                                     <th>옵션</th>
-                                    <td v-for="att in pv.options">{{ att.name }}</td>
+                                    <td v-for="att in pv.options" :key="att.name">{{ att.name }}</td>
                                 </tr>
                                 <tr>
                                     <th>CPC</th>

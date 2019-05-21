@@ -18,17 +18,34 @@
 
 <script>
 import utils from '../utils.js';
-import api from '../api.js';
+import routes from '../routes.js';
+
+window.__onGoogleLoginSuccess = function(gauth) {
+    // let guser = gauth.getAuthResponse();
+    // utils.setItem('access_token', guser.id_token);
+    utils.authenticate(gauth);
+    window.location = `/#/${routes.index()}`;
+    // console.log('login success', gauth, gauth.getAuthResponse());
+}
+
+window.__onGoogleLoginFailure = function() {
+    console.error('login error', arguments);
+}
 
 export default {
     name: 'glogin',
     created() {
-        window.__onGoogleLoginSuccess = api.onGoogleLoginSuccess;
-        window.__onGoogleLoginFailure = api.__onGoogleLoginFailure;
         utils.gauth();
     },
+    methods: {
+        onLoginSuccess: function(resp) {
+            window.console.log('login success', resp);
+        },
+        onLoginFailure: function() {
+            window.console.error('login errors', arguments);
+        }
+    },
     mounted() {
-        this.$root.$emit('displayControls', [false, false, false]);
     },
 }
 </script>

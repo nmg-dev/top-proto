@@ -10,10 +10,12 @@ const GOOGLE_CLIENT_ID = '812043764419-lunbnv3g64rg709da2ad6asnqg05c7oi.apps.goo
 const KEY_UINFO = 'userinfo';
 const KEY_METRIC = '_metric';
 const KEY_PERIOD = '_period';
+const KEY_FILTERS = '_filters';
 
 const KEY_TAGS = 'tags';
 const KEY_CAMPAIGNS = 'campaigns';
-const KEY_VALUES = '_values';
+const KEY_AFFILIATIONS = 'affiliations';
+const KEY_RECORDS = 'records';
 
 export default {
     // metrics
@@ -24,6 +26,24 @@ export default {
         { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, desc: 'Conversion Rate' },
         { key: 'cnt', label: 'COUNT', fn: () => 1, fmt: (v)=> v.toLocaleString(), desc: 'Counts', defaultHide: true },
     ],
+    // predefined classes
+    presetCategoryCls: [
+        { cls: 'category', label: '업종' },
+        { cls: 'subcategory', label: '세부업종' },
+    ],
+    presetDesignCls : [
+        { cls: 'design.layout', label: '레이아웃' },
+        { cls: 'design.objet', label: '오브제' },
+        { cls: 'design.background', label: '배경' },
+        { cls: 'design.button', label: '버튼' },
+    ],
+    presetMessageCls : [
+        { cls: 'message.keytopic', label: '주제' },
+        { cls: 'message.keyword', label: '키워드' },
+        { cls: 'message.trigger', label: '트리거' },
+        { cls: 'message.adcopy', label: '카피' },
+    ],
+
     html: function(tag, attrs) {
         let el = document.createElement(tag);
         Object.keys(attrs).forEach((ak) => {
@@ -59,8 +79,8 @@ export default {
         this.setItem(KEY_UINFO, await authResp.data);
 
         // get default tags, campaigns
-        // this.retrieveTags(true);
-        // this.retrieveCampaigns(true);
+        this.retrieveTags(true);
+        this.retrieveCampaigns(true);
     },
 
     hasItem: function(key) {
@@ -113,11 +133,12 @@ export default {
         mm = mm<10 ? `0${mm}` : mm.toFixed(0);
         let d = dd.getDate();
         d = d<10 ? `0${d}` : d.toFixed(0);
-        let ds = `${yy}-${mm}-${d}`;
+        return `${yy}-${mm}-${d}`;
+        
     },
 
     timeformat: function(dt) {
-        return `${this.dateformat(dt)}T00:00+09:00`;
+        return `${this.dateformat(dt)}T00:00:00+09:00`;
     },
 
     getPeriod: function() {
@@ -127,8 +148,8 @@ export default {
             _from.setYear(_from.getFullYear()-3);
             let _till = new Date();
             let defaultPeriod = {
-                from: _from.toLocaleDateString(),
-                till: _till.toLocaleDateString(),
+                from: Date.parse(_from.toLocaleDateString()),
+                till: Date.parse(_till.toLocaleDateString()),
             };
             this.setPeriod(defaultPeriod);
             m = defaultPeriod;
@@ -140,6 +161,50 @@ export default {
         this.setItem(KEY_PERIOD, period);
     },
 
+    getFilter: function() {
+        return this.getItem(KEY_FILTERS);
+    },
+
+    addFilter: function(tagId) {
+        let tags = this.retrieveTags();
+        let currentFilter = this.getFilter() || [];
+        let theTag = tags[tagId];
+        if(!theTag) return;
+        if(0<currentFilter.filter((cf)=>cf.id===tagId).length) return;
+        
+        currentFilter.push(theTag);
+        this.setItem(KEY_FILTERS, currentFilter);
+    },
+
+    delFilter: function(tagId) {
+        let tags = this.retrieveTags();
+        let currentFilter = this.getFilter() || {};
+        let theTag = tags[tagId];
+        if(!theTag) return;
+
+        currentFilter = currentFilter.filter((cf)=>cf.id!=tagId);
+        this.setItem(KEY_FILTERS, currentFilter);
+    },
+
+    getPresetCategoryClasses: function() {
+        return this.presetCategoryCls.map((c)=>c.cls);
+    },
+
+    getPresetDesignClasses: function() {
+        return this.presetDesignCls.map((c)=>c.cls);
+    },
+
+    getPresetMessageClasses: function() {
+        return this.presetMessageCls.map((c)=>c.cls);
+    },
+
+    getPresetVisualClasses: function() {
+        return []
+            .concat(this.getPresetDesignClasses())
+            .concat(this.getPresetMessageClasses());
+    },
+
+    // retrieve tag data from server
     retrieveTags: async function(overwrite) {
         if(overwrite || !this.hasItem(KEY_TAGS)) {
             let resp = await axios.get(`${API_HOST}/t/`);
@@ -148,6 +213,7 @@ export default {
         return this.getItem(KEY_TAGS);
     },
 
+    // retrieve campaign data from server
     retrieveCampaigns: async function(overwrite) {
         if(overwrite || !this.hasItem(KEY_CAMPAIGNS)) {
             let period = this.getPeriod();
@@ -155,46 +221,24 @@ export default {
                 from: this.timeformat(period.from), 
                 till: this.timeformat(period.till),
             });
-            this.setItem(KEY_CAMPAIGNS, await resp.data);
+            let cdata = await resp.data;
+            Object.keys(cdata).forEach((ck)=>{ 
+                this.setItem(ck, cdata[ck])
+            });
         }
         return this.getItem(KEY_CAMPAIGNS);
     },
 
-    retrieveCampaignIds(cdata, tagFilter) {
-        let p = this.getPeriod();
-        let pf = Date.parse(p.from);
-        let pt = Date.parse(p.till);
-
-        // retrieve campaign ids by filter
-        return cdata.affiliations.reduce((acc,aff) => {
-            // tag filter
-            if(tagFilter && tagFilter.indexOf(aff.t) <0)
-                return acc;
-            // campaign exists
-            if(0<=acc.indexOf(aff.c))
-                return acc;
-            // time filter
-            let ad = Date.parse(aff.d);
-            if(ad < pf || pt < ad)
-                return acc;
-            
-            acc.push(aff.c);
-            return acc;
-        }, []);
+    // filter records
+    filterRecords: function(tagFilters) {
+        let records = this.getItem(KEY_RECORDS);
+        let affs = this.getItem(KEY_AFFILIATIONS);
+        // TODO:
     },
 
-    retrieveDashboardSummary() {
-    },
+    // dashboard
+    computeDashboardPractices: function() {
+        let filters = this.getFilter();
+    }
 
-    retrieveCreativeSummary() {
-
-    },
-
-    retrieveCreativeDetails() {
-
-    },
-
-    retrieveSimulations(options) {
-
-    },
 };

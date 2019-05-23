@@ -10,22 +10,20 @@
                     <div class="col-sm-12 col-md-4" :key="cidx">
                         <h5>{{ cidx+1 }} 순위 조합</h5>
                         <!-- preview here -->
-                        <svg width="100%" height="120px" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
-                        </svg>
+                        <preview :data="comp" />
                     </div>
                 </template>
             </div>
             <div class="row panel-charts">
                 <template v-for="charting in chartings">
-                    <div class="col-sm-12 col-md-6 col-lg-3" :key="charting.label">
+                    <div class="col-sm-12 col-md-6 col-lg-3" :key="charting.cls">
                         <div class="creative-chart-link">
                             <a @click="showModal">자세히 보기 &gt;</a>
                         </div>
                         <div class="creative-chart-wrapper">
-                            <h5>{{ charting.label }}</h5>
-                            <!-- chart here -->
+                            <h5>{{ lang(charting.cls) }}</h5>
                             <div class="creative-chart">
-
+                                <apexchart type="bar" height="300" :options="chart_options(charting.data)" :series="chart_values(charting.data)" />
                             </div>
                         </div>
                     </div>
@@ -39,35 +37,53 @@
 </template>
 
 <script>
+import apexchart from 'vue-apexcharts';
+import preview from './preview';
+
+import utils from '../utils.js';
+import langs from '../langs.js';
+
 export default {
     name: 'creative',
+    langs,
+    components: {
+        apexchart,
+        preview,
+    },
     methods: {
         showModal: function(ev) {
             window.console.log(ev);
             this.$refs['creative_details_modal'].show();
+        },
+        lang: function(key) {
+            return langs.ko[key];
+        },
+        chart_options: function(data) {
+            let ret = {
+                plotOptions: { bar: { horizontal: true }},
+                dataLabels: { enabled: false },
+                xaxis: { categories: data.map((dt)=>dt.tag.name) },
+            };
+            return ret;
+        },
+        chart_values: function(data) {
+            let ret = [{data: data.map((dt) => dt.mean)}];
+            window.console.log('chart values', data, ret);
+            return ret;
         }
     },
+    mounted() { window.console.log(this.compositions, this.chartings); },
+    computed: {
+        compositions: function() {
+            return utils.creativeCombinations(3);
+        },
+        chartings: function() {
+            return utils.creativeSummaryCharts(5);
+        },
+
+    },
     data: function() {
-        return {
-            compositions : [
-                { 'design.layout': '중앙', 'design.background': '단색-밝은색', 'design.objet': '일러스트', 'design.button': '없음',
-                  'message.keytopic': '', 'message.keyword': '', 'message.trigger': '', 'message.adcopy': '' },
-                { 'design.layout': '중앙', 'design.background': '단색-밝은색', 'design.objet': '일러스트', 'design.button': '없음',
-                  'message.keytopic': '', 'message.keyword': '', 'message.trigger': '', 'message.adcopy': '' },
-                { 'design.layout': '중앙', 'design.background': '단색-밝은색', 'design.objet': '일러스트', 'design.button': '없음',
-                  'message.keytopic': '', 'message.keyword': '', 'message.trigger': '', 'message.adcopy': '' },
-            ],
-            chartings: [
-                { label: '레이아웃', data: [] },
-                { label: '배경', data: [] },
-                { label: '오브제', data: [] },
-                { label: '버튼', data: [] },
-                { label: '주제', data: [] },
-                { label: '키워드', data: [] },
-                { label: '트리거', data: [] },
-                { label: '카피', data: [] },
-            ]
-        }
+        return { };
     }
 }
 </script>

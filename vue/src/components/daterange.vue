@@ -3,8 +3,8 @@
         <b-input-group-text>
             <img src="../assets/icon-calendar.png" alt="calendar" />
         </b-input-group-text>
-        <b-form-input readonly :value="periodFrom"></b-form-input>
-        <b-form-input readonly :value="periodTill"></b-form-input>
+        <b-form-input readonly :value="$moment(periodFrom).format('YYYY-MM-DD')"></b-form-input>
+        <b-form-input readonly :value="$moment(periodTill).format('YYYY-MM-DD')"></b-form-input>
         <b-input-group-append>
             <b-dropdown right>
                 <b-dropdown-form>

@@ -20,10 +20,10 @@ const KEY_RECORDS = 'records';
 export default {
     // metrics
     metrices: [
-        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, desc: 'Cost Per Click', },
-        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, desc: 'Cost Per Action', },
-        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, desc: 'Click Through Rate' },
-        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, desc: 'Conversion Rate' },
+        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, desc: 'Cost Per Click', },
+        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, desc: 'Cost Per Action', },
+        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, desc: 'Click Through Rate' },
+        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, desc: 'Conversion Rate' },
         { key: 'cnt', label: 'COUNT', fn: () => 1, fmt: (v)=> v.toLocaleString(), desc: 'Counts', defaultHide: true },
     ],
     // predefined classes
@@ -38,10 +38,10 @@ export default {
         { cls: 'design.button', label: '버튼' },
     ],
     presetMessageCls : [
-        { cls: 'message.keytopic', label: '주제' },
-        { cls: 'message.keyword', label: '키워드' },
-        { cls: 'message.trigger', label: '트리거' },
-        { cls: 'message.adcopy', label: '카피' },
+        { cls: 'content.keytopic', label: '주제' },
+        { cls: 'content.keyword', label: '키워드' },
+        { cls: 'content.trigger', label: '트리거' },
+        { cls: 'content.adcopy', label: '카피' },
     ],
 
     html: function(tag, attrs) {
@@ -205,40 +205,256 @@ export default {
     },
 
     // retrieve tag data from server
-    retrieveTags: async function(overwrite) {
+    retrieveTags: function(overwrite) {
         if(overwrite || !this.hasItem(KEY_TAGS)) {
-            let resp = await axios.get(`${API_HOST}/t/`);
-            this.setItem(KEY_TAGS, await resp.data);
+            (async() => {
+                window.console.log(' -- retrieve tags');
+                let resp = await axios.get(`${API_HOST}/t/`);
+                this.setItem(KEY_TAGS, await resp.data);
+            })();
         }
         return this.getItem(KEY_TAGS);
     },
 
+    //
+    refreshUpdateValues: function(tags, campaigns, records, affiliations) {
+        let period = this.getPeriod();
+        let metric = this.getMetric();
+        // parse and load campaign records
+        records = records.map((rec)=> {
+            return {
+                id: rec.id, 
+                c: rec.c, 
+                imp: rec.imp, 
+                clk: rec.clk, 
+                cnv: rec.cnv, 
+                cost: rec.cost,
+                d: Date.parse(rec.d.replace(/T.+$/i, '')),
+                v: metric.fn(rec),
+            };
+        });
+        this.setItem(KEY_RECORDS, records);
+
+
+        // parse and load campaigns
+        Object.keys(campaigns).forEach((cid) => {
+            let ctags = affiliations
+                .filter((aff)=>aff.c == cid)
+                .reduce((agg,aff) => {
+                    if(agg.indexOf(aff.t)<0)
+                        agg.push(aff.t);
+                    return agg;
+                }, []);
+            let crecords = records.filter((rec)=>rec.c==cid && period.from <= rec.d && rec.d <= period.till);
+            let summary = crecords.reduce((agg,rec) => {
+                agg.sum += rec.v;
+                agg.cnt += 1;
+                agg.stdev += rec.v**2;
+                return agg;
+            }, { sum: 0, cnt: 0, stdev: 0, });
+            summary.avg = summary.sum / Math.max(1.0, summary.cnt);
+            summary.stdev = summary.stdev/summary.cnt - summary.avg**2;
+            campaigns[cid] = Object.assign(campaigns[cid], {
+                tags: ctags,
+                summary: summary,
+                records: crecords,
+            });
+        });
+
+        // update tag info
+        Object.keys(tags).forEach((tid) => {
+            tags[tid].campaigns = affiliations.filter((aff) => aff.t == tid)
+                .reduce((agg, aff) => {
+                    if(agg.indexOf(aff.c) < 0)
+                        agg.push(aff.c);
+                    return agg;
+                }, []);
+        });
+        this.setItem(KEY_TAGS, tags);
+
+        this.setItem(KEY_CAMPAIGNS, campaigns);
+        
+        this.setItem(KEY_AFFILIATIONS, affiliations);
+
+        window.console.log(' -- data refreshed');
+    },
+
     // retrieve campaign data from server
-    retrieveCampaigns: async function(overwrite) {
+    retrieveCampaigns: function(overwrite) {
         if(overwrite || !this.hasItem(KEY_CAMPAIGNS)) {
-            let period = this.getPeriod();
-            let resp = await axios.post(`${API_HOST}/c/`, {
-                from: this.timeformat(period.from), 
-                till: this.timeformat(period.till),
-            });
-            let cdata = await resp.data;
-            Object.keys(cdata).forEach((ck)=>{ 
-                this.setItem(ck, cdata[ck])
-            });
+            (async() => {
+                let tags = this.retrieveTags(overwrite);
+                let period = this.getPeriod();
+                let resp = await axios.post(`${API_HOST}/c/`, {
+                    from: this.timeformat(period.from), 
+                    till: this.timeformat(period.till),
+                });
+                let cdata = await resp.data;
+                let records = cdata.records;
+                let campaigns = cdata.campaigns;
+                let affiliations = cdata.affiliations;
+                
+                this.refreshUpdateValues(tags, campaigns, records, affiliations);
+            })();
         }
         return this.getItem(KEY_CAMPAIGNS);
     },
 
-    // filter records
-    filterRecords: function(tagFilters) {
-        let records = this.getItem(KEY_RECORDS);
-        let affs = this.getItem(KEY_AFFILIATIONS);
-        // TODO:
+    filterCampaignIds: function(filters) {
+        let campaigns = this.retrieveCampaigns();
+        let tags = this.retrieveTags();
+        let cids = Object.keys(campaigns).map((cid)=>parseInt(cid));
+        if(filters) {
+            Object.keys(filters).forEach((cls) => {
+                let positiveFilter = filters[cls].reduce((agg, tid) => {
+                    return agg.concat(tags[tid].campaigns.filter((cid)=> agg.indexOf(cid)<0));
+                }, []);
+                cids = cids.filter((cid)=> 0<=positiveFilter.indexOf(cid));
+            });
+        }
+        return cids;
     },
 
-    // dashboard
-    computeDashboardPractices: function() {
+    bestPracticeOver: function(filters) {
+        // load campaign data first
+        let campaigns = this.retrieveCampaigns();
+        let tags = this.retrieveTags();
+        // tags to array
+        tags = Object.keys(tags).map((tid) => tags[tid]);
+
+        // filter campaigns to put
+        let cids = this.filterCampaignIds(filters);
+        
+        // load tag values
+        return this.getPresetVisualClasses().reduce((agg, cls) => {
+            // filter tags
+            agg[cls] = tags
+                .filter((tag) => tag.class == cls)
+                .filter((tag) => !filters || !filters[cls] || 0<=filters[cls].indexOf(tag.id))
+                .reduce((acc, tag) => {
+                    // filter campaign ids
+                    let tcids = tag.campaigns.filter((cid) => 0<=cids.indexOf(cid));
+                    // average
+                    acc.push({
+                        t: tag,
+                        v: tcids.reduce((sum, cid) => sum + campaigns[cid].summary.avg, 0) / Math.max(1.0, tcids.length),
+                    });
+                    return acc;
+                }, [])
+                .sort((l,r) => r.v - l.v);
+            return agg;
+        }, {});
+    },
+
+    topOptionOverPractice: function(practices) {
+        Object.keys(practices).forEach((cls) => {
+            let ov = practices[cls];
+            try {
+                practices[cls] = ov[0].t.name;
+            } catch {
+                practices[cls] = undefined;
+            }
+        });
+        return practices;
+    },
+
+    getTagsWithinClass: function(cls) {
+        let tags = this.retrieveTags();
+        let rets = Object.keys(tags)
+            // .map((tid)=>parseInt(tid))
+            .filter((tid) => tags[tid].class == cls)
+            .map((tid) => tags[tid]);
+        return rets;
+    },
+
+    _classReferences: function(best, clss) {
+        return clss.map((cls) => {
+            return {
+                cls,
+                name: best[cls] && 0<best[cls].length ? best[cls][0].t.name : ''
+            };
+        });
+    },
+    dashboardDesignRefers: function(best) {
+        return this._classReferences(best, this.getPresetDesignClasses());
+    },
+    dashboardMessageRefers: function(best) {
+        return this._classReferences(best, this.getPresetMessageClasses());
+    },
+
+    dashboardPreviews: function() {
         let filters = this.getFilter();
-    }
+        let campaigns = this.retrieveCampaigns();
+        let cids = this.filterCampaignIds(filters);
+        let metric = this.getMetric();
+        let ctags = this.getTagsWithinClass('category');
+        return ctags.reduce((agg, tag) => {
+            let title = tag.name;
+            let cmps = tag.campaigns
+                .filter((cid)=> 0<=cids.indexOf(cid))
+                .map((cid) => campaigns[cid]);
+            let bests = this.bestPracticeOver(Object.assign(filters || {}, {category: [tag.id]}));
+            let cvs = cmps.map((cmp) => cmp.summary.avg);                
+            agg.push({
+                title,
+                options: this.topOptionOverPractice(bests),
+                average: metric.fmt(cvs.reduce((t, cv) => t+cv, 0) / Math.max(1.0, cvs.length)),
+            });
+            return agg;
+        }, []);
+    },
+    creativeCombinations: function(counts) {
+        let filters = this.getFilter();
+        let best = this.bestPracticeOver(filters);
+        let combinations = [];
+
+        for(let i=0; i<counts; i++) {
+            let combi = Object.keys(best).reduce((agg, cls) => {
+                if(i<best[cls].length)
+                    agg[cls] = best[cls][i].t.name;
+                else if(0<best[cls].length)
+                    agg[cls] = best[cls][best[cls].length-1];
+                else
+                    agg[cls] = undefined;
+                return agg;   
+            }, {});
+            combinations.push(combi);
+        }
+        return combinations;
+    },
+    creativeSummaryCharts: function(counts) {
+        let clss = this.getPresetVisualClasses();
+        let filter = this.getFilter();
+        let campaigns = this.retrieveCampaigns();
+        return clss.map((cls) => {
+            let ctags = this.getTagsWithinClass(cls)
+                .filter((tag) => !filter || !filter[tag.class] || 0<=filter[tag.class].indexOf(tag.id));
+            // 
+            if(counts < ctags.length)
+                ctags = ctags.slice(0, counts);
+            let data = [];
+            ctags.forEach((tag) => {
+                let cids = tag.campaigns;
+                let mean = cids.reduce((total, cid) => {
+                    return total + campaigns[cid].summary.avg / Math.max(1.0, cids.length);
+                });
+                data.push({
+                    tag,
+                    cids,
+                    mean,
+                });
+            });
+            data.sort((l,r) => r.mean - l.mean);
+            
+            return {
+                cls,
+                data,
+            };
+        });
+    },
+    creativeDetailChart: function() {
+
+    },
+
 
 };

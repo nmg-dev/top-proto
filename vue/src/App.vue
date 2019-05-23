@@ -20,6 +20,7 @@
 								<router-view 
 									class="container-fluid background-light"
 									style="min-height: 50vh;"
+									language="ko"
 								>
 								</router-view>
 							</b-card>

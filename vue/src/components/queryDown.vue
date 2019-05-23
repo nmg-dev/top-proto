@@ -13,28 +13,28 @@
 
 <script>
 import subcategory from './subcategory';
+import utils from '../utils.js';
+import langs from '../langs.js';
 
 export default {
     name: 'querydown',
     components: {
         subcategory,
     },
+    computed: {
+        designTypeOptions : function() {
+            return utils.getPresetDesignClasses().map((cls) => {
+                return { items: utils.getTagsWithinClass(cls), title: langs.ko[cls] }
+            })
+        },
+        messageTypeOptions : function() {
+            return utils.getPresetMessageClasses().map((cls) => {
+                return { items: utils.getTagsWithinClass(cls), title: langs.ko[cls] }
+            });
+        },
+    },
     data: function() {
         return {
-            designTypeOptions : [
-                {cls: 'layout', title: '레이아웃', onchange: () => {  }},
-                {cls: 'background', title: '배경', onchange: () => {  }},
-                {cls: 'objet', title: '오브제', onchange: () => {  }},
-                {cls: 'button', title: '버튼', onchange: () => {  }},
-            ],
-            messageTypeOptions : [
-                {cls: 'keytopic', title: '주제', onchange: () => {  }},
-                {cls: 'keyword', title: '키워드', onchange: () => {  }},
-                {cls: 'trigger', title: '트리거', onchange: () => {  }},
-                {cls: 'adcopy', title: '카피', onchange: () => {  }},
-            ],
-
-
         };
     }
 }

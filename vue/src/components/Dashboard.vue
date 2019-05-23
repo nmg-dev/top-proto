@@ -1,35 +1,35 @@
 <template>
-    <div className="m-0 p-1">
-        <div className="row panel-header">
-            <div className="col">
-                <h3 className="panel-title">Best Creative Element</h3>
+    <div class="m-0 p-1">
+        <div class="row panel-header">
+            <div class="col">
+                <h3 class="panel-title">Best Creative Element</h3>
             </div>
         </div>
-        <div className="row dashboard-card-design">
+        <div class="row dashboard-card-design">
             <template v-for="ref in design_references">
                 <div class="section col-3" :key="ref.cls">
-                    <h5 class="section-title class-design">{{ ref.label }}</h5>
+                    <h5 class="section-title class-design">{{ lang(ref.cls) }}</h5>
                     <div class="section-text">{{ ref.name }}</div>
                 </div>
             </template>
         </div>
-        <div className="row dashboard-card-message">
+        <div class="row dashboard-card-message">
             <template v-for="ref in message_references">
                 <div class="section col-3" :key="ref.cls">
-                    <h5 class="section-title class-message">{{ ref.label }}</h5>
+                    <h5 class="section-title class-message">{{ lang(ref.cls) }}</h5>
                     <div class="section-text">{{ ref.name }}</div>
                 </div>
             </template>
         </div>
-        <div className="row dashboard-card-chart">
-            <div className="col">
+        <div class="row dashboard-card-chart">
+            <div class="col">
                 <apexchart type="line" height="500" :options="chart_options" :series="chart_data">
                 </apexchart>
             </div>
         </div>
-        <div className="row dashboard-card-table panel-details">
-            <div className="col">
-                <h3 className="section-title">Element Analysis</h3>
+        <div class="row dashboard-card-table panel-details">
+            <div class="col">
+                <h3 class="section-title">Element Analysis</h3>
                 <template v-for="pv in previews">
                     <div class="panel-category-detail" :key="pv.title">
                         <h5>{{ pv.title }}</h5>
@@ -37,24 +37,26 @@
                             <thead>
                                 <tr>
                                     <th>속성</th>
-                                    <th v-for="att in pv.options">{{ att.label }}</th>
+                                    <th v-for="cls in preset_design_cls">{{ lang(cls) }}</th>
+                                    <th v-for="cls in preset_message_cls">{{ lang(cls) }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <th>옵션</th>
-                                    <td v-for="att in pv.options" :key="att.name">{{ att.name }}</td>
+                                    <th v-for="cls in preset_design_cls">{{ pv.options[cls] }}</th>
+                                    <th v-for="cls in preset_message_cls">{{ pv.options[cls] }}</th>
                                 </tr>
                                 <tr>
                                     <th>CPC</th>
-                                    <td class="cell-value" align="center" :colspan="pv.options.length">
+                                    <td class="cell-value" align="center" :colspan="Object.keys(pv.options).length">
                                         {{ pv.average }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <th>예시</th>
-                                    <td :colspan="pv.options.length">
-                                        <!-- TODO: preview -->
+                                    <td :colspan="Object.keys(pv.options).length">
+                                        <preview :data="pv.options" />
                                     </td>
                                 </tr>
                             </tbody>
@@ -68,8 +70,11 @@
 
 <script>
 import apexchart from 'vue-apexcharts'
+import preview from './preview';
 
 import './appscreen.css';
+import utils from '../utils.js';
+import langs from '../langs.js';
 
 const datelen_a_day = 86400000;
 const sample_design_refers = [
@@ -90,18 +95,19 @@ const sample_message_refers = [
 export default {
     name: 'dashboard',
     props: [
-        'design_attrs',
-        'message_attrs',
+        'language',
     ],
     data: () => {
+        let best = utils.bestPracticeOver();
+        window.console.log(best);
+        // let tops = utils.topOptionOverPractice(best);
+
         return {
-            design_references: sample_design_refers,
-            message_references: sample_message_refers,
-            previews: [
-                {title: '게임', options: sample_design_refers.concat(sample_message_refers), average: Math.random()*100 },
-                {title: '금융', options: sample_design_refers.concat(sample_message_refers), average: Math.random()*100 },
-                {title: '샘플', options: sample_design_refers.concat(sample_message_refers), average: Math.random()*100 },
-            ],
+            tagfilters: null,
+            best_practices: best,
+            previews: utils.dashboardPreviews(),
+            design_references: utils.dashboardDesignRefers(best),
+            message_references: utils.dashboardMessageRefers(best),
             chart_options: {
                 chart: {
                     stacked: false,
@@ -113,7 +119,7 @@ export default {
                 },
                 dataLabels: { enabled: true },
                 grid: {},
-                markers: { size: 4 },
+                markers: { size: 1 },
                 xaxis: {
                     type: 'datetime',
                     labels: {
@@ -140,8 +146,26 @@ export default {
             }],
         }
     },
+    watch: {
+        best_practices: function(best) {
+            this.design_references = utils.dashboardDesignRefers(best);
+            this.message_references = utils.dashboardMessageRefers(best);
+            this.previews = utils.dashboardPreviews(this.tagfilters);
+        }
+    },
+    computed: {
+        preset_design_cls: function() { return utils.getPresetDesignClasses() },
+        preset_message_cls: function() { return utils.getPresetMessageClasses() },
+    },
+    methods: {
+        lang: function(key) {
+            return langs[this.language][key];
+        },
+    },
+    created() { utils.retrieveCampaigns(); },
     components: {
         apexchart,
+        preview,
     }
 }
 </script>

@@ -24,12 +24,12 @@ window.__onGoogleLoginSuccess = function(gauth) {
     // let guser = gauth.getAuthResponse();
     // utils.setItem('access_token', guser.id_token);
     utils.authenticate(gauth);
-    window.location = `/#/${routes.index()}`;
+    window.history.back();
     // console.log('login success', gauth, gauth.getAuthResponse());
 }
 
 window.__onGoogleLoginFailure = function() {
-    console.error('login error', arguments);
+    window.console.error('login error', arguments);
 }
 
 export default {

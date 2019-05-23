@@ -64,7 +64,7 @@ export default {
     mounted: function() {
     },
     updated: function() {
-        window.console.log(this.app_metric);
+        // window.console.log(this.app_metric);
     }
 }
 </script>

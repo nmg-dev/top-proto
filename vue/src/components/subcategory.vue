@@ -3,13 +3,14 @@
         <h3 class="wrapper-title">{{ title }}</h3>
         <div class="categorybar-subwrapper">
             <div class="categorybar-control-wrapper" v-for="opt in options">
-                <h5 class="control-title">{{ opt.cls }}</h5>
+                <h5 class="control-title">{{ lang(opt.cls) }}</h5>
                 <div class="button-group category-control">
                     <categorybtn 
+                        :cls="opt.cls"
+                        :icon="false"
                         :items="opt.items" 
-                        :title="opt.title" 
-                        labelNone="ALL" 
-                        @change="opt.onchange">
+                        :title="lang(opt.cls)" 
+                        labelNone="ALL" >
                     </categorybtn>
                 </div>
             </div>
@@ -19,6 +20,7 @@
 
 <script>
 import categorybtn from './categorybtn';
+import langs from '../langs.js';
 
 export default {
     name: 'subcategory',
@@ -31,7 +33,13 @@ export default {
         categorybtn,
     },
     data: function() {
-        return {};
+        return {
+        };
     },
+    methods: {
+        lang: function(key) {
+            return langs.ko[key];
+        }
+    }
 }
 </script>

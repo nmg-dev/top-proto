@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const moment = require('moment');
+
 const API_HOST = 'http://localhost:8080';
 const GOOGLE_API_SCRIPT = 'https://apis.google.com/js/platform.js';
 // const GOOGLE_API_KEY = '';
@@ -17,13 +19,14 @@ const KEY_CAMPAIGNS = 'campaigns';
 const KEY_AFFILIATIONS = 'affiliations';
 const KEY_RECORDS = 'records';
 
+
 export default {
     // metrics
     metrices: [
-        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, desc: 'Cost Per Click', },
-        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, desc: 'Cost Per Action', },
-        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, desc: 'Click Through Rate' },
-        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, desc: 'Conversion Rate' },
+        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, ascending: true, desc: 'Cost Per Click', },
+        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, ascending: true, desc: 'Cost Per Action', },
+        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, ascending: false, desc: 'Click Through Rate' },
+        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, ascending: false, desc: 'Conversion Rate' },
         { key: 'cnt', label: 'COUNT', fn: () => 1, fmt: (v)=> v.toLocaleString(), desc: 'Counts', defaultHide: true },
     ],
     // predefined classes
@@ -118,27 +121,29 @@ export default {
     },
 
     dateformat: function(dt) {
-        let dd;
-        switch(typeof dt) {
-            case 'string':
-            case 'number': 
-                dd = new Date(dt); break;
-            case 'object':
-            default:
-                dd = dt; break;
-        }
+        return moment(dt).format('YYYY-MM-DD');
+        // let dd;
+        // switch(typeof dt) {
+        //     case 'string':
+        //     case 'number': 
+        //         dd = new Date(dt); break;
+        //     case 'object':
+        //     default:
+        //         dd = dt; break;
+        // }
 
-        let yy = dd.getFullYear();
-        let mm = dd.getMonth()+1;
-        mm = mm<10 ? `0${mm}` : mm.toFixed(0);
-        let d = dd.getDate();
-        d = d<10 ? `0${d}` : d.toFixed(0);
-        return `${yy}-${mm}-${d}`;
+        // let yy = dd.getFullYear();
+        // let mm = dd.getMonth()+1;
+        // mm = mm<10 ? `0${mm}` : mm.toFixed(0);
+        // let d = dd.getDate();
+        // d = d<10 ? `0${d}` : d.toFixed(0);
+        // return `${yy}-${mm}-${d}`;
         
     },
 
     timeformat: function(dt) {
-        return `${this.dateformat(dt)}T00:00:00+09:00`;
+        return `${moment(dt).format('YYYY-MM-DD')}T00:00:00+09:00`;
+        // return `${this.dateformat(dt)}T00:00:00+09:00`;
     },
 
     getPeriod: function() {
@@ -321,9 +326,13 @@ export default {
         let tags = this.retrieveTags();
         // tags to array
         tags = Object.keys(tags).map((tid) => tags[tid]);
+        
 
         // filter campaigns to put
         let cids = this.filterCampaignIds(filters);
+
+        // metric
+        let metric = this.getMetric();
         
         // load tag values
         return this.getPresetVisualClasses().reduce((agg, cls) => {
@@ -341,7 +350,7 @@ export default {
                     });
                     return acc;
                 }, [])
-                .sort((l,r) => r.v - l.v);
+                .sort((l,r) => (metric.ascending ? -1 : 1) * r.v - l.v);
             return agg;
         }, {});
     },
@@ -375,6 +384,91 @@ export default {
             };
         });
     },
+
+    getPeriodRanges(period) {
+        let days = (period.till - period.from) / 86400000;
+        // let inc = 86400000;
+        let radix = '';
+        let fmt;
+        // daily (0 ~ 32d); 0 to 32 points
+        if(days <= 32) {
+            radix = 'day';
+            fmt = (dt) => moment(dt).format('YYYY-MM-DD');
+        } 
+        // weekly (33 ~ 180d); 5 to 24 points
+        else if(days <= 180) {
+            radix = 'week';
+            fmt = (dt) => moment(dt).format('YYYY [week]WW');
+        }
+        // monthly (181 ~ 730d); 6 to 24 points
+        else if(days <= 730) {
+            radix = 'month';
+            fmt = (dt) => moment(dt).format('MMM.YYYY');
+        }
+        // quarterly (731 ~ 1461d); 8 to 16 points
+        else if(days <= 1461) {
+            radix = 'quarter';
+            fmt = (dt) => moment(dt).format('YYYY.[Q]Q');
+        }
+        // yearly; 4 to ~ points
+        else {
+            radix = 'year';
+            fmt = (dt) => (new Date(dt).getFullYear()).toString();
+        }
+
+        let labels = [];
+        let dc = moment(period.from);
+        let dt = moment(period.till);
+        do {
+            labels.push(fmt(dc));
+            dc = dc.add(1, radix);
+        } while(dc.isBefore(dt));
+
+        // append last if not exists
+        let _last = fmt(dt);
+        if(labels.indexOf(_last)<0) labels.push(_last);
+        return {
+            labels,
+            radix,
+            fmt,
+        };
+    },
+
+    dashboardSeries: function() {
+        let filters = this.getFilter();
+        let prange = this.getPeriodRanges(this.getPeriod());
+
+        let cids = this.filterCampaignIds(filters);
+        let series = new Array(prange.length);
+        // iterate records
+        this.getItem(KEY_RECORDS)
+            .filter((rec)=> 0<=cids.indexOf(rec.c))
+            .forEach((rec) => {
+                let label = prange.fmt(rec.d);
+                let didx = prange.labels.indexOf(label);
+                if(!series[didx])
+                    series[didx] = [];
+                series[didx].push(rec.v);
+            });
+        return prange.labels.map((label,sidx) => {
+            let s = series[sidx];
+            if(s && 0<s.length) {
+                let total = s.reduce((t,sv) => t+sv, 0); 
+                return {
+                    label,
+                    total,
+                    value: total / Math.max(1.0, s.length),
+                };
+            } else {
+                return {
+                    label,
+                    total: 0,
+                    value: 0,
+                };
+            }
+        });
+    },
+
     dashboardDesignRefers: function(best) {
         return this._classReferences(best, this.getPresetDesignClasses());
     },
@@ -426,6 +520,7 @@ export default {
         let clss = this.getPresetVisualClasses();
         let filter = this.getFilter();
         let campaigns = this.retrieveCampaigns();
+        let metric = this.getMetric();
         return clss.map((cls) => {
             let ctags = this.getTagsWithinClass(cls)
                 .filter((tag) => !filter || !filter[tag.class] || 0<=filter[tag.class].indexOf(tag.id));
@@ -444,8 +539,8 @@ export default {
                     mean,
                 });
             });
-            data.sort((l,r) => r.mean - l.mean);
-            
+            data.sort((l,r) => (metric.ascending ? -1 : 1) * r.mean - l.mean);
+
             return {
                 cls,
                 data,

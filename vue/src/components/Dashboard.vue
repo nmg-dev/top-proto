@@ -89,7 +89,28 @@ const sample_message_refers = [
     { cls: 'message.trigger', name: '설득형', label: '트리거' },
     { cls: 'message.adcopy', name: '제시', label: '카피' },
 ];
-
+const CHART_OPTIONS = {
+    chart: {
+        stacked: false,
+        zoom: { type: 'x', enabled: true },
+        toolbar: { show: true },
+    },
+    plotOptions: {
+        line: { curve: 'smooth' },
+    },
+    dataLabels: { enabled: true },
+    grid: {},
+    markers: { size: 1 },
+    xaxis: {
+        // type: 'datetime',
+        // labels: {},
+    },
+    yaxis: {
+        // labels: { formatter: utils.getMetric().fmt },
+    },
+    legend: {
+    },
+};
 
 
 export default {
@@ -99,7 +120,6 @@ export default {
     ],
     data: () => {
         let best = utils.bestPracticeOver();
-        window.console.log(best);
         // let tops = utils.topOptionOverPractice(best);
 
         return {
@@ -108,42 +128,7 @@ export default {
             previews: utils.dashboardPreviews(),
             design_references: utils.dashboardDesignRefers(best),
             message_references: utils.dashboardMessageRefers(best),
-            chart_options: {
-                chart: {
-                    stacked: false,
-                    zoom: { type: 'x', enabled: true },
-                    toolbar: { show: true },
-                },
-                plotOptions: {
-                    line: { curve: 'smooth' },
-                },
-                dataLabels: { enabled: true },
-                grid: {},
-                markers: { size: 1 },
-                xaxis: {
-                    type: 'datetime',
-                    labels: {
-                        datetimeFormatter: {
-                            year: 'yyyy',
-                            month: 'MMM',
-                            day: 'dd',
-                            hour: 'HH:mm',
-                        }
-                        /* formatter: '' */
-                    }
-                },
-                yaxis: {
-                    labels: { formatter: (v) => `${(v*100).toFixed(2)}%` },
-                },
-                legend: {
-                },
-            },
-            chart_data: [{
-                name: 'CPC',
-                data: [...new Array(3*365)].map(
-                    (v,idx)=> [Date.now() - (365-idx)*datelen_a_day, Math.random()*100]
-                )
-            }],
+            chart_series: utils.dashboardSeries(),
         }
     },
     watch: {
@@ -151,11 +136,29 @@ export default {
             this.design_references = utils.dashboardDesignRefers(best);
             this.message_references = utils.dashboardMessageRefers(best);
             this.previews = utils.dashboardPreviews(this.tagfilters);
-        }
+        },
+
     },
     computed: {
         preset_design_cls: function() { return utils.getPresetDesignClasses() },
         preset_message_cls: function() { return utils.getPresetMessageClasses() },
+        chart_options: function() {
+            return Object.assign(CHART_OPTIONS, {
+                xaxis: {
+                    categories: this.chart_series.map((ser)=>ser.label),
+                },
+                yaxis: {
+                    labels: { formatter: utils.getMetric().fmt },
+                }
+            });
+        },
+        chart_data: function() {
+            // window.console.log(utils.getMetric());
+            return [{
+                name: utils.getMetric().label,
+                data: this.chart_series.map((ser) => ser.value),
+            }];
+        },
     },
     methods: {
         lang: function(key) {

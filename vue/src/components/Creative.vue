@@ -52,7 +52,6 @@ export default {
     },
     methods: {
         showModal: function(ev) {
-            window.console.log(ev);
             this.$refs['creative_details_modal'].show();
         },
         lang: function(key) {
@@ -72,7 +71,7 @@ export default {
             return ret;
         }
     },
-    mounted() { window.console.log(this.compositions, this.chartings); },
+    mounted() {  },
     computed: {
         compositions: function() {
             return utils.creativeCombinations(3);

@@ -434,14 +434,9 @@ export default {
         };
     },
 
-    dashboardSeries: function() {
-        let filters = this.getFilter();
-        let prange = this.getPeriodRanges(this.getPeriod());
-
-        let cids = this.filterCampaignIds(filters);
+    _dailySeries: function(prange, records, cids) {
         let series = new Array(prange.length);
-        // iterate records
-        this.getItem(KEY_RECORDS)
+        records
             .filter((rec)=> 0<=cids.indexOf(rec.c))
             .forEach((rec) => {
                 let label = prange.fmt(rec.d);
@@ -451,22 +446,32 @@ export default {
                 series[didx].push(rec.v);
             });
         return prange.labels.map((label,sidx) => {
-            let s = series[sidx];
-            if(s && 0<s.length) {
-                let total = s.reduce((t,sv) => t+sv, 0); 
-                return {
-                    label,
-                    total,
-                    value: total / Math.max(1.0, s.length),
-                };
-            } else {
-                return {
-                    label,
-                    total: 0,
-                    value: 0,
-                };
-            }
-        });
+                let s = series[sidx];
+                if(s && 0<s.length) {
+                    let total = s.reduce((t,sv) => t+sv, 0); 
+                    return {
+                        label,
+                        total,
+                        value: total / Math.max(1.0, s.length),
+                    };
+                } else {
+                    return {
+                        label,
+                        total: 0,
+                        value: 0,
+                    };
+                }
+            });
+    },
+
+    dashboardSeries: function() {
+        let filters = this.getFilter();
+        let prange = this.getPeriodRanges(this.getPeriod());
+
+        let cids = this.filterCampaignIds(filters);
+        let records = this.getItem(KEY_RECORDS);
+        // iterate records
+        return this._dailySeries(prange, records, cids);
     },
 
     dashboardDesignRefers: function(best) {
@@ -547,7 +552,15 @@ export default {
             };
         });
     },
-    creativeDetailChart: function() {
+    _creativeDetailsChartSeries: function(cids, records, prange) {
+    },
+    creativeDetailChart: function(cls) {
+        let filters = this.getFilter();
+        let prange = this.getPeriodRanges(this.getPeriod());
+        let tags = this.getTagsWithinClass(cls);
+        let cids = this.filterCampaignIds(filters);
+
+        // TODO:
 
     },
 

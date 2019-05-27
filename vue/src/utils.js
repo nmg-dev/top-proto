@@ -546,8 +546,6 @@ export default {
             };
         });
     },
-    _creativeDetailsChartSeries: function(cids, records, prange) {
-    },
     creativeDetailChart: function(cls) {
         let filters = this.getFilter();
         let prange = this.getPeriodRanges(this.getPeriod());
@@ -591,6 +589,73 @@ export default {
             labels: prange.labels,
             values: rets,
         };
+    },
+
+    simulationOptionValues: function() {
+        let _tags = this.getItem(KEY_TAGS);
+        let ctmap = Object.keys(_tags).reduce((agg, tid) => {
+            let tag = _tags[tid];
+            if(!agg[tag.class])
+                agg[tag.class] = [];
+            agg[tag.class].push(tag);
+            return agg;
+        }, {});
+
+        let _clss = Object.assign(Object.keys(ctmap), {});
+        // window.console.log(_clss);
+
+        let cclss = ['category','subcategory','device', 'channel','admedia','adtype','goal'];
+        let dclss = this.getPresetDesignClasses();
+        dclss = dclss.concat(_clss.filter((cls)=>cls.startsWith('design.') && dclss.indexOf(cls)<0));
+        let mclss = this.getPresetMessageClasses();
+        mclss = mclss.concat(_clss.filter((cls)=>cls.startsWith('content.') && mclss.indexOf(cls)<0));
+        let presets = cclss.concat(dclss).concat(mclss);
+        // exceptions
+        presets = presets.concat(['account', 'brand', 'media']);
+        let rclss = _clss.filter((cls) => presets.indexOf(cls)<0);
+
+        let rets = {
+            campaigns: cclss.map((cls) => { return {cls, tags: ctmap[cls]}} ),
+            designs: dclss.map((cls) => { return {cls, tags: ctmap[cls]}} ),
+            content: mclss.map((cls) => { return {cls, tags: ctmap[cls]}} ),
+            others: rclss.map((cls)=> { return {cls, tags: ctmap[cls]}} ),
+        };
+
+        window.console.log(ctmap, rets);
+        return rets;
+    },
+    simulationResults: function(options) {
+        let tags = this.retrieveTags();
+        let campaigns = this.retrieveCampaigns();
+        // let records = this.getItem(KEY_RECORDS);
+
+        let cids = Object.keys(campaigns).map((cid)=>parseInt(cid));
+        // window.console.log(cids);
+        Object.keys(options)
+            .forEach((cls) => {
+                let tid = options[cls];
+                let tag = tags[tid];
+                cids = cids.filter((cid)=> 0<= tag.campaigns.indexOf(cid));
+            });
+        // sort anyway
+        cids.sort();
+        let ms = this.metrices.filter((m)=>!m.defaultHide);
+        let values = ms.reduce((agg,m)=> { agg[m.key]=[]; return agg; }, {});
+        cids.map((cid)=>campaigns[cid])
+        .forEach((cmp)=> {
+            window.console.log(cmp.id, cmp.records);
+            ms.forEach((m)=>{
+                values[m.key] = values[m.key].concat(cmp.records.map((rec)=>m.fn(rec)));
+            });
+        });
+        let result = ms.reduce((agg, met)=> {
+            agg[met.key] = values[met.key].reduce((s,v)=>s+v, 0) / values[met.key].length;
+            return agg;
+        }, {});
+        window.console.log(cids, values, result);
+        // window.console.log(cids, values, result);
+
+        return result;
     },
 
 

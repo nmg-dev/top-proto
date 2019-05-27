@@ -122,28 +122,10 @@ export default {
 
     dateformat: function(dt) {
         return moment(dt).format('YYYY-MM-DD');
-        // let dd;
-        // switch(typeof dt) {
-        //     case 'string':
-        //     case 'number': 
-        //         dd = new Date(dt); break;
-        //     case 'object':
-        //     default:
-        //         dd = dt; break;
-        // }
-
-        // let yy = dd.getFullYear();
-        // let mm = dd.getMonth()+1;
-        // mm = mm<10 ? `0${mm}` : mm.toFixed(0);
-        // let d = dd.getDate();
-        // d = d<10 ? `0${d}` : d.toFixed(0);
-        // return `${yy}-${mm}-${d}`;
-        
     },
 
     timeformat: function(dt) {
         return `${moment(dt).format('YYYY-MM-DD')}T00:00:00+09:00`;
-        // return `${this.dateformat(dt)}T00:00:00+09:00`;
     },
 
     getPeriod: function() {
@@ -434,8 +416,9 @@ export default {
         };
     },
 
-    _dailySeries: function(prange, records, cids) {
+    _dailySeries: function(metric, prange, records, cids, valuesOnly) {
         let series = new Array(prange.length);
+        let isAppMetric = metric === sessionStorage.getItem(KEY_METRIC);
         records
             .filter((rec)=> 0<=cids.indexOf(rec.c))
             .forEach((rec) => {
@@ -443,35 +426,46 @@ export default {
                 let didx = prange.labels.indexOf(label);
                 if(!series[didx])
                     series[didx] = [];
-                series[didx].push(rec.v);
+                if(isAppMetric) {
+                    series[didx].push(rec.v);
+                }
+                else {
+                    series[didx].push(metric.fn(rec));
+                }
             });
         return prange.labels.map((label,sidx) => {
                 let s = series[sidx];
-                if(s && 0<s.length) {
-                    let total = s.reduce((t,sv) => t+sv, 0); 
-                    return {
-                        label,
-                        total,
-                        value: total / Math.max(1.0, s.length),
-                    };
+                if(valuesOnly) {
+                    return s && 0<s.length ?
+                        s.reduce((t,sv)=>t+sv/(1.0*Math.max(1, s.length)), 0) : 0;
                 } else {
-                    return {
-                        label,
-                        total: 0,
-                        value: 0,
-                    };
+                    if(s && 0<s.length) {
+                        let total = s.reduce((t,sv) => t+sv, 0); 
+                        return {
+                            label,
+                            total,
+                            value: total / Math.max(1.0, s.length),
+                        };
+                    } else {
+                        return {
+                            label,
+                            total: 0,
+                            value: 0,
+                        };
+                    }
                 }
+                
             });
     },
 
     dashboardSeries: function() {
         let filters = this.getFilter();
         let prange = this.getPeriodRanges(this.getPeriod());
-
+        let metric = this.getMetric();
         let cids = this.filterCampaignIds(filters);
         let records = this.getItem(KEY_RECORDS);
         // iterate records
-        return this._dailySeries(prange, records, cids);
+        return this._dailySeries(metric, prange, records, cids);
     },
 
     dashboardDesignRefers: function(best) {
@@ -557,11 +551,46 @@ export default {
     creativeDetailChart: function(cls) {
         let filters = this.getFilter();
         let prange = this.getPeriodRanges(this.getPeriod());
+        let records = this.getItem(KEY_RECORDS);
         let tags = this.getTagsWithinClass(cls);
         let cids = this.filterCampaignIds(filters);
+        let alltcids = [];
 
-        // TODO:
+        let rets = tags.map((tag) => {
+            let tcids = tag.campaigns.filter((cid) => 0<=cids.indexOf(cid));
+            let data = this.metrices
+                .filter((met)=>!met.defaultHide)
+                .reduce((agg, met)=> {
+                    agg[met.key] = this._dailySeries(met, prange, records, tcids, true);
+                    return agg;
+                }, {});
 
+            // append new tag cids
+            alltcids = alltcids.concat(tcids.filter((cid)=>alltcids.indexOf(cid)<0));
+
+            return {
+                tag,
+                t: tag.id,
+                data,
+            };
+        });
+        let alldata = this.metrices
+            .filter((met)=>!met.defaultHide)
+            .reduce((agg, met) => {
+                agg[met.key] = this._dailySeries(met, prange, records, alltcids, true);
+                return agg;
+            }, {});
+
+        // summarize total
+        rets.unshift({
+            tag: null,
+            t: null,
+            data: alldata
+        });
+        return {
+            labels: prange.labels,
+            values: rets,
+        };
     },
 
 

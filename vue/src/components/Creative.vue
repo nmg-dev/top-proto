@@ -107,12 +107,10 @@ export default {
             } else {
                 this.details_tag = null;
             }
-            window.console.log(tagid, this.details_tag);
         },
         selectChartDetailMetric: function(ev) {
             let el = ev.currentTarget || ev.target;
             let mk = el.dataset.metric;
-            window.console.log(el, mk);
             this.details_metric = mk;
         },
         lang: function(key) {
@@ -191,9 +189,6 @@ export default {
             };
         },
         chart_detail_values: function(data) {
-            window.console.log(
-                this.details_tag, this.details_metric,
-                this.details_selected[this.details_metric]);
             return this.details_selected[this.details_metric];
         },
     },

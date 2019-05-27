@@ -6,9 +6,9 @@
                 {{title}}
                 <i class="fas fa-chevron-down" />
             </div>
-            <b-dropdown-item value="">{{labelNone}}</b-dropdown-item>
+            <b-dropdown-item value="" @click="resetSelections">{{labelNone}}</b-dropdown-item>
             <template v-for="item in items">
-                <b-dropdown-item :value="item.value" :key="item.value">{{item.label}}</b-dropdown-item>
+                <b-dropdown-item :value="item.value" :key="item.value" @click="addSelection">{{item.label}}</b-dropdown-item>
             </template>
         </b-dropdown>
     </b-button-group>
@@ -24,6 +24,34 @@ export default {
         cls: { type: String },
         icon: {},
         labelNone: { type: String, default: 'ALL' },
+    },
+    methods: {
+        resetSelections: function() {
+            let filter = utils.getFilter();
+            if(filter) 
+                delete filter[this.cls];
+            if(filter && 0<Object.keys(filter))
+                utils.setFilter(filter);
+            else
+                utils.setFilter(null);
+
+            //
+            this.$emit('refreshUpdate');
+        },
+        addSelection: function(ev) {
+            let el = ev.currentTarget || ev.target;
+            let tid = el.key;
+            let filter = utils.getFilter() || {};
+            if(!filter[this.cls])
+                filter[this.cls] = [tid];
+            else if(filter[this.cls].indexOf(tid)<0)
+                filter[this.cls].push(tid);
+            else
+                return;
+
+            //
+            this.$emit('refreshUpdate');
+        },
     },
     computed: {
         items: function() {

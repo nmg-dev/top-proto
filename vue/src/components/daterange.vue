@@ -3,8 +3,8 @@
         <b-input-group-text>
             <img src="../assets/icon-calendar.png" alt="calendar" />
         </b-input-group-text>
-        <b-form-input readonly :value="$moment(periodFrom).format('YYYY-MM-DD')"></b-form-input>
-        <b-form-input readonly :value="$moment(periodTill).format('YYYY-MM-DD')"></b-form-input>
+        <b-form-input type="date" :value="momentFrom"></b-form-input>
+        <b-form-input type="date" :value="momentTill"></b-form-input>
         <b-input-group-append>
             <b-dropdown right>
                 <b-dropdown-form>
@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import utils from '../utils.js';
+
 export default {
     name: 'daterange',
     props: {
@@ -72,6 +74,30 @@ export default {
             calendarMonth: undefined,
             calendar: [],
         };
+    },
+    computed: {
+        momentFrom: {
+            get: function() {
+                return this.$moment(this.periodFrom).format('YYYY-MM-DD');
+            },
+            set: function(v) {
+                window.console.log(v);
+                this.periodFrom = Date.parse(v);
+                utils.setPeriod({from: this.periodFrom, till: this.periodTill});
+                this.$emit('periodUpdated');
+            }
+        },
+        momentTill: {
+            get: function() {
+                return this.$moment(this.periodFrom).format('YYYY-MM-DD');
+                
+            },
+            set: function(v) {
+                this.periodTill = Date.parse(v);
+                utils.setPeriod({from: this.periodFrom, till: this.periodTill});
+                this.$emit('periodUpdated');
+            }
+        }
     },
     beforeUpdate: function() { 
         this.updateValues(); 

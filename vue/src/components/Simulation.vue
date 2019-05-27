@@ -92,7 +92,6 @@ export default {
         addSims: function(ev) {
             let options = Object.assign({}, this.selecteds);
             let result = utils.simulationResults(options);
-            window.console.log('addSims', options, result);
             this.sims.push({
                 options,
                 result,
@@ -100,7 +99,6 @@ export default {
             this.$forceUpdate();
         },
         addOpts: function(ev) {
-            window.console.log('addOpts', ev);
             let el = ev.currentTarger || ev.target;
             let cls = el.dataset.cls;
             let tid = el.dataset.tagid;

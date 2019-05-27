@@ -24,7 +24,8 @@
             <!-- period control -->
             <daterange 
                 :from="period.from"
-                :till="period.till">
+                :till="period.till"
+                @periodUpdated="set_app_period">
             </daterange>
         </div>
     </div>
@@ -56,7 +57,13 @@ export default {
         set_app_metric: function(metric) {
             utils.setMetric(metric);
             this.app_metric = utils.getMetric();
-        }
+            this.$emit('refreshUpdate');
+        },
+        set_app_period: function(period) {
+            // reload campaigns
+            utils.retriveCampaigns(true);
+            this.$emit('refreshUpdate');
+        },
     },
     // beforeMount: function() {
     //     this.appMetric = this.$root.metric;
@@ -64,7 +71,6 @@ export default {
     mounted: function() {
     },
     updated: function() {
-        // window.console.log(this.app_metric);
     }
 }
 </script>

@@ -116,8 +116,14 @@ export default {
 
     setMetric: function(mk) {
         let ms = this.metrices.filter((m)=>m.key===mk);
-        if(ms && 0<ms.length)
+        if(ms && 0<ms.length && mk!=this.getItem(KEY_METRIC)) {
             this.setItem(KEY_METRIC, mk);
+            this.refreshUpdateValues(
+                this.retrieveTags(),
+                this.retrieveCampaigns(),
+                this.getItem(KEY_RECORDS),
+                this.getItem(KEY_AFFILIATIONS));
+        }
     },
 
     dateformat: function(dt) {
@@ -195,7 +201,6 @@ export default {
     retrieveTags: function(overwrite) {
         if(overwrite || !this.hasItem(KEY_TAGS)) {
             (async() => {
-                window.console.log(' -- retrieve tags');
                 let resp = await axios.get(`${API_HOST}/t/`);
                 this.setItem(KEY_TAGS, await resp.data);
             })();
@@ -216,7 +221,7 @@ export default {
                 clk: rec.clk, 
                 cnv: rec.cnv, 
                 cost: rec.cost,
-                d: Date.parse(rec.d.replace(/T.+$/i, '')),
+                d: typeof(rec.d)=='string' ? Date.parse(rec.d.replace(/T.+$/i, '')) : rec.d,
                 v: metric.fn(rec),
             };
         });
@@ -262,8 +267,6 @@ export default {
         this.setItem(KEY_CAMPAIGNS, campaigns);
         
         this.setItem(KEY_AFFILIATIONS, affiliations);
-
-        window.console.log(' -- data refreshed');
     },
 
     // retrieve campaign data from server
@@ -602,7 +605,6 @@ export default {
         }, {});
 
         let _clss = Object.assign(Object.keys(ctmap), {});
-        // window.console.log(_clss);
 
         let cclss = ['category','subcategory','device', 'channel','admedia','adtype','goal'];
         let dclss = this.getPresetDesignClasses();
@@ -621,7 +623,6 @@ export default {
             others: rclss.map((cls)=> { return {cls, tags: ctmap[cls]}} ),
         };
 
-        window.console.log(ctmap, rets);
         return rets;
     },
     simulationResults: function(options) {
@@ -630,7 +631,6 @@ export default {
         // let records = this.getItem(KEY_RECORDS);
 
         let cids = Object.keys(campaigns).map((cid)=>parseInt(cid));
-        // window.console.log(cids);
         Object.keys(options)
             .forEach((cls) => {
                 let tid = options[cls];
@@ -643,7 +643,6 @@ export default {
         let values = ms.reduce((agg,m)=> { agg[m.key]=[]; return agg; }, {});
         cids.map((cid)=>campaigns[cid])
         .forEach((cmp)=> {
-            window.console.log(cmp.id, cmp.records);
             ms.forEach((m)=>{
                 values[m.key] = values[m.key].concat(cmp.records.map((rec)=>m.fn(rec)));
             });
@@ -652,8 +651,6 @@ export default {
             agg[met.key] = values[met.key].reduce((s,v)=>s+v, 0) / values[met.key].length;
             return agg;
         }, {});
-        window.console.log(cids, values, result);
-        // window.console.log(cids, values, result);
 
         return result;
     },

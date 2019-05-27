@@ -8,16 +8,16 @@
 					<div class="row m-0 p-0">
 						<div class="col m-0 p-0">
 							<div class="querybar">
-								<querytop :controls="showTopControls"></querytop>
-								<querymid v-if="showMidControls"></querymid>
-								<querydown v-if="showDownControls"></querydown>
+								<querytop :controls="showTopControls" @refreshUpdate="refreshUpdate"></querytop>
+								<querymid v-if="showMidControls" @refreshUpdate="refreshUpdate"></querymid>
+								<querydown v-if="showDownControls" @refreshUpdate="refreshUpdate"></querydown>
 							</div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col col-12">
 							<b-card>
-								<router-view 
+								<router-view :key="latestUpdate"
 									class="container-fluid background-light"
 									style="min-height: 50vh;"
 									language="ko"
@@ -60,11 +60,15 @@ export default {
 			showTopControls: false,
 			showMidControls: false,
 			showDownControls: false,
+			latestUpdate: Date.now(),
 		}
 	},
 	methods: {
+		refreshUpdate: function() {
+			this.latestUpdate = Date.now();
+		}
 	},
-	updated() {
+	beforeUpdate() {
 		this.showTopControls = Route.showTopControls(this.$route.path);
 		this.showMidControls = Route.showMidControls(this.$route.path);
 		this.showDownControls = Route.showDownControls(this.$route.path);

@@ -2,11 +2,13 @@
     <div class="querybar-down d-flex">
         <subcategory 
             title="Design Type"
-            :options="designTypeOptions">
+            :options="designTypeOptions"
+            @refreshUpdate="$emit('refreshUpdate')">
         </subcategory>
         <subcategory 
             title="Message Type"
-            :options="messageTypeOptions">
+            :options="messageTypeOptions"
+            @refreshUpdate="$emit('refreshUpdate')">
         </subcategory>
     </div>
 </template>
@@ -21,15 +23,17 @@ export default {
     components: {
         subcategory,
     },
+    methods: {
+    },
     computed: {
         designTypeOptions : function() {
             return utils.getPresetDesignClasses().map((cls) => {
-                return { items: utils.getTagsWithinClass(cls), title: langs.ko[cls] }
+                return { cls, items: utils.getTagsWithinClass(cls), title: langs.ko[cls] }
             })
         },
         messageTypeOptions : function() {
             return utils.getPresetMessageClasses().map((cls) => {
-                return { items: utils.getTagsWithinClass(cls), title: langs.ko[cls] }
+                return { cls, items: utils.getTagsWithinClass(cls), title: langs.ko[cls] }
             });
         },
     },

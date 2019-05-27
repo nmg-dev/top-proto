@@ -39,6 +39,9 @@ new Vue({
     },
     getApp: function() { return this.app; },
     getLanguage: function() { return this.lang; },
+    refreshUpdate: function() {
+      this.app.$forceUpdate();
+    },
   },
   mounted: function() {
   },

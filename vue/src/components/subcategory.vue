@@ -6,11 +6,12 @@
                 <h5 class="control-title">{{ opt.title }}</h5>
                 <div class="button-group category-control">
                     <categorybtn 
+                        class="query-control"
                         @refreshUpdate="$emit('refreshUpdate')"
                         :cls="opt.cls"
                         :icon="false"
                         :items="opt.items.map((tag)=>{ return {value: tag.id, label: tag.name}})" 
-                        :title="opt.title" 
+                        title="" 
                         labelNone="ALL" >
                     </categorybtn>
                 </div>
@@ -44,3 +45,13 @@ export default {
     }
 }
 </script>
+
+<style>
+    .categorybar-wrapper {
+        display: flex;
+    }
+    .categorybar-wrapper .categorybar-subwrapper {
+        display: flex;
+        flex-direction: column;
+    }
+</style>

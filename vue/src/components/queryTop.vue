@@ -6,14 +6,20 @@
         </div>
         <div class="querybar-controls" v-if="controls">
             <!-- dropdown metric -->
-            <b-input-group>
-                <b-input-group-text>
-                    <img src="../assets/icon-metric.png" alt="ruler" />
-                </b-input-group-text>
-                <b-input-group-text>{{ app_metric.label }}</b-input-group-text>
-                <b-dropdown>
+            <b-input-group class="query-control top-control">
+                <b-dropdown variant="default" no-caret>
+                    <template slot="button-content">
+                        <div class="label-icon m-0 p-0">
+                            <img src="../assets/icon-metric.png" alt="app metric" />
+                        </div>
+                        <div class="label-text text-muted">{{ app_metric.label }}</div>
+                        <i class="fas fa-chevron-down align-self-start" />
+                    </template>
                     <template v-for="met in metrices">
-                        <b-dropdown-item :key="met.key" :title="met.desc" 
+                        <b-dropdown-item 
+                            :key="met.key" 
+                            :title="met.desc" 
+                            :checked="met.key === app_metric.key"
                             @click="set_app_metric(met.key)"
                             v-if="!met.defaultHide">{{ met.label }}
                         </b-dropdown-item>
@@ -22,11 +28,13 @@
             </b-input-group>
             
             <!-- period control -->
-            <daterange 
-                :from="period.from"
-                :till="period.till"
-                @periodUpdated="set_app_period">
-            </daterange>
+            <b-input-group class="query-control top-control">
+                <daterange 
+                    :from="period.from"
+                    :till="period.till"
+                    @periodUpdated="set_app_period">
+                </daterange>
+            </b-input-group>
         </div>
     </div>
 </template>
@@ -77,4 +85,30 @@ export default {
 
 <style>
 @import 'https://nmg-dev.github.io/bs-daterange/daterange.css';
+
+.querybar .querybar-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    min-height: 90px;
+}
+.query-control.top-control {
+    margin: var(--padding-1);
+    margin-left: 0px;
+    border-radius: 0;
+    color: var(--font-light);
+    min-width: 12vw;
+}
+.query-control.top-control button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    border: 1px solid #d9d9d9;
+    border-radius: 1px;
+    box-shadow: none;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: var(--bg-white);
+}
 </style>

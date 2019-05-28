@@ -133,7 +133,6 @@ export default {
     },
     watch: {
         best_practices: function(best) {
-            window.console.log('best practice', best);
             this.design_references = utils.dashboardDesignRefers(best);
             this.message_references = utils.dashboardMessageRefers(best);
             this.previews = utils.dashboardPreviews(this.tagfilters);
@@ -154,7 +153,6 @@ export default {
             });
         },
         chart_data: function() {
-            // window.console.log(utils.getMetric());
             return [{
                 name: utils.getMetric().label,
                 data: this.chart_series.map((ser) => ser.value),

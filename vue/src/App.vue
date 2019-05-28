@@ -1,10 +1,10 @@
 <template>
-	<div id="app">
+	<div id="app" :key="latestUpdate">
 		<navigation></navigation>
 		<main class="wrap-container">
 			<sidebar></sidebar>
 			<transition name="fade">
-				<div class="container-fluid panel-wrapper">
+				<div class="container-fluid panel-wrapper m-0 p-4">
 					<div class="row m-0 p-0">
 						<div class="col m-0 p-0">
 							<div class="querybar">
@@ -16,9 +16,9 @@
 					</div>
 					<div class="row">
 						<div class="col col-12">
-							<b-card>
-								<router-view :key="latestUpdate"
-									class="container-fluid background-light"
+							<b-card class="panel">
+								<router-view
+									class="container-fluid"
 									style="min-height: 50vh;"
 									language="ko"
 								>
@@ -65,7 +65,6 @@ export default {
 	},
 	methods: {
 		refreshUpdate: function() {
-			window.console.log('app screen updated');
 			this.latestUpdate = Date.now();
 		}
 	},
@@ -91,61 +90,93 @@ export default {
 </script>
 
 <style>
+	@import url('https://fonts.googleapis.com/css?family=Noto+Sans+KR:100,300,400,500,700,900&display=swap&subset=korean');
+	@import 'https://use.fontawesome.com/releases/v5.8.2/css/all.css';
+
 	*,body {
 		margin: 0;
-	padding: 0;
+		padding: 0;
 
-	background-color: transparent;
-	color: var(--font-normal);
-	
-	font-weight: 300;
-	font-family: 'Noto Sans KR', sans-serif;
+		background-color: transparent;
+		color: var(--font-normal);
+		
+		font-weight: 300;
+		font-family: 'Noto Sans KR', sans-serif;
 
-	--bg-dark: #262626;
-	--bg-light: #F2F2F2;
-	--bg-select: #DEEBF7;
-	--bg-white: #FFFFFF;
+		--bg-dark: #262626;
+		--bg-light: #F2F2F2;
+		--bg-select: #DEEBF7;
+		--bg-white: #FFFFFF;
 
-	--data-grey: #D9D9D9;
-	--data-primary: #20ADE3;
-	--data-secondary: #002060;
-	--data-dark: #1F4E79;
-	--data-light: #9DC3E6;
+		--data-grey: #D9D9D9;
+		--data-primary: #20ADE3;
+		--data-secondary: #002060;
+		--data-dark: #1F4E79;
+		--data-light: #9DC3E6;
 
-	--font-normal: #262626;
-	--font-dark: #002060;
-	--font-light: #595959;
-	--font-white: #eeeeee;
+		--font-normal: #262626;
+		--font-dark: #002060;
+		--font-light: #595959;
+		--font-white: #eeeeee;
 
-	--gnb-height: 76px;
-	--sidebar-width: 190px;
+		--gnb-height: 76px;
+		--sidebar-width: 190px;
 
-	--font-size--2: 8px;
-	--font-size--1: 10px;
-	--font-size-0: 12px;
-	--font-size-1: 14px;
-	--font-size-2: 16px;
-	--font-size-3: 18px;
-	--font-size-3: 20px;
-	--font-size-4: 22px;
-	--font-size-5: 24px;
-	--font-size-6: 26px;
-	--font-size-7: 28px;
-	--font-size-8: 32px;
-	--font-size-9: 40px;
+		--font-size--2: 8px;
+		--font-size--1: 10px;
+		--font-size-0: 12px;
+		--font-size-1: 14px;
+		--font-size-2: 16px;
+		--font-size-3: 18px;
+		--font-size-3: 20px;
+		--font-size-4: 22px;
+		--font-size-5: 24px;
+		--font-size-6: 26px;
+		--font-size-7: 28px;
+		--font-size-8: 32px;
+		--font-size-9: 40px;
 
 
-	--padding-0: 14px;
-	--padding-1: 25px;
-	--padding-2: 35px;
-	--padding-3: 45px;
-	--padding-4: 65px;
-	--padding-5: 80px;
-	--padding-6: 100px;
+		--padding-0: 14px;
+		--padding-1: 25px;
+		--padding-2: 35px;
+		--padding-3: 45px;
+		--padding-4: 65px;
+		--padding-5: 80px;
+		--padding-6: 100px;
 
-	--section-title-font-size: 40px;
-	--section-subtitle-font-size: var(--font-size-2);
+		--section-title-font-size: 40px;
+		--section-subtitle-font-size: var(--font-size-2);
 	}
+	#app {
+		background-color: var(--bg-light);
+	}
+
+	
+	.query-bar .querybar-controls {
+		display: flex;
+	}
+	.querybar .querybar-controls:first-child {
+		margin-left: 0px;
+	}
+	.querybar .querybar-controls:last-child {
+		margin-right: 0px;
+	}
+
+	.query-control .query-btn {
+        background-color: #fff;
+        display: flex;
+        min-width: 5vw;
+        max-width: 280px;
+        align-items: center;
+        border-radius: 6px;
+    }
+
+	.query-control ul.dropdown-menu a.dropdown-item[checked] {
+		color: var(--data-primary);
+		background-color: var(--bg-select);
+	}
+
 	.query-btn.shadow {
 		box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5) !important;
 	}
@@ -157,6 +188,9 @@ export default {
 		padding: 0px;
 	}
 
+	.input-group {
+		width: inherit;
+	}
 
 	.wrap-container {
 		display: flex;
@@ -188,8 +222,6 @@ export default {
 		min-width: 10vw;
 	}
 
-
-
 	.dropdown-menu {
 		max-height: 50vh;
 		overflow: auto;
@@ -202,6 +234,20 @@ export default {
 	}
 	.dropdown-menu::-webkit-scrollbar-thumb {
 		background-color: var(--data-primary);
+	}
+
+	.card.panel {
+		border-top: none;
+		border-left: none;
+		border-radius: 2px;
+		box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+		width: 100%;
+		padding-top: 4vh;
+		padding-bottom: 6vh;
+		padding-left: 10vw;
+		padding-right: 10vw;
+		text-align: center;
+		color: var(--font-normal);
 	}
 
 
@@ -240,5 +286,5 @@ export default {
 		}
 	}
 
-	@import 'https://use.fontawesome.com/releases/v5.8.2/css/all.css';
+	
 </style>

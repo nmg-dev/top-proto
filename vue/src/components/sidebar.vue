@@ -22,9 +22,9 @@
 <script>
 export default {
     name: 'sidebar',
-    data: () => {
+    data: function(){
         return {
-            show: true,
+            show: window.innerWidth > 1200,
         }
     }
 }
@@ -67,7 +67,7 @@ export default {
     padding: 0px;
     width: var(--sidebar-width);
 }
-.sidebar .sidebar-item .router-link-exact-active {
+.sidebar .sidebar-item .router-link-active {
     color: var(--font-white);
     font-weight: border;
     font-size: calc(var(--font-size-3) + 1px);

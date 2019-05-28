@@ -487,8 +487,19 @@ export default {
             });
     },
 
-    dashboardSeries: function() {
+    _dashboardFilters: function() {
         let filters = this.getFilter();
+        let presets = this.getPresetCategoryClasses().concat(this.getPresetVisualClasses());
+        return Object.keys(filters)
+            .filter((cls) => 0<=presets.indexOf(cls))
+            .reduce((agg, cls) => {
+                agg[cls] = filters[cls];
+                return agg;
+            }, {});
+    },
+
+    dashboardSeries: function() {
+        let filters = this._dashboardFilters();
         let prange = this.getPeriodRanges(this.getPeriod());
         let metric = this.getMetric();
         let cids = this.filterCampaignIds(filters);
@@ -505,7 +516,7 @@ export default {
     },
 
     dashboardPreviews: function() {
-        let filters = this.getFilter();
+        let filters = this._dashboardFilters();
         let campaigns = this.retrieveCampaigns();
         let cids = this.filterCampaignIds(filters);
         let metric = this.getMetric();

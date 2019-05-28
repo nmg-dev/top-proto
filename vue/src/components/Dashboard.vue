@@ -7,7 +7,7 @@
         </div>
         <div class="row dashboard-card-design">
             <template v-for="ref in design_references">
-                <div class="section col-3" :key="ref.cls">
+                <div class="section col-3" :key="ref.cls" v-b-tooltip.hover :title="`${lang(ref.cls)}: ${ref.name}`">
                     <h5 class="section-title class-design">{{ lang(ref.cls) }}</h5>
                     <div class="section-text">{{ ref.name }}</div>
                 </div>
@@ -15,9 +15,9 @@
         </div>
         <div class="row dashboard-card-message">
             <template v-for="ref in message_references">
-                <div class="section col-3" :key="ref.cls">
-                    <h5 class="section-title class-message">{{ lang(ref.cls) }}</h5>
-                    <div class="section-text">{{ ref.name }}</div>
+                <div class="section col-3" :key="ref.cls" v-b-tooltip.hover :title="`${lang(ref.cls)}: ${ref.name}`">
+                    <h5 class="section-title class-message">{{ ref.name }}</h5>
+                    <div class="section-text">{{ lang(ref.cls) }}</div>
                 </div>
             </template>
         </div>
@@ -44,12 +44,12 @@
                             <tbody>
                                 <tr>
                                     <th>옵션</th>
-                                    <th v-for="cls in preset_design_cls">{{ pv.options[cls] }}</th>
-                                    <th v-for="cls in preset_message_cls">{{ pv.options[cls] }}</th>
+                                    <td v-for="cls in preset_design_cls" class="class-design">{{ pv.options[cls] }}</td>
+                                    <td v-for="cls in preset_message_cls" class="class-message">{{ pv.options[cls] }}</td>
                                 </tr>
                                 <tr>
-                                    <th>CPC</th>
-                                    <td class="cell-value" align="center" :colspan="Object.keys(pv.options).length">
+                                    <th>{{ app_metric }}</th>
+                                    <td class="cell-value class-design" align="center" :colspan="Object.keys(pv.options).length">
                                         {{ pv.average }}
                                     </td>
                                 </tr>
@@ -140,6 +140,7 @@ export default {
 
     },
     computed: {
+        app_metric: function() { return utils.getMetric().label; },
         preset_design_cls: function() { return utils.getPresetDesignClasses() },
         preset_message_cls: function() { return utils.getPresetMessageClasses() },
         chart_options: function() {
@@ -212,6 +213,7 @@ div.panel-category-detail h5 {
 }
 
 .card.panel .row.dashboard-card-table .section-title {
+    text-align: left;
     padding: 0px;
     line-height: 2.0em;
     border-bottom: 1px solid #595959;
@@ -249,10 +251,14 @@ div.panel-category-detail h5 {
     font-weight: 400;
     text-align: right;
 }
+.card.panel .panel-details tbody td svg {
+    width: 100%;
+}
 .card.panel .panel-details tbody td.class-design {
     background-color: var(--bg-select);
 }
 .card.panel .panel-details tbody td.cell-value {
     text-align: center;
 }
+
 </style>

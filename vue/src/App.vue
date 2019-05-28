@@ -65,6 +65,7 @@ export default {
 	},
 	methods: {
 		refreshUpdate: function() {
+			window.console.log('app screen updated');
 			this.latestUpdate = Date.now();
 		}
 	},

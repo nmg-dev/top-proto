@@ -61,7 +61,7 @@ export default {
         },
         set_app_period: function(period) {
             // reload campaigns
-            utils.retriveCampaigns(true);
+            utils.retrieveCampaigns(true);
             this.$emit('refreshUpdate');
         },
     },

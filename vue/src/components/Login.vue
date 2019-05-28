@@ -25,7 +25,6 @@ window.__onGoogleLoginSuccess = function(gauth) {
     // utils.setItem('access_token', guser.id_token);
     utils.authenticate(gauth);
     window.history.back();
-    // console.log('login success', gauth, gauth.getAuthResponse());
 }
 
 window.__onGoogleLoginFailure = function() {

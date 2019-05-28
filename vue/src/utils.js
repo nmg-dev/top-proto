@@ -160,23 +160,48 @@ export default {
 
     addFilter: function(tagId) {
         let tags = this.retrieveTags();
-        let currentFilter = this.getFilter() || [];
+        let currentFilter = this.getFilter() || {};
+        tagId = parseInt(tagId);
         let theTag = tags[tagId];
-        if(!theTag) return;
-        if(0<currentFilter.filter((cf)=>cf.id===tagId).length) return;
+
+        if(!theTag) return false;
+        // if(0<currentFilter.filter((cf)=>cf.id===tagId).length) return;
+        if(!currentFilter[theTag.class])
+            currentFilter[theTag.class] = [tagId];
+        else if(currentFilter[theTag.class].indexOf(tagId)<0)
+            currentFilter[theTag.class].push(tagId);
+        else
+            return false;
         
-        currentFilter.push(theTag);
         this.setItem(KEY_FILTERS, currentFilter);
+        return true;
     },
 
     delFilter: function(tagId) {
         let tags = this.retrieveTags();
-        let currentFilter = this.getFilter() || {};
+        let currentFilter = this.getFilter();
         let theTag = tags[tagId];
-        if(!theTag) return;
+        tagId = parseInt(tagId);
 
-        currentFilter = currentFilter.filter((cf)=>cf.id!=tagId);
+        if(!theTag || !currentFilter 
+        || !currentFilter[theTag.class] || !currentFilter[theTag.class].indexOf(tagId)<0) 
+            return false;
+
+        currentFilter[theTag.class] = currentFilter[theTag.class].filter((tid)=>tid!=tagId);
         this.setItem(KEY_FILTERS, currentFilter);
+        return true;
+    },
+
+    resetFilter: function(cls) {
+        let currentFilter = this.getFilter();
+        if(currentFilter[cls]) {
+            delete currentFilter[cls]
+            this.setItem(KEY_FILTERS, currentFilter);
+            return true;
+        } else {
+            return false;
+        }
+
     },
 
     getPresetCategoryClasses: function() {
@@ -213,7 +238,7 @@ export default {
         let period = this.getPeriod();
         let metric = this.getMetric();
         // parse and load campaign records
-        records = records.map((rec)=> {
+        records = records.map((rec)=> {            
             return {
                 id: rec.id, 
                 c: rec.c, 
@@ -312,7 +337,6 @@ export default {
         // tags to array
         tags = Object.keys(tags).map((tid) => tags[tid]);
         
-
         // filter campaigns to put
         let cids = this.filterCampaignIds(filters);
 
@@ -328,11 +352,13 @@ export default {
                 .reduce((acc, tag) => {
                     // filter campaign ids
                     let tcids = tag.campaigns.filter((cid) => 0<=cids.indexOf(cid));
-                    // average
-                    acc.push({
-                        t: tag,
-                        v: tcids.reduce((sum, cid) => sum + campaigns[cid].summary.avg, 0) / Math.max(1.0, tcids.length),
-                    });
+                    if(0<tcids.length) {
+                        // average
+                        acc.push({
+                            t: tag,
+                            v: tcids.reduce((sum, cid) => sum + campaigns[cid].summary.avg, 0) / Math.max(1.0, tcids.length),
+                        });
+                    }
                     return acc;
                 }, [])
                 .sort((l,r) => (metric.ascending ? -1 : 1) * r.v - l.v);
@@ -483,19 +509,22 @@ export default {
         let campaigns = this.retrieveCampaigns();
         let cids = this.filterCampaignIds(filters);
         let metric = this.getMetric();
-        let ctags = this.getTagsWithinClass('category');
+        let ctags = this.getTagsWithinClass('category')
+            .filter((ctag) => !filters || !filters['category'] || 0<=filters['category'].indexOf(ctag.id));
         return ctags.reduce((agg, tag) => {
             let title = tag.name;
             let cmps = tag.campaigns
                 .filter((cid)=> 0<=cids.indexOf(cid))
                 .map((cid) => campaigns[cid]);
-            let bests = this.bestPracticeOver(Object.assign(filters || {}, {category: [tag.id]}));
-            let cvs = cmps.map((cmp) => cmp.summary.avg);                
-            agg.push({
-                title,
-                options: this.topOptionOverPractice(bests),
-                average: metric.fmt(cvs.reduce((t, cv) => t+cv, 0) / Math.max(1.0, cvs.length)),
-            });
+            let bests = this.bestPracticeOver(Object.assign({category: [tag.id]}, filters || {}));
+            let cvs = cmps.map((cmp) => cmp.summary.avg);
+            if(0<cvs.length) {
+                agg.push({
+                    title,
+                    options: this.topOptionOverPractice(bests),
+                    average: metric.fmt(cvs.reduce((t, cv) => t+cv, 0) / Math.max(1.0, cvs.length)),
+                });
+            }
             return agg;
         }, []);
     },
@@ -522,6 +551,7 @@ export default {
         let clss = this.getPresetVisualClasses();
         let filter = this.getFilter();
         let campaigns = this.retrieveCampaigns();
+        let cids = this.filterCampaignIds(filter);
         let metric = this.getMetric();
         return clss.map((cls) => {
             let ctags = this.getTagsWithinClass(cls)
@@ -531,13 +561,16 @@ export default {
                 ctags = ctags.slice(0, counts);
             let data = [];
             ctags.forEach((tag) => {
-                let cids = tag.campaigns;
-                let mean = cids.reduce((total, cid) => {
-                    return total + campaigns[cid].summary.avg / Math.max(1.0, cids.length);
+                let tcids = tag.campaigns.filter((cid) => 0<=cids.indexOf(cid));
+                if(tcids.length<=0) 
+                    return;
+
+                let mean = tcids.reduce((total, cid) => {
+                    return total + campaigns[cid].summary.avg / Math.max(1.0, tcids.length);
                 });
                 data.push({
                     tag,
-                    cids,
+                    cids: tcids,
                     mean,
                 });
             });

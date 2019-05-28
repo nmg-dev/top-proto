@@ -119,7 +119,7 @@ export default {
         'language',
     ],
     data: () => {
-        let best = utils.bestPracticeOver();
+        let best = utils.bestPracticeOver(utils.getFilter());
         // let tops = utils.topOptionOverPractice(best);
 
         return {
@@ -133,6 +133,7 @@ export default {
     },
     watch: {
         best_practices: function(best) {
+            window.console.log('best practice', best);
             this.design_references = utils.dashboardDesignRefers(best);
             this.message_references = utils.dashboardMessageRefers(best);
             this.previews = utils.dashboardPreviews(this.tagfilters);

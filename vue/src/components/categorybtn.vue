@@ -8,7 +8,7 @@
             </div>
             <b-dropdown-item value="" @click="resetSelections">{{labelNone}}</b-dropdown-item>
             <template v-for="item in items">
-                <b-dropdown-item :value="item.value" :key="item.value" @click="addSelection">{{item.label}}</b-dropdown-item>
+                <b-dropdown-item :data-tagid="item.value" :value="item.value" :key="item.value" @click="toggleSelection">{{item.label}}</b-dropdown-item>
             </template>
         </b-dropdown>
     </b-button-group>
@@ -27,30 +27,20 @@ export default {
     },
     methods: {
         resetSelections: function() {
-            let filter = utils.getFilter();
-            if(filter) 
-                delete filter[this.cls];
-            if(filter && 0<Object.keys(filter))
-                utils.setFilter(filter);
-            else
-                utils.setFilter(null);
-
-            //
-            this.$emit('refreshUpdate');
+            if(utils.resetFilter(this.cls))
+                this.$emit('refreshUpdate');
         },
-        addSelection: function(ev) {
+        toggleSelection: function(ev) {
             let el = ev.currentTarget || ev.target;
-            let tid = el.key;
-            let filter = utils.getFilter() || {};
-            if(!filter[this.cls])
-                filter[this.cls] = [tid];
-            else if(filter[this.cls].indexOf(tid)<0)
-                filter[this.cls].push(tid);
-            else
-                return;
+            let tid = el.dataset.tagid;
 
-            //
-            this.$emit('refreshUpdate');
+            if(this.values && 0<=this.values.indexOf(tid)) {
+                if(utils.delFilter(tid))
+                    this.$emit('refreshUpdate');
+            } else {
+                if(utils.addFilter(tid))
+                    this.$emit('refreshUpdate');
+            }
         },
     },
     computed: {
@@ -64,10 +54,12 @@ export default {
             else
                 return null;
         },
+        values: function() {
+            return utils.getFilter() ? utils.getFilter()[this.cls] : [];
+        },
     },
     data: function() {
         return {
-            values: [],
         };
     },
 }

@@ -41,10 +41,10 @@ export default {
         { cls: 'design.button', label: '버튼' },
     ],
     presetMessageCls : [
-        { cls: 'content.keytopic', label: '주제' },
         { cls: 'content.keyword', label: '키워드' },
         { cls: 'content.trigger', label: '트리거' },
         { cls: 'content.adcopy', label: '카피' },
+        { cls: 'content.benefit', label: '혜택' },
     ],
 
     html: function(tag, attrs) {
@@ -116,8 +116,8 @@ export default {
         return (uinfo && uinfo.id && uinfo.token) ? uinfo.token : null;
     },
 
-    getMetric: function() {
-        let m = this.getItem(KEY_METRIC);
+    getMetric: function(mk) {
+        let m = mk || this.getItem(KEY_METRIC);
         if(!m) {
             let defaultMetric = this.metrices[0].key;
             this.setMetric(defaultMetric);
@@ -200,6 +200,10 @@ export default {
             return false;
 
         currentFilter[theTag.class] = currentFilter[theTag.class].filter((tid)=>tid!=tagId);
+        // null out
+        if(currentFilter[theTag.class].length<=0)
+            delete currentFilter[theTag.class];
+
         this.setItem(KEY_FILTERS, currentFilter);
         return true;
     },
@@ -237,6 +241,7 @@ export default {
     // retrieve tag data from server
     retrieveTags: function(overwrite) {
         if(overwrite || !this.hasItem(KEY_TAGS)) {
+            window.dataLayer.push({ event: 'tagop.api.tags' });
             (async() => {
                 let resp = await axios.get(`${API_HOST}/t/`);
                 this.setItem(KEY_TAGS, await resp.data);
@@ -247,6 +252,7 @@ export default {
 
     //
     refreshUpdateValues: function(tags, campaigns, records, affiliations) {
+        window.dataLayer.push({ event: 'tagop.values.update' });
         let period = this.getPeriod();
         let metric = this.getMetric();
         // parse and load campaign records
@@ -309,6 +315,7 @@ export default {
     // retrieve campaign data from server
     retrieveCampaigns: function(overwrite) {
         if(overwrite || !this.hasItem(KEY_CAMPAIGNS)) {
+            window.dataLayer.push({ event: 'tagop.api.campaigns' });
             (async() => {
                 let tags = this.retrieveTags(overwrite);
                 let period = this.getPeriod();
@@ -500,7 +507,7 @@ export default {
     },
 
     _dashboardFilters: function() {
-        let filters = this.getFilter();
+        let filters = this.getFilter() || {};
         let presets = this.getPresetCategoryClasses().concat(this.getPresetVisualClasses());
         return Object.keys(filters)
             .filter((cls) => 0<=presets.indexOf(cls))
@@ -590,14 +597,16 @@ export default {
 
                 let mean = tcids.reduce((total, cid) => {
                     return total + campaigns[cid].summary.avg / Math.max(1.0, tcids.length);
-                });
+                }, 0);
                 data.push({
                     tag,
                     cids: tcids,
                     mean,
                 });
             });
-            data.sort((l,r) => (metric.ascending ? -1 : 1) * r.mean - l.mean);
+            data.sort((l,r) => r.mean - l.mean);
+            if(metric.ascending)
+                data = data.reverse();
 
             return {
                 cls,

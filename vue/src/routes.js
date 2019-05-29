@@ -41,7 +41,21 @@ export default {
     },
 
     initRouter() {
-        return new VueRouter({ routes: this.keys.map((rk)=>this.values[rk]) });
+        let rt = new VueRouter({ routes: this.keys.map((rk)=>this.values[rk]) });
+        rt.afterEach((to) => {
+          let rtopt = {
+            event: 'tagop.pageview',
+            path: to.path,
+            params: to.params,
+            query: to.query,
+            hash: to.hash,
+            fullpath: to.fullPath,
+            redirected: to.redirectedFrom,
+          };
+          window.console.log(rtopt);
+          window.dataLayer.push(rtopt);
+        });
+        return rt;
     },
 
     index: function() {

@@ -8,8 +8,8 @@
         <div class="row dashboard-card-design">
             <template v-for="ref in design_references">
                 <div class="section col-3" :key="ref.cls" v-b-tooltip.hover :title="`${lang(ref.cls)}: ${ref.name}`">
-                    <h5 class="section-title class-design">{{ lang(ref.cls) }}</h5>
-                    <div class="section-text">{{ ref.name }}</div>
+                    <h5 class="section-title class-design">{{ ref.name }}</h5>
+                    <div class="section-text">{{ lang(ref.cls) }}</div>
                 </div>
             </template>
         </div>
@@ -93,13 +93,15 @@ const CHART_OPTIONS = {
     chart: {
         stacked: false,
         zoom: { type: 'x', enabled: true },
-        toolbar: { show: true },
+        toolbar: { show: false },
     },
     plotOptions: {
         line: { curve: 'smooth' },
     },
-    dataLabels: { enabled: true },
-    grid: {},
+    dataLabels: { 
+        enabled: true,
+    },
+    grid: { show: true },
     markers: { size: 1 },
     xaxis: {
         // type: 'datetime',
@@ -150,6 +152,10 @@ export default {
                 },
                 yaxis: {
                     labels: { formatter: utils.getMetric().fmt },
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: (v) => utils.getMetric().fmt(v),
                 }
             });
         },
@@ -174,91 +180,12 @@ export default {
 </script>
 
 <style>
-/* dashboard screen specific */
-div.panel-category-detail {
-    margin-top: 12px;
-    margin-bottom: 24px;
-}
-
-div.panel-category-detail h5 {
-    font-weight: 700;
-    line-height: 2.5em;
-}
-
-.card.panel a {
-    cursor: pointer;
-}
-
-.card.panel .row.dashboard-card-design,
-.card.panel .row.dashboard-card-message
- {
-    padding-left: 5vw;
-    padding-right: 5vw;
-    word-break: keep-all;
-    white-space: nowrap;
-    overflow: visible;
-}
-.card.panel .row.dashboard-card-chart {
-    margin-top: var(--padding-5);
-    padding: 0px;
-    /* border: 1px solid #979797;
-    background-color: #d8d8d8; */
-}
-.card.panel .row.dashboard-card-message {
-    margin-bottom: var(--padding-1);
-}
-.card.panel .row.dashboard-card-chart
- {
-    margin-bottom: var(--padding-5);
-}
-
-.card.panel .row.dashboard-card-table .section-title {
-    text-align: left;
-    padding: 0px;
-    line-height: 2.0em;
-    border-bottom: 1px solid #595959;
-}
-
-.card.panel .panel-details h3 {
-    font-size: var(--font-size-8);
-}
-.card.panel .panel-details h5 {
-    font-weight: 700;
-    font-size: var(--font-size-5);
-}
-
-.card.panel .panel-details table.table {
-    font-size: var(--font-size-1);
-}
-
-.card.panel .panel-details thead {
-    background-color: var(--bg-light);
-    border-top: 2px solid var(--data-grey);
-    text-transform: capitalize;
-}
-.card.panel .panel-details tr {
-    border-bottom: 1px solid var(--data-grey);
-}
-.card.panel .panel-details th {
-    padding: 0.24rem;
-    min-width: 5vw;
-    font-weight: 700;
-
-    text-align: center;
-    vertical-align: middle;
-}
-.card.panel .panel-details tbody td {
-    font-weight: 400;
-    text-align: right;
-}
-.card.panel .panel-details tbody td svg {
-    width: 100%;
-}
-.card.panel .panel-details tbody td.class-design {
-    background-color: var(--bg-select);
-}
-.card.panel .panel-details tbody td.cell-value {
-    text-align: center;
-}
+    .card.panel .section-title {
+		text-align: center;
+		font-weight: 700;
+		font-size: var(--font-size-6);
+		margin-top: var(--padding-1);
+		padding: 0px;
+	}
 
 </style>

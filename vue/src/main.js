@@ -10,6 +10,11 @@ import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 import App from './App';
 import Route from './routes.js';
 
+import utils from './utils.js';
+
+// GTM ON
+const GTM_ID = 'GTM-NKNJZMQ';
+utils.gtm(GTM_ID);
 
 // import 'font-awesome/css/font-awesome.min.css';
 Vue.config.productionTip = false
@@ -17,6 +22,7 @@ Vue.config.productionTip = false
 Vue.use(BootstrapVue);
 Vue.use(Route.useRouter());
 Vue.use(MomentVue);
+
 
 new Vue({
   render: h => h(App),

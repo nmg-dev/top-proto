@@ -19,7 +19,6 @@
 						<b-card class="panel">
 							<transition name="slide-fade">
 								<router-view
-									class="container-fluid"
 									style="min-height: 50vh;"
 									language="ko"
 								>
@@ -35,7 +34,7 @@
 </template>
 
 <script>
-const GTM_ID = 'GTM-NKNJZMQ';
+
 import navigation from './components/navigation';
 import sidebar from './components/sidebar';
 
@@ -85,7 +84,7 @@ export default {
 		utils.retrieveTags();
 		utils.retrieveCampaigns();
 
-		utils.gtm(GTM_ID);
+		
 	},
 
 	mounted: function() {			
@@ -282,6 +281,93 @@ export default {
 		font-size: var(--font-size-6);
 		margin-top: var(--padding-1);
 		padding: 0px;
+	}
+
+	div.panel-category-detail {
+		margin-top: 12px;
+		margin-bottom: 24px;
+	}
+
+	div.panel-category-detail h5 {
+		text-align: left;
+		font-weight: 700;
+		line-height: 2.5em;
+	}
+
+	.card.panel a {
+		cursor: pointer;
+	}
+
+	.card.panel .row.dashboard-card-design,
+	.card.panel .row.dashboard-card-message
+	{
+		padding-left: 5vw;
+		padding-right: 5vw;
+		word-break: keep-all;
+		white-space: nowrap;
+		overflow: visible;
+	}
+	.card.panel .row.dashboard-card-chart {
+		margin-top: var(--padding-5);
+		padding: 0px;
+		/* border: 1px solid #979797;
+		background-color: #d8d8d8; */
+	}
+	.card.panel .row.dashboard-card-message {
+		margin-bottom: var(--padding-1);
+	}
+	.card.panel .row.dashboard-card-chart
+	{
+		margin-bottom: var(--padding-5);
+	}
+
+	.card.panel .row.dashboard-card-table .section-title {
+		text-align: left;
+		padding: 0px;
+		line-height: 2.0em;
+		border-bottom: 1px solid #595959;
+	}
+
+	.card.panel .panel-details h3 {
+		font-size: var(--font-size-8);
+	}
+	.card.panel .panel-details h5 {
+		font-weight: 700;
+		font-size: var(--font-size-5);
+	}
+
+	.card.panel .panel-details table.table {
+		font-size: var(--font-size-1);
+	}
+
+	.card.panel .panel-details thead {
+		background-color: var(--bg-light);
+		border-top: 2px solid var(--data-grey);
+		text-transform: capitalize;
+	}
+	.card.panel .panel-details tr {
+		border-bottom: 1px solid var(--data-grey);
+	}
+	.card.panel .panel-details th {
+		padding: 0.24rem;
+		min-width: 5vw;
+		font-weight: 700;
+
+		text-align: center;
+		vertical-align: middle;
+	}
+	.card.panel .panel-details tbody td {
+		font-weight: 400;
+		text-align: right;
+	}
+	.card.panel .panel-details tbody td svg {
+		width: 100%;
+	}
+	.card.panel .panel-details tbody td.class-design {
+		background-color: var(--bg-select);
+	}
+	.card.panel .panel-details tbody td.cell-value {
+		text-align: center;
 	}
 
 	.card.panel .row.dashboard-card-design, .card.panel .row.dashboard-card-message {

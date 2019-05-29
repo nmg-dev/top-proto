@@ -1,8 +1,8 @@
 <template>
     <div class="querybar-mid">
         <categorybtn class="querybar-controls" title="업종" cls="category" :icon="true"  @refreshUpdate="refreshUpdate" />
-        <categorybtn class="querybar-controls" title="채널" cls="channel" :icon="true" @refreshUpdate="refreshUpdate" />
-        <categorybtn class="querybar-controls" title="미디어" cls="media" :icon="true" @refreshUpdate="refreshUpdate" />
+        <categorybtn class="querybar-controls" title="채널" cls="media" :icon="true" @refreshUpdate="refreshUpdate" />
+        <categorybtn class="querybar-controls" title="미디어" cls="admedia" :icon="true" @refreshUpdate="refreshUpdate" />
         <categorybtn class="querybar-controls" title="광고목적" cls="goal" :icon="true" @refreshUpdate="refreshUpdate" />
     </div>
 </template>

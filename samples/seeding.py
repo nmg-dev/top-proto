@@ -151,7 +151,7 @@ campaign_key_classes = (
     'media',
     'adtype',
     'admedia',
-    'period',
+    #'period',
     'design.layout',
     'design.background',
     'design.objet',
@@ -211,12 +211,21 @@ def _from_file_line_content(c,t) :
     return t.strip()
 
 def _campaign_key_from_values(line_values) :
-    return '|'.join(str(tags[cc][line_values[cc]]) for cc in campaign_key_classes)
+    try :
+        return '|'.join(str(tags[cc][line_values[cc]]) for cc in campaign_key_classes)
+    except:
+        return None
 
 def _perform_value_date(date_str) :
-    return datetime.strptime(date_str,'%Y-%m-%d') if date_str is not None else None
+    try :
+        return datetime.strptime(date_str,'%Y-%m-%d')
+    except :
+        return None
 def _perform_value_int(int_str) :
-    return int(integer_pattern.sub('', int_str)) if int_str is not None and 0<len(int_str) else None
+    try :
+        return int(integer_pattern.sub('', int_str))
+    except:
+        return None
 
 def seeding_from_file(filepath, sep='\t', include_header=False) :
     global tags, tag_autoinc, campaigns
@@ -232,13 +241,17 @@ def seeding_from_file(filepath, sep='\t', include_header=False) :
             for c in range(0, len(tag_classes)) }
         for k,v in line_values.items() :
             if k in tag_classes_to_excludes : continue
+            if v is None or len(v.strip())<=0 : continue
+            v = v.strip()
             if v not in tags[k] :
                 tag_autoinc += 1
                 tags[k][v] = tag_autoinc
         ck = _campaign_key_from_values(line_values)
+        if ck is None : continue
         if ck not in campaigns : 
             print(line_values)
             ctitle = '[{account}] {brand} -{device},{media},{adtype},{admedia}'.format(**line_values)
+            if line_values['period'] is None : continue
             periods = line_values['period'].split('~')
             period_from = None
             period_till = None
@@ -296,23 +309,29 @@ def seeding_data_campaign_tag(tags, tids, campaigns, cids) :
     global cnx, cs
     
     for ck,cv in campaigns.items() :
-        cid = cids[ck]
-        for tk in cv[-1] :
-            if tk not in tids or tids[tk] is None or tids[tk]<=0 : continue
-            cs.execute('''INSERT INTO tag_affiliations
-            (campaign_id, tag_id) VALUES(%s,%s)''', (cid, tids[tk]))
-        cnx.commit()
+        try :
+            cid = cids[ck]
+            for tk in cv[-1] :
+                if tk not in tids or tids[tk] is None or tids[tk]<=0 : continue
+                cs.execute('''INSERT INTO tag_affiliations
+                (campaign_id, tag_id) VALUES(%s,%s)''', (cid, tids[tk]))
+            cnx.commit()
+        except:
+            continue
 
 def seeding_data_campaign_performance(campaigns, performances, cids) :
     global cnx, cs
 
     for ck,pfs in performances.items() :
-        cid = cids[ck]
-        cps = [(cid,)+cv for cv in pfs]
-        cs.executemany('''INSERT INTO campaign_performances
-            (campaign_id, day_id, impression, click, cost, conversion, created_at)
-            VALUES(%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)''', cps)
-        cnx.commit()
+        try :
+            cid = cids[ck]
+            cps = [(cid,)+cv for cv in pfs]
+            cs.executemany('''INSERT INTO campaign_performances
+                (campaign_id, day_id, impression, click, cost, conversion, created_at)
+                VALUES(%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)''', cps)
+            cnx.commit()
+        except:
+            continue
 
 
 
@@ -321,9 +340,10 @@ if __name__ == '__main__' :
     for fname in os.listdir(folder) :
         if not filename_pattern.match(fname) : continue
         fpath = '%s/%s'%(folder, fname)
+        print('open-file %s'%(fpath))
         seeding_from_file(fpath)
 
-        to_clear = ('campaigns', 'campaign_grants', 'campaign_performances', 'tags', 'tag_affiliations')
+    to_clear = ('campaigns', 'campaign_grants', 'campaign_performances', 'tags', 'tag_affiliations')
 
     # drop tables
     drop_tables(to_clear)

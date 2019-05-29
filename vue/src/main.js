@@ -16,6 +16,10 @@ import utils from './utils.js';
 const GTM_ID = 'GTM-NKNJZMQ';
 utils.gtm(GTM_ID);
 
+// default metric / period
+utils.getMetric();
+utils.getPeriod();
+
 // import 'font-awesome/css/font-awesome.min.css';
 Vue.config.productionTip = false
 
@@ -34,6 +38,8 @@ new Vue({
     metric: null,
     period: null,
     lang: 'ko',
+  },
+  beforeMount: function() {
   },
   methods: {
     getItem: function(key) {

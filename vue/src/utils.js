@@ -7,6 +7,7 @@ const GOOGLE_API_SCRIPT = 'https://apis.google.com/js/platform.js';
 // const GOOGLE_API_KEY = '';
 const GOOGLE_CLIENT_ID = '812043764419-lunbnv3g64rg709da2ad6asnqg05c7oi.apps.googleusercontent.com';
 
+const DEFAULT_PERIOD_FROM = Date.parse('2017-01-01');
 
 // storage keys
 const KEY_UINFO = 'userinfo';
@@ -95,7 +96,7 @@ export default {
             token: resp.id_token,
         });
         this.setItem(KEY_UINFO, await authResp.data);
-
+        
         // get default tags, campaigns
         this.retrieveTags(true);
         this.retrieveCampaigns(true);
@@ -152,8 +153,8 @@ export default {
     getPeriod: function() {
         let m = this.getItem(KEY_PERIOD);
         if(!m) {
-            let _from = new Date();
-            _from.setYear(_from.getFullYear()-3);
+            let _from = new Date(DEFAULT_PERIOD_FROM);
+            // _from.setYear(_from.getFullYear()-3);
             let _till = new Date();
             let defaultPeriod = {
                 from: Date.parse(_from.toLocaleDateString()),
@@ -255,6 +256,8 @@ export default {
 
     //
     refreshUpdateValues: function(tags, campaigns, records, affiliations) {
+        if(!(tags && campaigns && records && affiliations))
+            return;
         window.dataLayer.push({ event: 'tagop.values.update' });
         let period = this.getPeriod();
         let metric = this.getMetric();
@@ -571,11 +574,12 @@ export default {
                 if(i<best[cls].length)
                     agg[cls] = best[cls][i].t.name;
                 else if(0<best[cls].length)
-                    agg[cls] = best[cls][best[cls].length-1];
+                    agg[cls] = best[cls][best[cls].length-1].t.name;
                 else
                     agg[cls] = undefined;
                 return agg;   
             }, {});
+
             combinations.push(combi);
         }
         return combinations;

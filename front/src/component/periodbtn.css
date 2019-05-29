@@ -1,8 +1,0 @@
-.daterange button.btn {
-    border: none !important;
-}
-
-.daterange button.btn.daterange-selector-submit {
-    background-color: var(--data-primary);
-    color: var(--font-white);
-}

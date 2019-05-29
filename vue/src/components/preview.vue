@@ -1,5 +1,9 @@
 <template>
-    <svg class="creative-preview" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <svg 
+        class="creative-preview" 
+        xmlns="http://www.w3.org/2000/svg" 
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        v-b-tooltip :title="stringifyData">
         <!-- background image -->
         <image x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" :href="background" />
         <!-- objet image -->
@@ -18,6 +22,8 @@
 </template>
 
 <script>
+import langs from '../langs.js';
+
 const IMAGE_FOLDER = '/img/preview';
 const LAYOUT_DEFAULT = '좌측';
 const LAYOUT_OBJECT = {
@@ -51,12 +57,12 @@ const BACKGROUND_MAP = {
     '공백': 'blank',
 };
 const TRIGGER_MAP = {
-    'User Persuasive Text': 'suggest',
-    'Emphasize Reward': 'reward',
-    'Highlight benefits': 'benefit',
-    'Include Seasonlaity': 'season',
-    'Create Ungency': 'time',
-    'Esatablish credibility': 'credible',
+    'Persuasive': 'suggest',
+    'Reward': 'reward',
+    'Benefit': 'benefit',
+    'Seasonal': 'season',
+    'Rapidity': 'time',
+    'Reliability': 'credible',
 }
 
 export default {
@@ -89,6 +95,13 @@ export default {
         trigger_href: function() {
             let trigger = this.data['content.trigger'];
             return `${IMAGE_FOLDER}/button_${trigger}.png`;
+        },
+        stringifyData: function() {
+            return Object.keys(this.data).reduce((buf,mk) => {
+                if(0<buf.length)
+                    buf += '\n';
+                return buf + `${langs.ko[mk] ? langs.ko[mk] : mk}: ${this.data[mk]}`;
+            }, '');
         }
 
 

@@ -12,25 +12,29 @@ const showDownControlPaths = ['creative'];
 export default {
     keys: ['dashboard','creative','simulation','login'],
     values: {
-        dashboard: {
-            path: '/dashboard',
-            component: dashboardScreen,
-            name: '업종별 분석',
-          },
-          creative: {
-            path: '/creative',
-            component: creativeScreen,
-            name: '크리에이티브 분석',
-          },
-          simulation: {
-            path: '/simulation',
-            component: simulationScreen,
-            name: '예상효율 확인',
-          },
-          login: {
-            path: '/login',
-            component: loginScreen,
-          }
+      dashboard: {
+        path: '/dashboard',
+        component: dashboardScreen,
+        name: '업종별 분석',
+      },
+      creative: {
+        path: '/creative',
+        component: creativeScreen,
+        name: '크리에이티브 분석',
+      },
+      simulation: {
+        path: '/simulation',
+        component: simulationScreen,
+        name: '예상효율 확인',
+      },
+      login: {
+        path: '/login',
+        component: loginScreen,
+      },
+      default: {
+        path: '*',
+        redirect: '/dashboard',
+      }
     },
     paths: function() {
         return this.keys.map((rk)=>this.values[rk].path);

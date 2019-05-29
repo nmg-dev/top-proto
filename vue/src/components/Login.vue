@@ -24,7 +24,20 @@ window.__onGoogleLoginSuccess = function(gauth) {
     // let guser = gauth.getAuthResponse();
     // utils.setItem('access_token', guser.id_token);
     utils.authenticate(gauth);
-    window.history.back();
+
+    // after login data checkup
+    let dataCheckupInterval = setInterval(()=> {
+        let checks = utils.checkup_keys.reduce((agg, ck) => {
+            if(!agg) return false;
+            window.console.log(`${ck} checking...`);
+            return utils.hasItem(ck);
+        }, true);
+
+        if(checks) {
+            clearInterval(dataCheckupInterval);
+            window.history.back();
+        }
+    }, 500);
 }
 
 window.__onGoogleLoginFailure = function() {

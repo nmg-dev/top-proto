@@ -46,6 +46,9 @@ export default {
         { cls: 'content.adcopy', label: '카피' },
         { cls: 'content.benefit', label: '혜택' },
     ],
+    checkup_keys: [
+        KEY_UINFO, KEY_CAMPAIGNS, KEY_RECORDS
+    ],
 
     html: function(tag, attrs) {
         let el = document.createElement(tag);

@@ -43,6 +43,7 @@ export default {
     initRouter() {
         let rt = new VueRouter({ routes: this.keys.map((rk)=>this.values[rk]) });
         rt.afterEach((to) => {
+          window.document.title = `[NMG]TagOperation ${to.name}`;
           let rtopt = {
             event: 'tagop.pageview',
             path: to.path,
@@ -52,7 +53,6 @@ export default {
             fullpath: to.fullPath,
             redirected: to.redirectedFrom,
           };
-          window.console.log(rtopt);
           window.dataLayer.push(rtopt);
         });
         return rt;

@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
@@ -28,18 +29,20 @@ func main() {
 		}
 	}
 
+	// production mode
+	gin.SetMode(gin.ReleaseMode)
 	app := gin.Default()
 	// recovery
 	app.Use(gin.Recovery())
 	// to debug! CORS allow all origin
-	// app.Use(cors.Default())
+	app.Use(cors.Default())
 
 	// static index endpoint
 	app.Static(`/img`, `./img`)
 	// app.Static(`/js`, `./js`)
 	// app.Static(`/css`, `./css`)
 
-	app.Use(static.Serve("/", static.LocalFile("vue/src/dist", true)))
+	app.Use(static.Serve("/", static.LocalFile("vue/dist", true)))
 
 	GroupDatabaseConnection(app)
 

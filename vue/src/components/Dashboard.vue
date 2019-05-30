@@ -171,7 +171,6 @@ export default {
             return langs[this.language][key];
         },
     },
-    created() { utils.retrieveCampaigns(); },
     components: {
         apexchart,
         preview,

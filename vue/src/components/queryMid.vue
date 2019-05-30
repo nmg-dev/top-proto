@@ -1,13 +1,18 @@
 <template>
     <div class="querybar-mid">
-        <categorybtn class="querybar-controls" title="업종" cls="category" :icon="true"  @refreshUpdate="refreshUpdate" />
-        <categorybtn class="querybar-controls" title="채널" cls="media" :icon="true" @refreshUpdate="refreshUpdate" />
-        <categorybtn class="querybar-controls" title="미디어" cls="admedia" :icon="true" @refreshUpdate="refreshUpdate" />
-        <categorybtn class="querybar-controls" title="광고목적" cls="goal" :icon="true" @refreshUpdate="refreshUpdate" />
+        <categorybtn class="querybar-controls" 
+            v-for="cls in classes"
+            :title="lang(cls)" 
+            :cls="cls" 
+            :icon="true" 
+            @refreshUpdate="refreshUpdate" />
     </div>
 </template>
 
 <script>
+import utils from '../utils.js';
+import langs from '../langs.js';
+
 import categoryBtn from './categorybtn';
 
 
@@ -17,12 +22,17 @@ export default {
         'categorybtn': categoryBtn,
     },
     methods: {
+        lang: function(key) {
+            return langs.ko[key] || key;
+        },
         refreshUpdate: function() {
             this.$emit('refreshUpdate');
         }
     },
     data: () => {
-        return {}
+        return {
+            classes: utils.querymid_classes,
+        }
     }
 }
 </script>

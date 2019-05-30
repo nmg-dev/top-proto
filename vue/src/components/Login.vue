@@ -1,18 +1,23 @@
 <template>
-    <div class="container-fluid panel-wrapper m-0 p-4">
-        <div class="row">
-            <div class="col col-12 justify-content-center align-items-center">
-                <div class="g-signin2" 
-                    data-onsuccess="__onGoogleLoginSuccess"
-                    data-onerror="__onGoogleLoginFailure">
-                </div>
-            </div>
+    <div class="d-flex flex-column justify-content-between align-items-center">
+        <h3 class="panel-title">Login</h3>
+        <div class="g-signin2" 
+            data-onsuccess="__onGoogleLoginSuccess"
+            data-onerror="__onGoogleLoginFailure">
         </div>
-        <div class="row">
-            <div class="col col-12 justify-content-end align-items-baseline">
-                <h5>by <a href="https://www.nextmediagroup.co.kr" target="_blank" rel="noopener noreferrer">NextMediaGroup</a></h5>
-            </div>
-        </div>
+        <b-list-group class="loading-status" :key="latest_success">
+            <template v-for="ck in checkups">
+                <b-list-group-item>
+                    {{ ck.l }}
+                    <template v-if="ck.f">
+                        &nbsp; <i class="fas fa-check" style="color: var(--success)" />
+                    </template>
+                    <template v-else>
+                        ... <b-spinner type="grow" variant="success" />
+                    </template>
+                </b-list-group-item>
+            </template>
+        </b-list-group>
     </div>
 </template>
 
@@ -24,20 +29,6 @@ window.__onGoogleLoginSuccess = function(gauth) {
     // let guser = gauth.getAuthResponse();
     // utils.setItem('access_token', guser.id_token);
     utils.authenticate(gauth);
-
-    // after login data checkup
-    let dataCheckupInterval = setInterval(()=> {
-        let checks = utils.checkup_keys.reduce((agg, ck) => {
-            if(!agg) return false;
-            window.console.log(`${ck} checking...`);
-            return utils.hasItem(ck);
-        }, true);
-
-        if(checks) {
-            clearInterval(dataCheckupInterval);
-            window.history.back();
-        }
-    }, 500);
 }
 
 window.__onGoogleLoginFailure = function() {
@@ -48,6 +39,29 @@ export default {
     name: 'glogin',
     created() {
         utils.gauth();
+    },
+    data: function() {
+        return {
+            checkups: utils.loading_check(),
+            latest_success: 0,
+            interval: setInterval((() => {
+                if(this.latest_success == this.checkups.length-1) {
+                    clearInterval(this.interval);
+                    // window.history.back();
+                    if(this.$route.query.b && /^\/.+/.exec(this.$route.query.b)) {
+                        window.location = this.$route.query.b;
+                    } else {
+                        window.location = '/#/dashboard';
+                    }
+                } else {
+                    if(utils.hasItem(this.checkups[this.latest_success].k)) {
+                        this.checkups[this.latest_success].f = true;
+                        this.latest_success += 1;
+                    }
+                }
+                // window.console.log(this.latest_success);
+            }).bind(this), 250),
+        }
     },
     methods: {
         onLoginSuccess: function(resp) {

@@ -27,8 +27,12 @@
 						</b-card>
 					</div>
 				</div>
+				<div class="row footer m-0 p-0">
+					<a href="https://www.nextmediagroup.co.kr" target="_blank">Next Media Group</a> 
+					&nbsp;is part of the&nbsp; 
+					<a href="https://fsn.co.kr" target="_blank">FSN group</a>
+				</div>
 			</div>
-			
 		</main>
 	</div>
 </template>
@@ -74,13 +78,6 @@ export default {
 		this.showMidControls = Route.showMidControls(this.$route.path);
 		this.showDownControls = Route.showDownControls(this.$route.path);
 	},
-	created: function() {
-		if(!utils.getToken())
-			this.$router.push('/login');
-		else if(!this.$routes)
-			this.$router.push(Route.index());		
-	},
-
 	mounted: function() {			
 	}
 }

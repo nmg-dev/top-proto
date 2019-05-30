@@ -1,5 +1,7 @@
 import VueRouter from 'vue-router';
 
+import utils from './utils.js';
+
 import dashboardScreen from './components/Dashboard';
 import creativeScreen from './components/Creative';
 import simulationScreen from './components/Simulation';
@@ -46,6 +48,14 @@ export default {
 
     initRouter() {
         let rt = new VueRouter({ routes: this.keys.map((rk)=>this.values[rk]) });
+        rt.beforeEach((to,from,next) => {
+          if(to.path!='/login' && !utils.getToken()) {
+            rt.push(`/login?b=${to.path}`);
+          }
+
+          // 
+          next();
+        });
         rt.afterEach((to) => {
           window.document.title = `[NMG]TagOperation ${to.name}`;
           let rtopt = {

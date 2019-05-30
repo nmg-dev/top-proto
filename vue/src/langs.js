@@ -14,9 +14,10 @@ export default {
 
         'category': '업종(대분류)',
         'subcategory': '업종(중분류)',
-        'admedia': '광고상품',
+        'channel': '광고 채널',
+        'admedia': '광고 상품',
         'media': '매체',
-        'adtype': '광고유형',
+        'adtype': '광고 유형',
         'account': '광고주',
         'device': '기기',
         'brand': '브랜드',

@@ -7,7 +7,7 @@ const GOOGLE_API_SCRIPT = 'https://apis.google.com/js/platform.js';
 // const GOOGLE_API_KEY = '';
 const GOOGLE_CLIENT_ID = '812043764419-lunbnv3g64rg709da2ad6asnqg05c7oi.apps.googleusercontent.com';
 
-const DEFAULT_PERIOD_FROM = Date.parse('2017-01-01');
+const DEFAULT_PERIOD_FROM = Date.parse('2017-05-01');
 
 // storage keys
 const KEY_UINFO = 'userinfo';
@@ -20,6 +20,9 @@ const KEY_CAMPAIGNS = 'campaigns';
 const KEY_AFFILIATIONS = 'affiliations';
 const KEY_RECORDS = 'records';
 
+const QUERY_MID_CLASSES = [
+    'category', 'media', 'admedia', 'goal'
+];
 
 export default {
     // metrics
@@ -48,8 +51,13 @@ export default {
         { cls: 'content.benefit', label: '혜택' },
     ],
     checkup_keys: [
-        KEY_UINFO, KEY_CAMPAIGNS, KEY_RECORDS
+        {k: KEY_UINFO, l: 'authenticate'},
+        {k: KEY_TAGS, l: 'loading_tags'},
+        {k: KEY_CAMPAIGNS, l: 'loading_campaigns'},
+        {k: KEY_RECORDS, l: 'processing_records'},
+        {k: KEY_AFFILIATIONS, l: 'computing_affiliations'},
     ],
+    querymid_classes: QUERY_MID_CLASSES,
 
     html: function(tag, attrs) {
         let el = document.createElement(tag);
@@ -86,6 +94,10 @@ export default {
         document.head.appendChild(src);
     },
 
+    loading_check: function() {
+        return this.checkup_keys.map((ck) => Object.assign({f: this.hasItem(ck.k)}, ck));
+    },
+
     authenticate: async function(gauth) {
         let resp = gauth.getAuthResponse();
         let profile = gauth.getBasicProfile();
@@ -113,6 +125,10 @@ export default {
 
     setItem: function(key, value) {
         return window.sessionStorage.setItem(key, JSON.stringify(value));
+    },
+
+    getUser: function() {
+        return this.getItem(KEY_UINFO);
     },
 
     getToken: function() {
@@ -514,9 +530,8 @@ export default {
 
     _dashboardFilters: function() {
         let filters = this.getFilter() || {};
-        let presets = this.getPresetCategoryClasses().concat(this.getPresetVisualClasses());
         return Object.keys(filters)
-            .filter((cls) => 0<=presets.indexOf(cls))
+            .filter((cls) => 0<=QUERY_MID_CLASSES.indexOf(cls))
             .reduce((agg, cls) => {
                 agg[cls] = filters[cls];
                 return agg;

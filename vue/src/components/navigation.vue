@@ -5,20 +5,27 @@
         </b-navbar-brand>
 
         <b-nav class="ml-auto">
-            <b-nav-item-dropdown dropleft no-caret>
-                <i class="fa fa-globe" slot="button-content" />
-            </b-nav-item-dropdown>
-            <b-nav-item-dropdown dropleft no-caret>
-                <i class="fa fa-user" slot="button-content" />
-            </b-nav-item-dropdown>
+          <b-nav-item v-if="user">
+            <b-badge variant="light" pill class="profile-badge">
+              <span>{{ user.profile.name }}</span>
+              <img :src="user.profile.picture" style="width: 36px; height: 36px; border-radius: 50%; padding: 0px; margin: 0px;" />
+            </b-badge>
+          </b-nav-item>
         </b-nav>
     </b-navbar>
 </template>
 
 <script>
+import utils from '../utils.js';
+
 export default {
     name: 'navigation',
     props: [],
+    data: function() {
+      return {
+        user: utils.getUser(),
+      }
+    }
 }
 </script>
 
@@ -51,5 +58,25 @@ export default {
   height: 32px;
   border-radius: 16px;
   object-fit: cover;
+}
+
+.gnb.navbar .profile-badge {
+  padding: 0px;
+}
+
+.gnb.navbar .profile-badge img {
+  width: 36px;
+  height: 36px;
+  margin: 0px;
+  padding: 0px;
+  border-radius: 50%;
+}
+
+.gnb.navbar .profile-badge span {
+  padding-left: 28px;
+  padding-right: 12px;
+  font-weight: 600;
+  color: var(--font-light);
+  vertical-align: middle;
 }
 </style>

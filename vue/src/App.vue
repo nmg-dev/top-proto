@@ -78,13 +78,7 @@ export default {
 		if(!utils.getToken())
 			this.$router.push('/login');
 		else if(!this.$routes)
-			this.$router.push(Route.index());
-
-		//
-		utils.retrieveTags();
-		utils.retrieveCampaigns();
-
-		
+			this.$router.push(Route.index());		
 	},
 
 	mounted: function() {			

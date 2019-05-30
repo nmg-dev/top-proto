@@ -5,6 +5,8 @@ import json
 import os, os.path
 import re
 
+import traceback
+
 __mysql_config = {}
 if os.path.exists('./seeding.database.json') :
     with open('./seeding.database.json', encoding='utf8') as dbfp : __mysql_config = json.load(dbfp)
@@ -212,19 +214,23 @@ def _from_file_line_content(c,t) :
 
 def _campaign_key_from_values(line_values) :
     try :
-        return '|'.join(str(tags[cc][line_values[cc]]) for cc in campaign_key_classes)
+        vs = [str(tags[cc][line_values[cc]] if line_values[cc] is not None and 0<len(line_values[cc]) else '') for cc in campaign_key_classes]
+        return '|'.join(vs)
     except:
+        traceback.print_exc()
         return None
 
 def _perform_value_date(date_str) :
     try :
-        return datetime.strptime(date_str,'%Y-%m-%d')
+        return datetime.strptime(date_str,'%Y-%m-%d') if date_str is not None and 0<len(date_str) else None
     except :
+        traceback.print_exc()
         return None
 def _perform_value_int(int_str) :
     try :
-        return int(integer_pattern.sub('', int_str))
+        return int(integer_pattern.sub('', int_str)) if int_str is not None and 0<len(int_str.strip()) else None
     except:
+        traceback.print_exc()
         return None
 
 def seeding_from_file(filepath, sep='\t', include_header=False) :
@@ -263,11 +269,11 @@ def seeding_from_file(filepath, sep='\t', include_header=False) :
                     p = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(periods[0]) - 2)
                     period_from = p
                     period_till = p
+                tks = tuple(tags[c][line_values[c]] for c in campaign_aff_classes)
+                campaigns[ck] = (ctitle, period_from, period_till,tks)
             except :
                 continue
 
-            tks = tuple(tags[c][line_values[c]] for c in campaign_aff_classes)
-            campaigns[ck] = (ctitle, period_from, period_till,tks)
         if ck not in performances : 
             performances[ck] = []
         performance = ( \
@@ -317,6 +323,7 @@ def seeding_data_campaign_tag(tags, tids, campaigns, cids) :
                 (campaign_id, tag_id) VALUES(%s,%s)''', (cid, tids[tk]))
             cnx.commit()
         except:
+            traceback.print_exc()
             continue
 
 def seeding_data_campaign_performance(campaigns, performances, cids) :
@@ -325,12 +332,17 @@ def seeding_data_campaign_performance(campaigns, performances, cids) :
     for ck,pfs in performances.items() :
         try :
             cid = cids[ck]
-            cps = [(cid,)+cv for cv in pfs]
-            cs.executemany('''INSERT INTO campaign_performances
-                (campaign_id, day_id, impression, click, cost, conversion, created_at)
-                VALUES(%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)''', cps)
+            cnts = 0
+            for cv in pfs :
+                if cv[0] is None : continue
+                cs.execute('''INSERT INTO campaign_performances
+                    (campaign_id, day_id, impression, click, cost, conversion, created_at)
+                    VALUES(%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)''', (cid,)+cv)
+                cnts += 1
             cnx.commit()
+            print('%s campaign records: %d/%d'%(ck, cnts, len(pfs)))
         except:
+            traceback.print_exc()
             continue
 
 

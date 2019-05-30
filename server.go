@@ -39,7 +39,7 @@ func main() {
 	// app.Static(`/js`, `./js`)
 	// app.Static(`/css`, `./css`)
 
-	app.Use(static.Serve("/", static.LocalFile("vue/src/dist", true)))
+	app.Use(static.Serve("/", static.LocalFile("vue/dist", true)))
 
 	GroupDatabaseConnection(app)
 

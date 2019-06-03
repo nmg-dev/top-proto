@@ -1,4 +1,7 @@
+/top-proto
+/top-proto.exe
 *.log
+*.sqlite
 /*.exe
 **/node_modules
 

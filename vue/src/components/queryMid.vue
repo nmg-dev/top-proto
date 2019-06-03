@@ -4,7 +4,8 @@
             v-for="cls in classes"
             :title="lang(cls)" 
             :cls="cls" 
-            :icon="true" 
+            :icon="true"
+            :autofilter="cls == 'admedia'"
             @refreshUpdate="refreshUpdate" />
     </div>
 </template>

@@ -32,10 +32,6 @@ export default {
       login: {
         path: '/login',
         component: loginScreen,
-      },
-      default: {
-        path: '*',
-        redirect: '/dashboard',
       }
     },
     paths: function() {
@@ -49,12 +45,15 @@ export default {
     initRouter() {
         let rt = new VueRouter({ routes: this.keys.map((rk)=>this.values[rk]) });
         rt.beforeEach((to,from,next) => {
-          if(to.path!='/login' && !utils.getToken()) {
+          if(to.path == '/') {
+            rt.push('/dashboard');
+          }
+          else if(to.path!='/login' && !utils.getToken()) {
             rt.push(`/login?b=${to.path}`);
           }
-
-          // 
-          next();
+          else {
+            next();
+          }
         });
         rt.afterEach((to) => {
           window.document.title = `[NMG]TagOperation ${to.name}`;

@@ -620,6 +620,9 @@ export default {
                 let mean = tcids.reduce((total, cid) => {
                     return total + campaigns[cid].summary.avg / Math.max(1.0, tcids.length);
                 }, 0);
+                // no zeros!
+                if(mean<=0) 
+                    return;
                 data.push({
                     tag,
                     cids: tcids,
@@ -740,6 +743,16 @@ export default {
         }, {});
 
         return result;
+    },
+    filteredTags: function(cls) {
+        let filter = /\/dashboard\/?/.exec(window.location.pathname) ? this._dashboardFilters() : this.getFilter();
+        let cids = this.filterCampaignIds(filter);
+        let tags = this.retrieveTags(cls);
+        return Object.keys(tags)
+            .map((tid)=>tags[tid])
+            .filter((tag)=>tag.class==cls)
+            .filter((tag) => 0<tag.campaigns.filter((cid)=>0<=cids.indexOf(cid)).length)
+        // return 0<tag.campaigns.filter((cid)=> 0<=cids.indexOf(cid)).length;
     },
 
 

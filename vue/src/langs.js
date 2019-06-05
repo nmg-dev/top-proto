@@ -22,8 +22,33 @@ export default {
         'device': '기기',
         'brand': '브랜드',
         'goal': '광고 목적',
+
+        'all': '전체선택',
     },
     en: {
+        'design.layout': 'Layout',
+        'design.background': 'Background',
+        'design.objet': 'Objet',
+        'design.button': 'Button',
+        'design.shape': 'Shape',
 
+        'content.keytopic': 'Subject',
+        'content.keyword': 'Keyword',
+        'content.trigger': 'Trigger',
+        'content.adcopy': 'Copy Text',
+        'content.benefit': 'Benefit',
+
+        'category': 'Category',
+        'subcategory': 'Sub category',
+        'channel': 'Ad Channel',
+        'admedia': 'Ad Media',
+        'media': 'Media Platform',
+        'adtype': 'Ad Type',
+        'account': 'Account',
+        'device': 'Device',
+        'brand': 'Brand',
+        'goal': 'Object',
+
+        'all': 'ALL',
     },
 }

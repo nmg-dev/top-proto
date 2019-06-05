@@ -1,10 +1,19 @@
 <template>
-    <div class="querybar-top">
+    <div class="querybar-top d-flex justify-content-between">
         <div class="querybar-title d-flex justify-content-start align-items-center">
-            <h1>Tag Operation</h1>
-            <sup>Beta</sup>
+            <h1><b>C</b>reative <b>O</b>ptimize <b>S</b>ystem</h1>
+            <sup style="color: var(--data-primary);">Beta</sup>
         </div>
-        <div class="querybar-controls" v-if="controls">
+        <div class="querybar-controls d-block" v-if="controls">
+            <!-- period control -->
+            <b-input-group class="query-control top-control">
+                <daterange 
+                    :from="period.from"
+                    :till="period.till"
+                    @periodUpdated="set_app_period">
+                </daterange>
+            </b-input-group>
+
             <!-- dropdown metric -->
             <b-input-group class="query-control top-control">
                 <b-dropdown variant="default" no-caret>
@@ -25,15 +34,6 @@
                         </b-dropdown-item>
                     </template>
                 </b-dropdown>
-            </b-input-group>
-            
-            <!-- period control -->
-            <b-input-group class="query-control top-control">
-                <daterange 
-                    :from="period.from"
-                    :till="period.till"
-                    @periodUpdated="set_app_period">
-                </daterange>
             </b-input-group>
         </div>
     </div>
@@ -86,29 +86,5 @@ export default {
 <style>
 @import 'https://nmg-dev.github.io/bs-daterange/daterange.css';
 
-.querybar .querybar-top {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    min-height: 90px;
-}
-.query-control.top-control {
-    margin: var(--padding-1);
-    margin-left: 0px;
-    border-radius: 0;
-    color: var(--font-light);
-    min-width: 12vw;
-}
-.query-control.top-control button {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    border: 1px solid #d9d9d9;
-    border-radius: 1px;
-    box-shadow: none;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: var(--bg-white);
-}
+
 </style>

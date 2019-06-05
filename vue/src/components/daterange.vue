@@ -43,8 +43,12 @@
             <table class="bs-daterange-calendar-table" :key="calendarMonth">
                 <thead>
                     <tr>
-                        <template v-for="w in weekdays">
-                            <td class="weekday-w" :key="`weekday-${w.toLowerCase()}`">{{ w }}</td>
+                        <template v-for="(w,widx) in weekdays">
+                            <th class="weekday" 
+                                :data-weekday="widx"
+                                :key="`weekday-${widx}`">
+                                {{ w }}
+                            </th>
                         </template>
                     </tr>
                 </thead>
@@ -95,7 +99,7 @@ export default {
     },
     data: function() {
         return {
-            mode: undefined,
+            mode: 'from',
             period: {from: this.from, till: this.till},
             weekdays: this.$moment.weekdaysShort(),
             periodFrom: this.from,
@@ -162,6 +166,9 @@ export default {
             if(el.dataset.timestamp)
                 this.calendarMonth = this.$moment(parseInt(el.dataset.timestamp)).format('YYYY-MM');
         },
+        toggleMode: function() {
+            this.mode = this.mode === 'from' ? 'till' : 'from';
+        },
         onDateSelect: function(ev) {
             let el = ev.currentTarget || ev.target;
             let ts = parseInt(el.dataset.timestamp);
@@ -174,7 +181,10 @@ export default {
                     if(!this.periodFrom || ts > this.periodFrom) 
                         this.periodTill = ts; 
                     break;
+                default:
+                    return;
             }
+            this.toggleMode();
         },
         moveMonths: function(radix) {
             let nextMoment = this.$moment(this.calendarMonth).add(radix, 'month');
@@ -202,6 +212,7 @@ export default {
     }
     table.bs-daterange-calendar-table {
         min-width: 240px;
+        max-width: 360px;
         width: 25vw;
     }
 
@@ -229,10 +240,11 @@ export default {
     }
 
     .query-control.top-control  .daterange-form button.daterange-submit {
-        
+        background-color: var(--data-primary);
+        border-radius: 5%;
     }
     .query-control.top-control  .daterange-form button.daterange-submit i {
-        color: var(--data-primary);
+        color: var(--font-white);
     }
 
 
@@ -243,11 +255,18 @@ export default {
         font-weight: 600;
         padding: calc(var(--padding-0));
     }
+    .daterange-form table [data-weekday="0"] {
+        color: #FF0000;
+    }
+    .daterange-form table [data-weekday="6"] {
+        color: #0000FF;
+    }
+
     .daterange-form table td {
         padding: calc(var(--padding-0));
     }
     .daterange-form table td:not([data-current]) {
-        opacity: .75;
+        opacity: .65;
     }
     .daterange-form table td[data-in] {
         background-color: var(--bg-select);

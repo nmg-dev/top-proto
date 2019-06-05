@@ -2,7 +2,7 @@
     <div class="section panel-details m-0">
         <div class="row section-title m-0 p-0">
             <div class="col p-0" align="left">
-                <h3>Element Analysis</h3>
+                <h3>상세 분석</h3>
                 <h5>소재 요소 상세 분석</h5>
             </div>
         </div>
@@ -22,7 +22,7 @@
                         <a :data-cls="charting.cls" @click="showModal">자세히 보기 &gt;</a>
                     </div>
                     <div class="creative-chart-wrapper">
-                        <h5>{{ lang(charting.cls) }}</h5>
+                        <h5>{{ lang(charting.cls) }} -{{ appMetric.label }}</h5>
                         <div class="creative-chart">
                             <apexchart type="bar" height="200" :options="chart_options(charting.data)" :series="chart_values(charting.data)" />
                         </div>
@@ -33,8 +33,8 @@
         <b-modal size="lg" ref="creative-modal" class="creative-modal">
             <template slot="modal-header">
                 <div class="d-block">
-                    <h3 class="modal-title">{{ lang(this.details_cls) }} Details</h3>
-                    <h5>크리에이티브 요소 상세분석</h5>
+                    <h3 class="modal-title">{{ lang(this.details_cls) }} 세부 분석</h3>
+                    <h5>크리에이티브 요소 분석</h5>
                 </div>
                 <button type="button" class="close" aria-label="Close" @click="$refs['creative-modal'].hide()"><span aria-hidden="true">×</span></button>
             </template>
@@ -42,10 +42,10 @@
                 <div class="d-flex justify-content-end align-items-top">
                     <b-dropdown class="query-control m-0" variant="default" no-caret>
                         <template slot="button-content">
-                            <div class="label-text text-muted">{{ details_tag ? details_tag.name : 'ALL' }}</div>
+                            <div class="label-text text-muted">{{ details_tag ? details_tag.name : lang('all') }}</div>
                             <i class="fas fa-chevron-down m-0 p-0"></i>
                         </template>
-                        <b-dropdown-item :data-tagid="null" @click="selectChartDetailTag">ALL</b-dropdown-item>
+                        <b-dropdown-item :data-tagid="null" @click="selectChartDetailTag">{{ lang('all') }}</b-dropdown-item>
                         <b-dropdown-divider />
                         <template v-for="tag in details_tags">
                             <b-dropdown-item :data-tagid="tag.id" @click="selectChartDetailTag">{{ tag.name }}</b-dropdown-item>

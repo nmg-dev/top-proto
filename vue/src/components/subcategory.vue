@@ -11,8 +11,7 @@
                         :cls="opt.cls"
                         :icon="false"
                         :items="opt.items.map((tag)=>{ return {value: tag.id, label: tag.name}})" 
-                        title="" 
-                        labelNone="ALL" >
+                        title="">
                     </categorybtn>
                 </div>
             </div>

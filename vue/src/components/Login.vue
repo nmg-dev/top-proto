@@ -49,9 +49,11 @@ export default {
                     clearInterval(this.interval);
                     // window.history.back();
                     if(this.$route.query.b && /^\/.+/.exec(this.$route.query.b)) {
-                        window.location = this.$route.query.b;
+                        this.$router.push(this.$route.query.b);
+                        // window.location = `/#${this.$route.query.b}`;
                     } else {
-                        window.location = '/#/dashboard';
+                        this.$router.push('/dashboard');
+                        // window.location = '/#/dashboard';
                     }
                 } else {
                     if(utils.hasItem(this.checkups[this.latest_success].k)) {

@@ -35,7 +35,7 @@ export default {
         title: { type: String },
         cls: { type: String },
         icon: {},
-        labelNone: { type: String, default: 'ALL' },
+        labelNone: { type: String, default: langs.ko.all },
         autoFilter: { type: Boolean, default: true },
     },
     methods: {

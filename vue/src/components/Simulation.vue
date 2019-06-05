@@ -25,11 +25,11 @@
                                             {{ tagName(selecteds[opts.cls]) }}
                                         </span>
                                         <span v-else>
-                                            ALL
+                                            전체선택
                                         </span>
                                         <i class="fas fa-chevron-down"></i>
                                     </template>
-                                    <b-dropdown-item :data-cls="opts.cls" :data-tagid="-1" @click="addOpts" value="">ALL</b-dropdown-item>
+                                    <b-dropdown-item :data-cls="opts.cls" :data-tagid="-1" @click="addOpts" value="">전체선택</b-dropdown-item>
                                     <b-dropdown-divider />
                                     <b-dropdown-item :checked="selecteds[opts.cls] == tag.id" :data-cls="opts.cls" :data-tagid="tag.id" @click="addOpts" v-for="tag in opts.tags" :key="`simulate-opt-${tag.id}`" :value="tag.id">{{ tag.name }}</b-dropdown-item>
                                 </b-dropdown>

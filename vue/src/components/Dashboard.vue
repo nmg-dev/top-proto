@@ -2,7 +2,7 @@
     <div class="m-0 p-1">
         <div class="row panel-header">
             <div class="col">
-                <h3 class="panel-title">Best Creative Element</h3>
+                <h3 class="panel-title">최적 소재 요소</h3>
             </div>
         </div>
         <div class="row dashboard-card-design">
@@ -29,7 +29,7 @@
         </div>
         <div class="row dashboard-card-table panel-details">
             <div class="col">
-                <h3 class="section-title">Element Analysis</h3>
+                <h3 class="section-title">상세 분석</h3>
                 <template v-for="pv in previews">
                     <div class="panel-category-detail" :key="pv.title">
                         <h5>{{ pv.title }}</h5>
@@ -151,12 +151,13 @@ export default {
                     categories: this.chart_series.map((ser)=>ser.label),
                 },
                 yaxis: {
-                    labels: { formatter: utils.getMetric().fmt },
+                    labels: { formatter: utils.getMetric().chart_fmt },
                 },
                 dataLabels: {
                     enabled: true,
-                    formatter: (v) => utils.getMetric().fmt(v),
-                }
+                    formatter: utils.getMetric().chart_fmt,
+                },
+                tooltip: { x: { show: true}, y: { formatter: utils.getMetric().fmt } },
             });
         },
         chart_data: function() {

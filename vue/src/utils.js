@@ -2,7 +2,7 @@ import axios from "axios";
 
 const moment = require('moment');
 
-const API_HOST = '';
+const API_HOST = 'http://localhost:8080';
 const GOOGLE_API_SCRIPT = 'https://apis.google.com/js/platform.js';
 // const GOOGLE_API_KEY = '';
 const GOOGLE_CLIENT_ID = '812043764419-lunbnv3g64rg709da2ad6asnqg05c7oi.apps.googleusercontent.com';
@@ -24,13 +24,23 @@ const QUERY_MID_CLASSES = [
     'category', 'media', 'admedia', 'goal'
 ];
 
+const NUMBER_FORMATTER = function(suffix, multiplier, radix) {
+    let s = suffix;
+    let m = multiplier || 1;
+    let r = 10.0**radix;
+    return function(v) {
+        let n = Math.round(r*m*v) / r;
+        return `${n.toLocaleString()} ${s}`;
+    }
+};
+
 export default {
     // metrics
     metrices: [
-        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, ascending: true, desc: 'Cost Per Click', },
-        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: (v)=> `${v.toLocaleString()} 원`, ascending: true, desc: 'Cost Per Action', },
-        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, ascending: false, desc: 'Click Through Rate' },
-        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: (v)=> `${(100*v).toFixed(2)} %`, ascending: false, desc: 'Conversion Rate' },
+        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: NUMBER_FORMATTER('원', 1, 0), ascending: true, desc: 'Cost Per Click', },
+        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: NUMBER_FORMATTER('원', 1, 0), ascending: true, desc: 'Cost Per Action', },
+        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: NUMBER_FORMATTER('%', 100, 0), ascending: false, desc: 'Click Through Rate' },
+        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: NUMBER_FORMATTER('%', 100, 0), ascending: false, desc: 'Conversion Rate' },
         { key: 'cnt', label: 'COUNT', fn: () => 1, fmt: (v)=> v.toLocaleString(), desc: 'Counts', defaultHide: true },
     ],
     // predefined classes

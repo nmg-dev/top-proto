@@ -57,12 +57,12 @@ const BACKGROUND_MAP = {
     '공백': 'blank',
 };
 const TRIGGER_MAP = {
-    'Persuasive': 'suggest',
-    'Reward': 'reward',
-    'Benefit': 'benefit',
-    'Seasonal': 'season',
-    'Rapidity': 'time',
-    'Reliability': 'credible',
+    '설득': 'suggest',
+    '리워드': 'reward',
+    '혜택': 'benefit',
+    '시즌': 'season',
+    '긴급': 'time',
+    '신뢰성': 'credible',
 }
 
 export default {

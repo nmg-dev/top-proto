@@ -24,7 +24,9 @@
                     <div class="creative-chart-wrapper">
                         <h5>{{ lang(charting.cls) }} -{{ appMetric.label }}</h5>
                         <div class="creative-chart">
-                            <apexchart type="bar" height="200" :options="chart_options(charting.data)" :series="chart_values(charting.data)" />
+                            <vue-plotly height="200" 
+                                :layout="chart_layout" 
+                                :data="chart_values(charting.data)" />
                         </div>
                     </div>
                 </div>
@@ -53,9 +55,9 @@
                     </b-dropdown>
                 </div>
                 <div>
-                    <apexchart type="line" height="350" 
-                        :options="chart_detail_options" 
-                        :series="[{name: chart_detail_title, data: chart_detail_values}]" />
+                    <vue-plotly height="350" 
+                        :layout="chart_detail_options" 
+                        :data="chart_detail_values()" />
                 </div>
                 <div>
                     <table class="table">
@@ -87,7 +89,7 @@
 </template>
 
 <script>
-    import apexchart from 'vue-apexcharts';
+    import VuePlotly from '@statnett/vue-plotly'
     import preview from './preview';
 
     import utils from '../utils.js';
@@ -97,7 +99,8 @@
         name: 'creative',
         langs,
         components: {
-            apexchart,
+            // apexchart,
+            VuePlotly,
             preview,
         },
         methods: {
@@ -171,17 +174,50 @@
                 return ret;
             },
             chart_values: function(data) {
-                return data.map((dv)=>{
+                let colors = ['#20ade3', '#1f4e79', '#9dc3e6', '#d9d9d9', '#deebf7', '#002060'];
+                let opts = {
+                    type: 'bar',
+                    orientation: 'h',
+                    showlegend: false,
+
+                    hoverinfo: 'name+text',
+                    textposition: 'inside',
+                    contraintext: 'both',
+                };
+                let met = utils.getMetric();
+                return data.map((dv, di)=>{
+                    let c = colors[di % colors.length];
                     return {
+                        x: [ dv.mean, ],
+                        y: [ met.label ],
                         name: dv.tag.name,
-                        data: [dv.mean],
-                    }
+                        text: dv.tag.name,
+                        marker:{ color: c },
+                        line: { color: c, width: 1 },
+
+                        type: 'bar',
+                        orientation: 'h',
+                        showlegend: false,
+
+                        hoverinfo: 'name+text',
+                        textposition: 'inside',
+                        contraintext: 'both',   
+                    };
                 });
-                // let ret = [{data: data.map((dt) => dt.mean)}];
-                // return ret;
             },
-            
-            
+            chart_detail_values: function() {
+                let values = this.details_selected[this.details_metric];
+                return [{
+                    x: this.details.labels,
+                    y: values,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#20ade3', },
+                    marker: { color: '#20ade3' },
+                }];
+                //     y: ;
+                // };
+            },            
         },
         mounted() {  },
         computed: {
@@ -214,32 +250,21 @@
                         .data;
                 }
             },
-            chart_detail_title: function() {
-                return `${this.lang(this.details_cls)}`
-                    + `:${this.details_tag ? this.details_tag.name : '-ALL'}`
-                    + `[${this.details_metric}]`;
-            },
             chart_detail_options: function() {
                 let metric = utils.getMetric(this.details_metric);
                 return {
-                    chart: {
-                        height: 350,
-                        zoom: {
-                            enabled: false
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false,
-                        formatter: metric.fmt,
-                    },
-                    xaxis: { categories: this.details.labels, },
-                    yaxis: { labels: { formatter: metric.fmt }, },
-                    stroke: { colors: ['#002060'] },
-                    tooltip: { marker: { show: false }},
+                    title: `${metric.label}: ${this.details_tag ? this.details_tag.name : '-'}`
+
                 };
             },
-            chart_detail_values: function(data) {
-                return this.details_selected[this.details_metric];
+            
+            chart_layout: function(){
+                return {
+                    title: utils.getMetric().label,
+                    xaxis: { visible: false },
+                    yaxis: { visible: false },
+                    autosize: true,
+                };
             },
         },
         data: function() {
@@ -247,6 +272,7 @@
                 details_cls: null,
                 details_tag: null,
                 details_metric: utils.getMetric().key,
+                
             };
         }
     }

@@ -37,10 +37,10 @@ const NUMBER_FORMATTER = function(suffix, multiplier, radix) {
 export default {
     // metrics
     metrices: [
-        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: NUMBER_FORMATTER('원', 1, 0), ascending: true, desc: 'Cost Per Click', },
-        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: NUMBER_FORMATTER('원', 1, 0), ascending: true, desc: 'Cost Per Action', },
-        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: NUMBER_FORMATTER('%', 100, 0), ascending: false, desc: 'Click Through Rate' },
-        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: NUMBER_FORMATTER('%', 100, 0), ascending: false, desc: 'Conversion Rate' },
+        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: '#,###원', ascending: true, desc: 'Cost Per Click', },
+        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: '#,###원', ascending: true, desc: 'Cost Per Action', },
+        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: '#,###%', ascending: false, desc: 'Click Through Rate' },
+        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: '#,###%', ascending: false, desc: 'Conversion Rate' },
         { key: 'cnt', label: 'COUNT', fn: () => 1, fmt: (v)=> v.toLocaleString(), desc: 'Counts', defaultHide: true },
     ],
     // predefined classes
@@ -447,36 +447,36 @@ export default {
         });
     },
 
-    getPeriodRanges(period) {
+    getPeriodRanges(period, r) {
         let days = (period.till - period.from) / 86400000;
         // let inc = 86400000;
-        let radix = '';
-        let fmt;
+        let radix;
+        let _fm;
         // daily (0 ~ 32d); 0 to 32 points
-        if(days <= 32) {
-            radix = 'day';
-            fmt = (dt) => moment(dt).format('YYYY-MM-DD');
-        } 
+        if(r) radix = r;
+        else if(days <= 32) radix = 'day';
         // weekly (33 ~ 180d); 5 to 24 points
-        else if(days <= 180) {
-            radix = 'week';
-            fmt = (dt) => moment(dt).format('YYYY [week]WW');
-        }
+        else if(days <= 180) radix = 'week';
         // monthly (181 ~ 730d); 6 to 24 points
-        else if(days <= 730) {
-            radix = 'month';
-            fmt = (dt) => moment(dt).format('MMM.YYYY');
-        }
+        else if(days <= 730) radix = 'month';
         // quarterly (731 ~ 1461d); 8 to 16 points
-        else if(days <= 1461) {
-            radix = 'quarter';
-            fmt = (dt) => moment(dt).format('YYYY.[Q]Q');
-        }
+        else if(days <= 1461) radix = 'quarter';
         // yearly; 4 to ~ points
-        else {
-            radix = 'year';
-            fmt = (dt) => (new Date(dt).getFullYear()).toString();
+        else radix = 'year';
+
+        switch(radix) {
+            case 'day':
+                _fm = 'YYYY-MM-DD'; break;
+            case 'week': 
+                _fm = 'YYYY [week]WW'; break;
+            case 'month':
+                _fm = 'MMM.YYYY'; break;
+            case 'quarter':
+                _fm = 'YYYY.[Q]Q'; break;
+            case 'year':
+                _fm = 'YYYY'; break;
         }
+        let fmt = (dt) => moment(dt).format(_fm);
 
         let labels = [];
         let dc = moment(period.from);
@@ -550,7 +550,7 @@ export default {
 
     dashboardSeries: function() {
         let filters = this._dashboardFilters();
-        let prange = this.getPeriodRanges(this.getPeriod());
+        let prange = this.getPeriodRanges(this.getPeriod(), 'month');
         let metric = this.getMetric();
         let cids = this.filterCampaignIds(filters);
         let records = this.getItem(KEY_RECORDS);
@@ -640,7 +640,7 @@ export default {
                 });
             });
             data.sort((l,r) => r.mean - l.mean);
-            if(metric.ascending)
+            if(!metric.ascending)
                 data = data.reverse();
 
             return {

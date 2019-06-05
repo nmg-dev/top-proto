@@ -23,8 +23,9 @@
         </div>
         <div class="row dashboard-card-chart">
             <div class="col">
-                <apexchart type="line" height="500" :options="chart_options" :series="chart_data">
-                </apexchart>
+                <vue-plotly height="500" 
+                    :layout="chart_options"
+                    :data="chart_data" />
             </div>
         </div>
         <div class="row dashboard-card-table panel-details">
@@ -69,7 +70,8 @@
 </template>
 
 <script>
-import apexchart from 'vue-apexcharts'
+// import apexchart from 'vue-apexcharts'
+import VuePlotly from '@statnett/vue-plotly'
 import preview from './preview';
 
 import './appscreen.css';
@@ -90,29 +92,14 @@ const sample_message_refers = [
     { cls: 'message.adcopy', name: '제시', label: '카피' },
 ];
 const CHART_OPTIONS = {
-    chart: {
-        stacked: false,
-        zoom: { type: 'x', enabled: true },
-        toolbar: { show: false },
-    },
-    plotOptions: {
-        line: { curve: 'smooth' },
-    },
-    dataLabels: { 
-        enabled: true,
-    },
-    grid: { show: true },
-    markers: { size: 1 },
     xaxis: {
-        // type: 'datetime',
-        // labels: {},
+        rangeslider: {}
     },
-    yaxis: {
-        // labels: { formatter: utils.getMetric().fmt },
-    },
-    legend: {
-    },
+    yaxis: { fixedrange: true },
 };
+const CHART_LAYOUT = {
+
+}
 
 
 export default {
@@ -146,24 +133,32 @@ export default {
         preset_design_cls: function() { return utils.getPresetDesignClasses() },
         preset_message_cls: function() { return utils.getPresetMessageClasses() },
         chart_options: function() {
-            return Object.assign(CHART_OPTIONS, {
-                xaxis: {
-                    categories: this.chart_series.map((ser)=>ser.label),
-                },
-                yaxis: {
-                    labels: { formatter: utils.getMetric().chart_fmt },
-                },
-                dataLabels: {
-                    enabled: true,
-                    formatter: utils.getMetric().chart_fmt,
-                },
-                tooltip: { x: { show: true}, y: { formatter: utils.getMetric().fmt } },
-            });
+            return Object.assign(CHART_OPTIONS, {});
         },
         chart_data: function() {
+            let met = utils.getMetric();
+            // let values = this.chart_series.map((ser) => [ser.label, ser.value])
             return [{
-                name: utils.getMetric().label,
-                data: this.chart_series.map((ser) => ser.value),
+                x: this.chart_series.map((ser)=>ser.label),
+                y: this.chart_series.map((ser)=>ser.value),
+                type: 'scatter',
+                mode: 'lines+markers',
+                showlegend: false,
+                // name: string,
+                hovertemplate: ``,
+                line: {
+                    color: '#20ade3',
+                    width: 2.5,
+                    shape: 'spline',
+                    smoothing: 0.5,
+                },
+                marker: {
+                    symbol: 'circle',
+                    size: 4,
+                },
+                selected: { marker: { size: 12 }, },
+                textposition: 'top center',
+                // textfont: { family:, size, color, ... }
             }];
         },
     },
@@ -173,7 +168,8 @@ export default {
         },
     },
     components: {
-        apexchart,
+        // apexchart,
+        VuePlotly,
         preview,
     }
 }

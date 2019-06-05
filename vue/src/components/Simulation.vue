@@ -2,7 +2,7 @@
     <div class="section panel-details">
         <div class="row section-title p-0 m-0">
             <div class="col m-0 p-0" align="left">
-                <h3 class="title">Creative Simulation</h3>
+                <h3 class="title">크리에이티브 시뮬레이션</h3>
                 <h5 class="subtitle">소재요소별 예상효율 확인</h5>
             </div>
         </div>

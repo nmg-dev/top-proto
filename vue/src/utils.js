@@ -706,14 +706,14 @@ export default {
 
         let _clss = Object.assign(Object.keys(ctmap), {});
 
-        let cclss = ['category','subcategory','device', 'channel','admedia','adtype','goal'];
+        let cclss = ['category','subcategory','device', 'channel', 'media', 'admedia','adtype','goal'];
         let dclss = this.getPresetDesignClasses();
         dclss = dclss.concat(_clss.filter((cls)=>cls.startsWith('design.') && dclss.indexOf(cls)<0));
         let mclss = this.getPresetMessageClasses();
         mclss = mclss.concat(_clss.filter((cls)=>cls.startsWith('content.') && mclss.indexOf(cls)<0));
         let presets = cclss.concat(dclss).concat(mclss);
         // exceptions
-        presets = presets.concat(['account', 'brand', 'media']);
+        presets = presets.concat(['account', 'brand']);
         let rclss = _clss.filter((cls) => presets.indexOf(cls)<0);
 
         let rets = {

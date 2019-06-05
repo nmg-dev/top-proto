@@ -2,7 +2,7 @@
     <div class="section panel-details m-0">
         <div class="row section-title m-0 p-0">
             <div class="col p-0" align="left">
-                <h3>상세 분석</h3>
+                <h3>크리에이티브 분석</h3>
                 <h5>소재 요소 상세 분석</h5>
             </div>
         </div>

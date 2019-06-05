@@ -2,13 +2,13 @@
     <div class="querybar-down">
         <div class="querybar-controls">
             <subcategory 
-                title="Design Type"
+                title="디자인 요소"
                 class="querybar-controls"
                 :options="designTypeOptions"
                 @refreshUpdate="$emit('refreshUpdate')">
             </subcategory>
             <subcategory 
-                title="Message Type"
+                title="메시지 요소"
                 class="querybar-controls"
                 :options="messageTypeOptions"
                 @refreshUpdate="$emit('refreshUpdate')">

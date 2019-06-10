@@ -36,7 +36,6 @@ export default {
         cls: { type: String },
         icon: {},
         labelNone: { type: String, default: langs.ko.all },
-        autoFilter: { type: Boolean, default: true },
     },
     methods: {
         hasCampaigns: function(tag) {
@@ -68,7 +67,7 @@ export default {
     },
     computed: {
         items: function() {
-            let _tags = this.autofilter ? utils.filteredTags(this.cls) : utils.getTagsWithinClass(this.cls);
+            let _tags = utils.filteredTags(this.cls);
             return _tags.map((tag) => { return { tag, value: tag.id, label: tag.name }; });                    
         },
         iconUrl: function() {

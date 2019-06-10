@@ -203,7 +203,7 @@ export default {
 
 	.background-dark {
 		color: var(--font-white);
-		background-color: var(--bg-dark);
+		background-color: #000000;
 	}
 
 	.panel-wrapper {

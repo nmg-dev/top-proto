@@ -8,7 +8,10 @@
         <div class="row dashboard-card-design">
             <template v-for="ref in design_references">
                 <div class="section col-3" :key="ref.cls" v-b-tooltip.hover :title="`${lang(ref.cls)}: ${ref.name}`">
-                    <h5 class="section-title class-design">{{ ref.name }}</h5>
+                    <h5 class="section-title class-design">
+                        <template v-if="ref && ref.name">{{ ref.name }}</template>
+                        <template v-else> - </template>
+                    </h5>
                     <div class="section-text">{{ lang(ref.cls) }}</div>
                 </div>
             </template>
@@ -23,9 +26,10 @@
         </div>
         <div class="row dashboard-card-chart">
             <div class="col">
-                <vue-plotly height="500" 
-                    :layout="chart_options"
-                    :data="chart_data" />
+                <apexchart height="500" 
+                    type="area"
+                    :options="chart_options"
+                    :series="chart_data" />
             </div>
         </div>
         <div class="row dashboard-card-table panel-details">
@@ -70,8 +74,8 @@
 </template>
 
 <script>
-// import apexchart from 'vue-apexcharts'
-import VuePlotly from '@statnett/vue-plotly'
+import apexchart from 'vue-apexcharts'
+// import VuePlotly from '@statnett/vue-plotly'
 import preview from './preview';
 
 import './appscreen.css';
@@ -91,15 +95,23 @@ const sample_message_refers = [
     { cls: 'message.trigger', name: '설득형', label: '트리거' },
     { cls: 'message.adcopy', name: '제시', label: '카피' },
 ];
-const CHART_OPTIONS = {
-    xaxis: {
-        rangeslider: {}
-    },
-    yaxis: { fixedrange: true },
-};
-const CHART_LAYOUT = {
 
-}
+const CHART_OPTIONS = {
+    chart: {
+        stacked: false,
+        zoom: { type: 'x', enabled: true },
+        toolbar: { show: true },
+    },
+    plotOptions: {
+        line: { curve: 'smooth' },
+    },
+    dataLabels: { 
+        enabled: true,
+    },
+    grid: { show: true },
+    markers: { size: 1 },
+    colors: ['#20ade3'],
+};
 
 
 export default {
@@ -133,32 +145,30 @@ export default {
         preset_design_cls: function() { return utils.getPresetDesignClasses() },
         preset_message_cls: function() { return utils.getPresetMessageClasses() },
         chart_options: function() {
-            return Object.assign(CHART_OPTIONS, {});
+            return Object.assign(CHART_OPTIONS, {
+                xaxis: {
+                    categories: this.chart_series.map((ser)=>ser.label),
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                },
+                yaxis: {
+                    labels: { formatter: utils.getMetric().fmt },
+                    min: 0,
+                    axisAmount: 4,
+                    forceNiceScale: true,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: (v) => utils.getMetric().fmt(v),
+                }
+            });
         },
         chart_data: function() {
-            let met = utils.getMetric();
-            // let values = this.chart_series.map((ser) => [ser.label, ser.value])
             return [{
-                x: this.chart_series.map((ser)=>ser.label),
-                y: this.chart_series.map((ser)=>ser.value),
-                type: 'scatter',
-                mode: 'lines+markers',
-                showlegend: false,
-                // name: string,
-                hovertemplate: ``,
-                line: {
-                    color: '#20ade3',
-                    width: 2.5,
-                    shape: 'spline',
-                    smoothing: 0.5,
-                },
-                marker: {
-                    symbol: 'circle',
-                    size: 4,
-                },
-                selected: { marker: { size: 12 }, },
-                textposition: 'top center',
-                // textfont: { family:, size, color, ... }
+                name: utils.getMetric().label,
+                data: this.chart_series.map((ser) => ser.value),
             }];
         },
     },
@@ -168,8 +178,8 @@ export default {
         },
     },
     components: {
-        // apexchart,
-        VuePlotly,
+        apexchart,
+        // VuePlotly,
         preview,
     }
 }

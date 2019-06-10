@@ -1,6 +1,6 @@
 <template>
     <b-navbar class="gnb background-dark" fixed="top">
-        <b-navbar-brand>
+        <b-navbar-brand title="NEXT MEDIA GROUP - media innovation">
             <img alt="main logo" src="../assets/logo.png" />
         </b-navbar-brand>
 

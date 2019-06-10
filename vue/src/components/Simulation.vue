@@ -31,7 +31,18 @@
                                     </template>
                                     <b-dropdown-item :data-cls="opts.cls" :data-tagid="-1" @click="addOpts" value="">전체선택</b-dropdown-item>
                                     <b-dropdown-divider />
-                                    <b-dropdown-item :checked="selecteds[opts.cls] == tag.id" :data-cls="opts.cls" :data-tagid="tag.id" @click="addOpts" v-for="tag in opts.tags" :key="`simulate-opt-${tag.id}`" :value="tag.id">{{ tag.name }}</b-dropdown-item>
+                                    <template v-for="tag in opts.tags">
+                                        <b-dropdown-item 
+                                            v-if="0<tag.campaigns.filter((cid)=>0<=campaign_ids.indexOf(cid)).length"
+                                            :key="`simulate-opt-${tag.id}`" 
+                                            :checked="selecteds[opts.cls] == tag.id" 
+                                            :data-cls="opts.cls" 
+                                            :data-tagid="tag.id" 
+                                            @click="addOpts" 
+                                            :value="tag.id">
+                                                {{ tag.name }}
+                                            </b-dropdown-item>
+                                    </template>
                                 </b-dropdown>
                             </td>
                         </tr>
@@ -40,12 +51,12 @@
             </div>
         </div>
         <div class="row section-controls">
-            <div class="col" align="right" v-if="sims.length<=0">
-                <b-button variant="default" @click="resetOpts">리셋</b-button>
-                <b-button variant="default" @click="addSims">예상효율 확인하기</b-button>
-            </div>
-            <div class="col" align="right" v-else>
-                <b-button variant="default" @click="addSims">다시 확인하기</b-button>
+            <div class="col" align="right">
+                <b-button variant="default" @click="resetOpts">옵션 리셋</b-button>
+                <b-button variant="default" @click="addSims">
+                    <template v-if="sims.length<=0">예상효율 확인하기</template>
+                    <template v-else>다시 확인하기</template>
+                </b-button>
             </div>
         </div>
         <div class="printable section-result">
@@ -98,7 +109,7 @@ export default {
         tagName: function(tid) { return this.tags[tid].name }, 
         resetOpts: function() {
             this.selecteds = {};
-            this.$forceUpdate();
+            this.updateOpts();
         },
         addSims: function() {
             let options = Object.assign({}, this.selecteds);
@@ -119,6 +130,17 @@ export default {
             else {
                 this.selecteds[cls] = tid;
             } 
+
+            this.updateOpts();
+        },
+        updateOpts: function() {
+            // window.console.log(this.selecteds);
+            let filters = Object.keys(this.selecteds).reduce((agg, cls) => {
+                agg[cls] = [this.selecteds[cls]];
+                return agg;
+            }, {});
+            this.campaign_ids = utils.filterCampaignIds(filters)
+                .map((cid)=>parseInt(cid));
             this.$forceUpdate();
         },
     },
@@ -126,6 +148,7 @@ export default {
         return {
             metrices: utils.metrices.filter((m)=>!m.defaultHide),
             tags: utils.retrieveTags(),
+            campaign_ids: Object.keys(utils.retrieveCampaigns()).map((cid)=>parseInt(cid)),
             classes: [
                 {c: 'designs', label: '디자인 속성' },
                 {c: 'content', label: '컨텐츠 속성' },

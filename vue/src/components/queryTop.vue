@@ -1,7 +1,7 @@
 <template>
     <div class="querybar-top d-flex justify-content-between">
         <div class="querybar-title d-flex justify-content-start align-items-center">
-            <h1><b>C</b>reative <b>O</b>ptimize <b>S</b>ystem</h1>
+            <h1><b>C</b>reative <b>O</b>ptimization <b>S</b>ystem</h1>
             <sup style="color: var(--data-primary);">Beta</sup>
         </div>
         <div class="querybar-controls d-block" v-if="controls">

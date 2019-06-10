@@ -57,6 +57,12 @@ export default {
         });
         rt.afterEach((to) => {
           window.document.title = `[NMG]TagOperation ${to.name}`;
+          if(to.path!='/login') {
+            if(!utils.hasRetrieved())
+              utils.retrieveCampaigns(true);
+            else if(!utils.hasUpdated())
+              utils.updateValues();
+          }
           let rtopt = {
             event: 'tagop.pageview',
             path: to.path,

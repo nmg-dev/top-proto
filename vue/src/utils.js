@@ -19,6 +19,11 @@ const KEY_TAGS = 'tags';
 const KEY_CAMPAIGNS = 'campaigns';
 const KEY_AFFILIATIONS = 'affiliations';
 const KEY_RECORDS = 'records';
+const KEY_LATEST_UPDATED = '_last_updated';
+
+const KEY_LOCK_CAMPAIGNS = '_lock.campaigns';
+const KEY_LOCK_TAGS = '_lock.tags';
+const KEY_LOCK_UPDATES = '_lock.updates';
 
 const QUERY_MID_CLASSES = [
     'category', 'media', 'admedia', 'goal'
@@ -66,6 +71,7 @@ export default {
         {k: KEY_CAMPAIGNS, l: 'loading_campaigns'},
         {k: KEY_RECORDS, l: 'processing_records'},
         {k: KEY_AFFILIATIONS, l: 'computing_affiliations'},
+        {k: KEY_LATEST_UPDATED, l: 'latest_updated'},
     ],
     querymid_classes: QUERY_MID_CLASSES,
 
@@ -128,6 +134,14 @@ export default {
         return window.sessionStorage.getItem(key)!=null;
     },
 
+    hasUpdated: function() {
+        return this.hasItem(KEY_RECORDS) && this.hasItem(KEY_AFFILIATIONS);
+    },
+
+    hasRetrieved: function() {
+        return this.hasItem(KEY_TAGS) && this.hasItem(KEY_CAMPAIGNS);
+    },
+
     getItem: function(key) {
         let vals = window.sessionStorage.getItem(key);
         return vals ? JSON.parse(vals) : undefined;
@@ -135,6 +149,12 @@ export default {
 
     setItem: function(key, value) {
         return window.sessionStorage.setItem(key, JSON.stringify(value));
+    },
+
+    delItem: function(key) {
+        if(window.sessionStorage[key]!==undefined) {
+            window.sessionStorage.removeItem(key);
+        }
     },
 
     getUser: function() {
@@ -271,20 +291,49 @@ export default {
     // retrieve tag data from server
     retrieveTags: function(overwrite) {
         if(overwrite || !this.hasItem(KEY_TAGS)) {
+            // 
+            if(this.hasItem(KEY_LOCK_TAGS)) return;
+            this.setItem(KEY_LOCK_TAGS, Date.now());
+
+            this.delItem(KEY_LATEST_UPDATED);
             window.dataLayer.push({ event: 'tagop.api.tags' });
             (async() => {
                 let resp = await axios.get(`${API_HOST}/t/`);
                 this.setItem(KEY_TAGS, await resp.data);
+
+                // release lock
+                this.delItem(KEY_LOCK_TAGS);
             })();
         }
         return this.getItem(KEY_TAGS);
     },
 
+    retrieveRecords: function() {
+        return this.getItem(KEY_RECORDS);
+    },
+
+    retrieveAffiliations: function() {
+        return this.getItem(KEY_AFFILIATIONS);
+    },
+
+    updateValues: function() {
+        this.refreshUpdateValues(
+            this.retrieveTags(),
+            this.retrieveCampaigns(),
+            this.retrieveRecords(),
+            this.retrieveAffiliations()
+        );
+    },
+
     //
     refreshUpdateValues: function(tags, campaigns, records, affiliations) {
-        if(!(tags && campaigns && records && affiliations))
+        if(!records || !affiliations || !tags || !campaigns)
             return;
-        window.dataLayer.push({ event: 'tagop.values.update' });
+        if(this.hasItem(KEY_LOCK_UPDATES))
+            return;
+        this.setItem(KEY_LOCK_UPDATES, Date.now());
+
+
         let period = this.getPeriod();
         let metric = this.getMetric();
         // parse and load campaign records
@@ -301,7 +350,6 @@ export default {
             };
         });
         this.setItem(KEY_RECORDS, records);
-
 
         // parse and load campaigns
         Object.keys(campaigns).forEach((cid) => {
@@ -327,6 +375,7 @@ export default {
                 records: crecords,
             });
         });
+        this.setItem(KEY_CAMPAIGNS, campaigns);
 
         // update tag info
         Object.keys(tags).forEach((tid) => {
@@ -336,20 +385,29 @@ export default {
                         agg.push(aff.c);
                     return agg;
                 }, []);
+            // window.console.log(tid, tags[tid], tags[tid].campaigns);
         });
         this.setItem(KEY_TAGS, tags);
 
-        this.setItem(KEY_CAMPAIGNS, campaigns);
-        
         this.setItem(KEY_AFFILIATIONS, affiliations);
+        window.dataLayer.push({ event: 'tagop.values.update' });
+
+        this.setItem(KEY_LATEST_UPDATED, Date.now());
+
+        // release lock
+        this.delItem(KEY_LOCK_UPDATES);
     },
 
     // retrieve campaign data from server
     retrieveCampaigns: function(overwrite) {
         if(overwrite || !this.hasItem(KEY_CAMPAIGNS)) {
-            window.dataLayer.push({ event: 'tagop.api.campaigns' });
+            // loading lock
+            if(this.hasItem(KEY_LOCK_CAMPAIGNS)) return;
+            this.setItem(KEY_LOCK_CAMPAIGNS, Date.now());
+
+            this.delItem(KEY_LATEST_UPDATED);
             (async() => {
-                let tags = this.retrieveTags(overwrite);
+                let tags = this.retrieveTags();
                 let period = this.getPeriod();
                 let resp = await axios.post(`${API_HOST}/c/`, {
                     from: this.timeformat(period.from), 
@@ -360,22 +418,33 @@ export default {
                 let campaigns = cdata.campaigns;
                 let affiliations = cdata.affiliations;
                 
+                this.setItem(KEY_CAMPAIGNS, campaigns);
                 this.refreshUpdateValues(tags, campaigns, records, affiliations);
+                this.delItem(KEY_LOCK_CAMPAIGNS);
+
+                window.dataLayer.push({ event: 'tagop.api.campaigns' });
             })();
         }
         return this.getItem(KEY_CAMPAIGNS);
     },
 
-    filterCampaignIds: function(filters) {
+    filterCampaignIds: function(filters, exceptionCls) {
         let campaigns = this.retrieveCampaigns();
         let tags = this.retrieveTags();
         let cids = Object.keys(campaigns).map((cid)=>parseInt(cid));
         if(filters) {
             Object.keys(filters).forEach((cls) => {
-                let positiveFilter = filters[cls].reduce((agg, tid) => {
-                    return agg.concat(tags[tid].campaigns.filter((cid)=> agg.indexOf(cid)<0));
-                }, []);
-                cids = cids.filter((cid)=> 0<=positiveFilter.indexOf(cid));
+                if(exceptionCls && cls == exceptionCls) {
+                    return;
+                } else {
+                    let positiveFilter = filters[cls].reduce((agg, tid) => {
+                        if(tags[tid].campaigns)
+                            return agg.concat(tags[tid].campaigns.filter((cid)=> agg.indexOf(cid)<0));
+                        else
+                            return agg;
+                    }, []);
+                    cids = cids.filter((cid)=> 0<=positiveFilter.indexOf(cid));
+                }
             });
         }
         return cids;
@@ -640,7 +709,7 @@ export default {
                 });
             });
             data.sort((l,r) => r.mean - l.mean);
-            if(!metric.ascending)
+            if(metric.ascending)
                 data = data.reverse();
 
             return {
@@ -706,14 +775,14 @@ export default {
 
         let _clss = Object.assign(Object.keys(ctmap), {});
 
-        let cclss = ['category','subcategory','device', 'channel', 'media', 'admedia','adtype','goal'];
+        let cclss = ['category','subcategory','device', 'media', 'admedia','adtype','goal'];
         let dclss = this.getPresetDesignClasses();
         dclss = dclss.concat(_clss.filter((cls)=>cls.startsWith('design.') && dclss.indexOf(cls)<0));
         let mclss = this.getPresetMessageClasses();
         mclss = mclss.concat(_clss.filter((cls)=>cls.startsWith('content.') && mclss.indexOf(cls)<0));
         let presets = cclss.concat(dclss).concat(mclss);
         // exceptions
-        presets = presets.concat(['account', 'brand']);
+        presets = presets.concat(['account', 'brand', 'channel']);
         let rclss = _clss.filter((cls) => presets.indexOf(cls)<0);
 
         let rets = {
@@ -756,8 +825,8 @@ export default {
     },
     filteredTags: function(cls) {
         let filter = /\/dashboard\/?/.exec(window.location.pathname) ? this._dashboardFilters() : this.getFilter();
-        let cids = this.filterCampaignIds(filter);
-        let tags = this.retrieveTags(cls);
+        let cids = this.filterCampaignIds(filter, cls);
+        let tags = this.retrieveTags();
         return Object.keys(tags)
             .map((tid)=>tags[tid])
             .filter((tag)=>tag.class==cls)

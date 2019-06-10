@@ -5,7 +5,6 @@
             :title="lang(cls)" 
             :cls="cls" 
             :icon="true"
-            :autofilter="cls == 'admedia'"
             @refreshUpdate="refreshUpdate" />
     </div>
 </template>

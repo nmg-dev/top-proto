@@ -2,8 +2,10 @@
     <div class="sidebar background-dark m-0 p-0">
         <div class="sidebar-inner" v-show="show">
             <ul>
-                <li class="sidebar-item logo m-0 p-0">
-                    <img class="logo" src="../assets/logo_md.png" />
+                <li class="sidebar-item logo m-0 p-0 d-flex justify-content-center"
+                    title="COS;Creative Optimization System by NMG">
+                    <span style="color: var(--font-white); font-size: 60px; font-weight: 900;">COS</span> 
+                    <sup style="color: var(--data-primary); font-size: 18px; font-weight: 300;">Beta</sup>
                 </li>
                 <template  v-for="rt in $router.options.routes">
                     <li v-if="rt.name" :key="rt.path" class="sidebar-item">
@@ -63,6 +65,8 @@ export default {
     font-weight: bold;
 }
 .sidebar img.logo {
+    display: flex;
+    justify-content: center;
     margin: 0px;
     padding: 0px;
     width: var(--sidebar-width);

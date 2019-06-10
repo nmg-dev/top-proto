@@ -18,7 +18,13 @@
                 <b-input-group-text>-</b-input-group-text>
                 <b-input class="selection till" type="text" :data-mselect="mode === 'till'" data-mode="till" :data-timestamp="periodTill" readonly :value="pTill" @click="switchMode"/>
                 <b-input-group-append>
-                    <b-button variant="primary" class="daterange-submit" @click="submitPeriod"><i class="fas fa-check" /></b-button>
+                    <b-button variant="primary" 
+                        title="Click here to submit the period"
+                        style="color: var(--font-white); background-color: var(--data-secondary); border-radius: 4px;"
+                        class="daterange-submit" 
+                        @click="submitPeriod">
+                            <i class="fas fa-check" />
+                    </b-button>
                 </b-input-group-append>
             </b-input-group>
             <b-input-group>

@@ -24,9 +24,9 @@
                     <div class="creative-chart-wrapper">
                         <h5>{{ lang(charting.cls) }} -{{ appMetric.label }}</h5>
                         <div class="creative-chart">
-                            <vue-plotly height="200" 
-                                :layout="chart_layout" 
-                                :data="chart_values(charting.data)" />
+                            <apexchart height="200" type="bar"
+                                :options="chart_options(charting.data)" 
+                                :series="chart_values(charting.data)" />
                         </div>
                     </div>
                 </div>
@@ -55,9 +55,10 @@
                     </b-dropdown>
                 </div>
                 <div>
-                    <vue-plotly height="350" 
-                        :layout="chart_detail_options" 
-                        :data="chart_detail_values()" />
+                    <apexchart height="350"
+                        type="area" 
+                        :options="chart_detail_options" 
+                        :series="chart_detail_values()" />
                 </div>
                 <div>
                     <table class="table">
@@ -89,7 +90,8 @@
 </template>
 
 <script>
-    import VuePlotly from '@statnett/vue-plotly'
+    import apexchart from 'vue-apexcharts';
+    // import VuePlotly from '@statnett/vue-plotly'
     import preview from './preview';
 
     import utils from '../utils.js';
@@ -99,8 +101,8 @@
         name: 'creative',
         langs,
         components: {
-            // apexchart,
-            VuePlotly,
+            apexchart,
+            // VuePlotly,
             preview,
         },
         methods: {
@@ -132,88 +134,57 @@
                 let ret = {
                     chart: { toolbar: { show: false }, },
                     grid: { show: false },
-                    plotOptions: { 
-                        bar: { 
-                            horizontal: true,
-                            dataLabels: {
-                                position: 'top',
-                                maxItems: 5,
-                                hideOverflowingLabels: false,
-                            }
+                    plotOptions: {
+                        bar: {
+                            distributed: true,
                         }
                     },
-                    dataLabels: { 
-                        enabled: true,
-                        position: 'top',
-                        textAnchor: 'end',
-                        formatter: (v,opt) => data[opt.seriesIndex].tag.name,
-                        style: {
-                            colors: ['#20ade3', '#1f4e79', '#9dc3e6', '#d9d9d9', '#deebf7', '#002060'],
-                        },
-                        offsetX: '-1px',
+                    yaxis: { 
+                        labels: { show: false }, 
+                        axisBorder: { show: false },  
+                        axisTicks: { show: false },
+                        min: 0,
                     },
-                    fill: { colors: ['#20ade3', '#1f4e79', '#9dc3e6', '#d9d9d9', '#deebf7', '#002060'], },
-                    xaxis: { 
+                    xaxis: {
                         categories: data.map((dv)=>dv.tag.name),
-                        labels: { show: false }, 
+                        labels: { 
+                            show: true,
+                            rotate: 30,
+                            rotateAlways: true,
+                        }, 
                         axisBorder: { show: false },  
-                        axisTicks: { show: false },
+                        axisTicks: { show: false },                        
                     },
-                    yaxis: {
-                        labels: { show: false }, 
-                        axisBorder: { show: false },  
-                        axisTicks: { show: false },
-                    },
+                    dataLabels: { enabled: false },
+                    colors: ['#20ade3', '#1f4e79', '#9dc3e6', '#d9d9d9', '#deebf7', '#002060'],
                     legend: { show: false },
                     tooltip: {
                         x: { show: true },
-                        y: { show: true, formatter: utils.getMetric().fmt },
+                        y: { show: false, formatter: utils.getMetric().fmt },
                         marker: { show: false },
                     }
                 };
                 return ret;
             },
             chart_values: function(data) {
-                let colors = ['#20ade3', '#1f4e79', '#9dc3e6', '#d9d9d9', '#deebf7', '#002060'];
-                let opts = {
-                    type: 'bar',
-                    orientation: 'h',
-                    showlegend: false,
-
-                    hoverinfo: 'name+text',
-                    textposition: 'inside',
-                    contraintext: 'both',
-                };
                 let met = utils.getMetric();
-                return data.map((dv, di)=>{
-                    let c = colors[di % colors.length];
+                return [{
+                    name: met.label,
+                    data: data.map((d)=>d.mean),
+                }];
+                return data.map((d)=>{
                     return {
-                        x: [ dv.mean, ],
-                        y: [ met.label ],
-                        name: dv.tag.name,
-                        text: dv.tag.name,
-                        marker:{ color: c },
-                        line: { color: c, width: 1 },
-
-                        type: 'bar',
-                        orientation: 'h',
-                        showlegend: false,
-
-                        hoverinfo: 'name+text',
-                        textposition: 'inside',
-                        contraintext: 'both',   
+                        name: d.tag.name,
+                        data: [d.mean],
                     };
                 });
             },
             chart_detail_values: function() {
+                let met = utils.getMetric(this.details_metric);
                 let values = this.details_selected[this.details_metric];
                 return [{
-                    x: this.details.labels,
-                    y: values,
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    line: { color: '#20ade3', },
-                    marker: { color: '#20ade3' },
+                    name: met.label,
+                    data: values,
                 }];
                 //     y: ;
                 // };
@@ -221,12 +192,6 @@
         },
         mounted() {  },
         computed: {
-            compositions: function() {
-                return utils.creativeCombinations(3);
-            },
-            chartings: function() {
-                return utils.creativeSummaryCharts(5);
-            },
             appMetric: function() {
                 return utils.getMetric();
             },
@@ -251,19 +216,49 @@
                 }
             },
             chart_detail_options: function() {
-                let metric = utils.getMetric(this.details_metric);
+                let met = utils.getMetric(this.details_metric);
                 return {
-                    title: `${metric.label}: ${this.details_tag ? this.details_tag.name : '-'}`
-
-                };
-            },
-            
-            chart_layout: function(){
-                return {
-                    title: utils.getMetric().label,
-                    xaxis: { visible: false },
-                    yaxis: { visible: false },
-                    autosize: true,
+                    chart: {
+                        toolbar: { show: false },
+                    },
+                    plotOptions: {
+                        line: { curve: 'smooth' },
+                    },
+                    dataLabels: { 
+                        enabled: true,
+                        formatter: met.fmt,
+                    },
+                    grid: { 
+                        show: true, 
+                        xaxis: { lines: { show: false } },
+                        yaxis: { lines: { show: true } },
+                    },
+                    markers: { size: 1 },
+                    colors: ['#20ade3'],
+                    xaxis: {
+                        categories: this.details.labels,
+                        position: 'bottom',
+                        labels: {
+                            offsetX: 10,
+                            offsetY: 15,
+                            rotate: 30,
+                            rotateAlways: true,
+                        },
+                        axisTicks: { show: false,  },                   
+                        axisBorder: { show: false, },
+                    },
+                    yaxis: {
+                        labels: { show: false  },
+                        axisTicks: { show: false },
+                        axisBorder: { show: false },
+                        tickAmount: 4,
+                        min: 0,
+                    },
+                    legend: {},
+                    tooltip: {
+                        enabled: true,
+                        y: { formatter: met.fmt },
+                    }
                 };
             },
         },
@@ -272,6 +267,8 @@
                 details_cls: null,
                 details_tag: null,
                 details_metric: utils.getMetric().key,
+                compositions: utils.creativeCombinations(3),
+                chartings: utils.creativeSummaryCharts(4),
                 
             };
         }

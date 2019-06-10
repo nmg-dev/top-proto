@@ -153,7 +153,7 @@ campaign_key_classes = (
     'media',
     'adtype',
     'admedia',
-    #'period',
+    'period',
     'design.layout',
     'design.background',
     'design.objet',
@@ -269,9 +269,13 @@ def seeding_from_file(filepath, sep='\t', include_header=False) :
                     p = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + int(periods[0]) - 2)
                     period_from = p
                     period_till = p
-                tks = tuple(tags[c][line_values[c]] for c in campaign_aff_classes)
+                
+                tks = tuple(tags[c][line_values[c]] \
+                    if c in tags and c in line_values and line_values[c] in tags[c] else ''\
+                    for c in campaign_aff_classes)
                 campaigns[ck] = (ctitle, period_from, period_till,tks)
             except :
+                traceback.print_exc()
                 continue
 
         if ck not in performances : 

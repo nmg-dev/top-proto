@@ -2,7 +2,7 @@ import axios from "axios";
 
 const moment = require('moment');
 
-const API_HOST = '';
+const API_HOST = 0<=window.location.hostname.indexOf('localhost') ? 'http://localhost:8080' : '';
 const GOOGLE_API_SCRIPT = 'https://apis.google.com/js/platform.js';
 // const GOOGLE_API_KEY = '';
 const GOOGLE_CLIENT_ID = '812043764419-lunbnv3g64rg709da2ad6asnqg05c7oi.apps.googleusercontent.com';

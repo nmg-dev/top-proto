@@ -28,7 +28,12 @@ import routes from '../routes.js';
 window.__onGoogleLoginSuccess = function(gauth) {
     // let guser = gauth.getAuthResponse();
     // utils.setItem('access_token', guser.id_token);
-    utils.authenticate(gauth);
+    utils.authenticate(gauth)
+        .then(()=>{ 
+            utils.retrieveTags(true);
+            utils.retrieveCampaigns(true); 
+        });
+
 }
 
 window.__onGoogleLoginFailure = function() {
@@ -61,7 +66,7 @@ export default {
                         this.latest_success += 1;
                     }
                 }
-                // window.console.log(this.latest_success);
+                window.console.log(this.latest_success);
             }).bind(this), 250),
         }
     },

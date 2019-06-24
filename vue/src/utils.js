@@ -126,8 +126,8 @@ export default {
         this.setItem(KEY_UINFO, await authResp.data);
         
         // get default tags, campaigns
-        this.retrieveTags(true);
-        this.retrieveCampaigns(true);
+        // this.retrieveTags(true);
+        // this.retrieveCampaigns(true);
     },
 
     hasItem: function(key) {
@@ -290,6 +290,8 @@ export default {
 
     // retrieve tag data from server
     retrieveTags: function(overwrite) {
+        // nothing without access
+        if(!this.hasItem(KEY_UINFO)) return [];
         if(overwrite || !this.hasItem(KEY_TAGS)) {
             // 
             if(this.hasItem(KEY_LOCK_TAGS)) return;
@@ -329,7 +331,8 @@ export default {
     refreshUpdateValues: function(tags, campaigns, records, affiliations) {
         if(!records || !affiliations || !tags || !campaigns)
             return;
-        if(this.hasItem(KEY_LOCK_UPDATES))
+        if(this.hasItem(KEY_LOCK_UPDATES)
+        && parseInt(this.getItem(KEY_LOCK_TAGS))>Date.now()-900)
             return;
         this.setItem(KEY_LOCK_UPDATES, Date.now());
 
@@ -400,9 +403,12 @@ export default {
 
     // retrieve campaign data from server
     retrieveCampaigns: function(overwrite) {
+        // nothing without access
+        if(!this.hasItem(KEY_UINFO)) return [];
         if(overwrite || !this.hasItem(KEY_CAMPAIGNS)) {
             // loading lock
-            if(this.hasItem(KEY_LOCK_CAMPAIGNS)) return;
+            if(this.hasItem(KEY_LOCK_CAMPAIGNS)
+            && parseInt(this.hasItem(KEY_LOCK_CAMPAIGNS))>=Date.now()-900) return;
             this.setItem(KEY_LOCK_CAMPAIGNS, Date.now());
 
             this.delItem(KEY_LATEST_UPDATED);
@@ -431,6 +437,10 @@ export default {
     filterCampaignIds: function(filters, exceptionCls) {
         let campaigns = this.retrieveCampaigns();
         let tags = this.retrieveTags();
+
+        // if null, return blank.
+        if(!campaigns || !tags) return [];
+
         let cids = Object.keys(campaigns).map((cid)=>parseInt(cid));
         if(filters) {
             Object.keys(filters).forEach((cls) => {

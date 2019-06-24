@@ -1,6 +1,6 @@
 export default {
     ko: {
-        'design.layout': '레이아웃',
+        'design.layout': '카피 레이아웃',
         'design.background': '배경',
         'design.objet': '오브제',
         'design.button': '버튼',

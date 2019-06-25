@@ -592,7 +592,6 @@ export default {
                     series[didx].push(metric.fn(rec));
                 }
             });
-        window.console.log(records, series);
 
         let values = prange.labels.map((label,sidx) => {
                 let s = series[sidx];
@@ -726,7 +725,6 @@ export default {
             if(metric.ascending)
                 data = data.reverse();
 
-            window.console.log(cls, data);
 
             return {
                 cls,

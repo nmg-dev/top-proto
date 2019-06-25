@@ -70,6 +70,7 @@ export default {
 	},
 	methods: {
 		refreshUpdate: function() {
+			utils.updateValues();
 			this.latestUpdate = Date.now();
 		}
 	},

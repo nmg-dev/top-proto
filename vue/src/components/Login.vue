@@ -28,11 +28,12 @@ import routes from '../routes.js';
 window.__onGoogleLoginSuccess = function(gauth) {
     // let guser = gauth.getAuthResponse();
     // utils.setItem('access_token', guser.id_token);
-    utils.authenticate(gauth)
-        .then(()=>{ 
-            utils.retrieveTags(true);
-            utils.retrieveCampaigns(true); 
-        });
+    utils.authenticate(gauth);
+        // .then(()=>{ 
+        //     utils.retrieveTags(true);
+        //     utils.retrieveCampaigns(true);
+        //     utils.updateValues();
+        // });
 
 }
 
@@ -64,9 +65,20 @@ export default {
                     if(utils.hasItem(this.checkups[this.latest_success].k)) {
                         this.checkups[this.latest_success].f = true;
                         this.latest_success += 1;
+                    } else {
+                        switch(this.checkups[this.latest_success].k) {
+                            default: break;
+                            case 'tags':
+                                utils.retrieveTags(true); break;
+                            case 'campaigns':
+                                utils.retrieveCampaigns(true); break;
+                            // case 'affiliations':
+                            case 'records':
+                                utils.updateValues(); break;
+                        }
                     }
                 }
-                window.console.log(this.latest_success);
+                // window.console.log(this.latest_success);
             }).bind(this), 250),
         }
     },

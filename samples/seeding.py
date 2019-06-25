@@ -71,12 +71,12 @@ __table_schema = {
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         day_id DATE NOT NULL,
         campaign_id INT UNSIGNED NOT NULL,
-        impression BIGINT UNSIGNED NULL,
-        click BIGINT UNSIGNED NULL,
-        conversion BIGINT UNSIGNED NULL,
-        cost BIGINT UNSIGNED NULL,
-        created_at TIMESTAMP NULL,
-        updated_at TIMESTAMP NULL,
+        impression BIGINT UNSIGNED DEFAULT 0 NOT NULL,
+        click BIGINT UNSIGNED DEFAULT 0 NOT NULL,
+        conversion BIGINT UNSIGNED DEFAULT 0 NOT NULL,
+        cost BIGINT UNSIGNED DEFAULT 0 NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NULL,
         created_by INT UNSIGNED NULL,
         updated_by INT UNSIGNED NULL,
         INDEX fk_campaign_performance_idx (campaign_id ASC),
@@ -228,10 +228,9 @@ def _perform_value_date(date_str) :
         return None
 def _perform_value_int(int_str) :
     try :
-        return int(integer_pattern.sub('', int_str)) if int_str is not None and 0<len(int_str.strip()) else None
+        return int(integer_pattern.sub('', int_str))
     except:
-        traceback.print_exc()
-        return None
+        return 0
 
 def seeding_from_file(filepath, sep='\t', include_header=False) :
     global tags, tag_autoinc, campaigns

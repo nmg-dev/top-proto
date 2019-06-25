@@ -7,7 +7,8 @@ const GOOGLE_API_SCRIPT = 'https://apis.google.com/js/platform.js';
 // const GOOGLE_API_KEY = '';
 const GOOGLE_CLIENT_ID = '812043764419-lunbnv3g64rg709da2ad6asnqg05c7oi.apps.googleusercontent.com';
 
-const DEFAULT_PERIOD_FROM = Date.parse('2017-05-01');
+const DEFAULT_PERIOD_FROM = Date.parse('2017-12-01');
+const DEFAULT_PERIOD_TILL = Date.parse('2018-12-31');
 
 // storage keys
 const KEY_UINFO = 'userinfo';
@@ -42,10 +43,10 @@ const NUMBER_FORMATTER = function(suffix, multiplier, radix) {
 export default {
     // metrics
     metrices: [
-        { key: 'cpc', label: 'CPC', fn: (v) => (v.clk/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: '#,###원', ascending: true, desc: 'Cost Per Click', },
-        { key: 'cpa', label: 'CPA', fn: (v) => (v.cnv/Math.max(1.0, v.cost)), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: '#,###원', ascending: true, desc: 'Cost Per Action', },
-        { key: 'ctr', label: 'CTR', fn: (v) => (v.clk/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: '#,###%', ascending: false, desc: 'Click Through Rate' },
-        { key: 'cvr', label: 'CVR', fn: (v) => (v.cnv/Math.max(1.0, v.imp)), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: '#,###%', ascending: false, desc: 'Conversion Rate' },
+        { key: 'cpc', label: 'CPC', fn: (v) => (0<v.clk*v.cost ? v.cost/v.clk : 0), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: '#,###원', ascending: true, desc: 'Cost Per Click', },
+        { key: 'cpa', label: 'CPA', fn: (v) => (0<v.cnv*v.cost ? v.cost/v.cnv : 0), fmt: NUMBER_FORMATTER('원', 1, 0), chart_fmt: '#,###원', ascending: true, desc: 'Cost Per Action', },
+        { key: 'ctr', label: 'CTR', fn: (v) => (0<v.clk*v.imp ? v.clk/v.imp : 0), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: '#,###%', ascending: false, desc: 'Click Through Rate' },
+        { key: 'cvr', label: 'CVR', fn: (v) => (0<v.cnv*v.imp ? v.cnv/v.imp : 0), fmt: NUMBER_FORMATTER('%', 100, 2), chart_fmt: '#,###%', ascending: false, desc: 'Conversion Rate' },
         { key: 'cnt', label: 'COUNT', fn: () => 1, fmt: (v)=> v.toLocaleString(), desc: 'Counts', defaultHide: true },
     ],
     // predefined classes
@@ -201,7 +202,7 @@ export default {
         if(!m) {
             let _from = new Date(DEFAULT_PERIOD_FROM);
             // _from.setYear(_from.getFullYear()-3);
-            let _till = new Date();
+            let _till = new Date(DEFAULT_PERIOD_TILL);
             let defaultPeriod = {
                 from: Date.parse(_from.toLocaleDateString()),
                 till: Date.parse(_till.toLocaleDateString()),
@@ -388,7 +389,6 @@ export default {
                         agg.push(aff.c);
                     return agg;
                 }, []);
-            // window.console.log(tid, tags[tid], tags[tid].campaigns);
         });
         this.setItem(KEY_TAGS, tags);
 
@@ -592,7 +592,9 @@ export default {
                     series[didx].push(metric.fn(rec));
                 }
             });
-        return prange.labels.map((label,sidx) => {
+        window.console.log(records, series);
+
+        let values = prange.labels.map((label,sidx) => {
                 let s = series[sidx];
                 if(valuesOnly) {
                     return s && 0<s.length ?
@@ -615,6 +617,7 @@ export default {
                 }
                 
             });
+        return values;
     },
 
     _dashboardFilters: function() {
@@ -632,9 +635,10 @@ export default {
         let prange = this.getPeriodRanges(this.getPeriod(), 'month');
         let metric = this.getMetric();
         let cids = this.filterCampaignIds(filters);
-        let records = this.getItem(KEY_RECORDS);
+        let records = this.retrieveRecords();
         // iterate records
-        return this._dailySeries(metric, prange, records, cids);
+        let rets = this._dailySeries(metric, prange, records, cids);
+        return rets;
     },
 
     dashboardDesignRefers: function(best) {
@@ -722,6 +726,8 @@ export default {
             if(metric.ascending)
                 data = data.reverse();
 
+            window.console.log(cls, data);
+
             return {
                 cls,
                 data,
@@ -731,7 +737,7 @@ export default {
     creativeDetailChart: function(cls) {
         let filters = this.getFilter();
         let prange = this.getPeriodRanges(this.getPeriod());
-        let records = this.getItem(KEY_RECORDS);
+        let records = this.retrieveRecords();
         let tags = this.getTagsWithinClass(cls);
         let cids = this.filterCampaignIds(filters);
         let alltcids = [];

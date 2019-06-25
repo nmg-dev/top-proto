@@ -5,14 +5,34 @@
         </b-navbar-brand>
 
         <b-nav class="ml-auto">
+          
           <b-nav-item v-if="user">
             <b-badge variant="light" pill class="profile-badge">
               <span>{{ user.profile.name }}</span>
               <img :src="user.profile.picture" style="width: 36px; height: 36px; border-radius: 50%; padding: 0px; margin: 0px;" />
             </b-badge>
           </b-nav-item>
+
+          <b-nav-item>
+            <b-button v-b-modal.guide-modal
+              b-tooltip title="도움말은 클릭!"
+              variant="outline-primary" 
+              style="width: 38px; height: 38px; border-radius: 50%;">
+              <i class="fas fa-question" style="color: var(--font-white);" />
+            </b-button>
+          </b-nav-item>
         </b-nav>
+        <div class="guide">
+          <b-modal id="guide-modal" title="가이드" size="xl" ok-only="true">
+            <template v-for="ginum in ['01','02','03','04']">
+              <img :key="`guide-modal-image-${ginum}`" 
+                :src="`/img/guide/guide_${ginum}.png`" />
+            </template>
+          </b-modal>
+        </div>
     </b-navbar>
+
+    
 </template>
 
 <script>
@@ -78,5 +98,11 @@ export default {
   font-weight: 600;
   color: var(--font-light);
   vertical-align: middle;
+}
+
+#guide-modal .modal-body img {
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
 }
 </style>

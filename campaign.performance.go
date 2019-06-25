@@ -12,10 +12,10 @@ type CampaignPerformance struct {
 	DayID      time.Time `json:"d" db:"day_id"`
 	CampaignID uint      `json:"c" db:"campaign_id"`
 
-	Impression uint `json:"imp" db:"impression"`
-	Click      uint `json:"clk" db:"click"`
-	Conversion uint `json:"cnv" db:"conversion"`
-	Cost       uint `json:"cost" db:"cost"`
+	Impression uint64 `json:"imp" db:"impression"`
+	Click      uint64 `json:"clk" db:"click"`
+	Conversion uint64 `json:"cnv" db:"conversion"`
+	Cost       uint64 `json:"cost" db:"cost"`
 
 	CreatedAt time.Time `json:"c_at" db:"created_at"`
 	CreatedBy uint      `json:"c_by" db:"created_by"`
